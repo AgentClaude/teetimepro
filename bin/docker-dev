@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# TeeTimes Pro — Docker development helper
+# Usage: bin/docker-dev [command]
+#
+# Commands:
+#   up        Start all services (default)
+#   down      Stop all services
+#   build     Rebuild containers
+#   logs      Tail logs (optionally: bin/docker-dev logs api)
+#   console   Rails console
+#   dbconsole Database console
+#   rspec     Run RSpec tests
+#   seed      Seed the database
+#   reset     Reset database (drop, create, migrate, seed)
+#   sh        Shell into a container (default: api)
+
+COMPOSE="docker compose -f docker-compose.yml -f docker-compose.dev.yml"
+
+case "${1:-up}" in
+  up)
+    $COMPOSE up --build "${@:2}"
+    ;;
+  down)
+    $COMPOSE down "${@:2}"
+    ;;
+  build)
+    $COMPOSE build "${@:2}"
+    ;;
+  logs)
+    $COMPOSE logs -f "${@:2}"
+    ;;
+  console)
+    $COMPOSE exec api bundle exec rails console
+    ;;
+  dbconsole)
+    $COMPOSE exec db psql -U teetimepro -d teetimepro_development
+    ;;
+  rspec)
+    $COMPOSE exec api bundle exec rspec "${@:2}"
+    ;;
+  seed)
+    $COMPOSE exec api bundle exec rails db:seed
+    ;;
+  reset)
+    $COMPOSE exec api bundle exec rails db:reset
+    ;;
+  sh)
+    $COMPOSE exec "${2:-api}" sh
+    ;;
+  *)
+    echo "Unknown command: $1"
+    echo "Usage: bin/docker-dev [up|down|build|logs|console|dbconsole|rspec|seed|reset|sh]"
+    exit 1
+    ;;
+esac

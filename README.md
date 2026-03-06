@@ -27,14 +27,19 @@ Golf course tee time management SaaS platform. Built for course operators who ne
 
 ## Getting Started
 
+### Docker (recommended)
+
 ```bash
 # Clone and configure
 git clone https://github.com/AgentClaude/teetimepro.git
 cd teetimepro
 cp .env.example .env
 
-# Start everything
-docker-compose up --build
+# Development mode (hot-reload for API + frontend)
+bin/docker-dev up
+
+# Or production-like mode
+docker compose up --build
 
 # Services:
 #   API:      http://localhost:3003
@@ -43,9 +48,24 @@ docker-compose up --build
 #   Redis:    localhost:6381
 ```
 
-## Development Workflow
+### Docker Dev Commands
 
-### API (Rails)
+```bash
+bin/docker-dev up           # Start all services with hot-reload
+bin/docker-dev down         # Stop all services
+bin/docker-dev build        # Rebuild containers
+bin/docker-dev logs api     # Tail logs for a service
+bin/docker-dev console      # Rails console
+bin/docker-dev dbconsole    # PostgreSQL console
+bin/docker-dev rspec        # Run API tests
+bin/docker-dev seed         # Seed the database
+bin/docker-dev reset        # Reset database (drop + create + migrate + seed)
+bin/docker-dev sh api       # Shell into a container
+```
+
+### Local Development (without Docker)
+
+#### API (Rails)
 ```bash
 cd api
 bundle install
@@ -55,7 +75,7 @@ bundle exec rspec              # Run tests
 bundle exec sidekiq            # Background jobs
 ```
 
-### Frontend (React)
+#### Frontend (React)
 ```bash
 cd web
 npm install
