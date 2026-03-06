@@ -145,6 +145,45 @@ export const GET_AVAILABLE_TEE_TIMES = gql`
   }
 `;
 
+export const GET_VOICE_CALL_LOGS = gql`
+  query GetVoiceCallLogs($courseId: ID, $channel: String, $limit: Int) {
+    voiceCallLogs(courseId: $courseId, channel: $channel, limit: $limit) {
+      id
+      courseId
+      courseName
+      callSid
+      channel
+      callerPhone
+      callerName
+      status
+      durationSeconds
+      summary
+      startedAt
+      endedAt
+    }
+  }
+`;
+
+export const GET_VOICE_CALL_LOG = gql`
+  query GetVoiceCallLog($id: ID!) {
+    voiceCallLog(id: $id) {
+      id
+      courseId
+      courseName
+      callSid
+      channel
+      callerPhone
+      callerName
+      status
+      durationSeconds
+      transcript
+      summary
+      startedAt
+      endedAt
+    }
+  }
+`;
+
 export const GET_SMS_CAMPAIGNS = gql`
   query GetSmsCampaigns($status: String) {
     smsCampaigns(status: $status) {

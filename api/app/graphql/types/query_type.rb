@@ -85,6 +85,28 @@ module Types
       org.sms_campaigns.find(id)
     end
 
+    # Voice call logs
+    field :voice_call_logs, [Types::VoiceCallLogType], null: false do
+      argument :course_id, ID, required: false
+      argument :channel, String, required: false
+      argument :limit, Integer, required: false
+    end
+    def voice_call_logs(course_id: nil, channel: nil, limit: 50)
+      org = require_auth!
+      scope = VoiceCallLog.for_organization(org).recent
+      scope = scope.where(course_id: course_id) if course_id.present?
+      scope = scope.where(channel: channel) if channel.present?
+      scope.includes(:course).limit([limit, 100].min)
+    end
+
+    field :voice_call_log, Types::VoiceCallLogType, null: true do
+      argument :id, ID, required: true
+    end
+    def voice_call_log(id:)
+      org = require_auth!
+      VoiceCallLog.for_organization(org).find(id)
+    end
+
     # Available tee times
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true

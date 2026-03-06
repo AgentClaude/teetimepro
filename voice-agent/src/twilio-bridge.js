@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import { buildSettings } from "./deepgram-settings.js";
 import { executeFunction } from "./function-handlers.js";
+import { CallLogger } from "./call-logger.js";
 
 const DEEPGRAM_URL = "wss://agent.deepgram.com/v1/agent/converse";
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
@@ -17,6 +18,7 @@ export function handleTwilioConnection(twilioSocket, log) {
   let callMeta = {};
   let deepgramWs = null;
   let audioBuffer = [];
+  let callLogger = new CallLogger({ channel: "twilio", log });
 
   // Connect to Deepgram Voice Agent API
   deepgramWs = new WebSocket(DEEPGRAM_URL, ["token", DEEPGRAM_API_KEY]);
@@ -52,7 +54,7 @@ export function handleTwilioConnection(twilioSocket, log) {
         break;
 
       case "FunctionCallRequest":
-        handleFunctionCalls(msg, deepgramWs, callMeta, log);
+        handleFunctionCalls(msg, deepgramWs, callMeta, log, callLogger);
         break;
 
       case "UserStartedSpeaking":
@@ -74,6 +76,7 @@ export function handleTwilioConnection(twilioSocket, log) {
         } else {
           log.info({ text: msg.content }, "Agent said");
         }
+        callLogger.addTranscript(msg.role, msg.content);
         break;
 
       case "AgentThinking":
@@ -116,6 +119,8 @@ export function handleTwilioConnection(twilioSocket, log) {
           from: msg.start.customParameters?.from || "",
           to: msg.start.customParameters?.to || "",
         };
+        callLogger.callSid = callMeta.callSid;
+        callLogger.callerPhone = callMeta.from;
         log.info({ streamSid, callSid: callMeta.callSid }, "Twilio stream started");
         break;
 
@@ -139,6 +144,9 @@ export function handleTwilioConnection(twilioSocket, log) {
           const combined = Buffer.concat(audioBuffer);
           deepgramWs.send(combined);
           audioBuffer = [];
+        }
+        if (callLogger.transcript.length > 0) {
+          callLogger.save();
         }
         cleanup();
         break;
@@ -169,9 +177,11 @@ export function handleTwilioConnection(twilioSocket, log) {
 /**
  * Handle function calls from Deepgram Voice Agent
  */
-async function handleFunctionCalls(msg, deepgramWs, callMeta, log) {
+async function handleFunctionCalls(msg, deepgramWs, callMeta, log, callLogger) {
   for (const fn of msg.functions || []) {
     log.info({ name: fn.name, args: fn.arguments }, "Function call requested");
+
+    callLogger.addFunctionCall(fn.name, fn.arguments);
 
     try {
       const args = typeof fn.arguments === "string"
@@ -181,6 +191,8 @@ async function handleFunctionCalls(msg, deepgramWs, callMeta, log) {
       const result = await executeFunction(fn.name, args, callMeta);
 
       log.info({ name: fn.name, result }, "Function call result");
+
+      callLogger.addFunctionResult(fn.name, result);
 
       // Send FunctionCallResponse back to Deepgram
       if (deepgramWs.readyState === WebSocket.OPEN) {

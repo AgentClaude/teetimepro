@@ -50,6 +50,9 @@ Rails.application.routes.draw do
         end
       end
 
+      # Voice call logs
+      resources :voice_call_logs, only: [:index, :show, :create]
+
       # SMS status callback (Twilio webhook)
       post "/sms/status_callback", to: "sms#status_callback"
     end

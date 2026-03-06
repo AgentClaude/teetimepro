@@ -84,6 +84,42 @@ export interface BookingPlayer {
   handicap: number | null;
 }
 
+export interface VoiceCallLogSummary {
+  message_count: number;
+  user_messages: number;
+  agent_messages: number;
+  function_calls: number;
+  booking_created: boolean;
+  confirmation_code: string | null;
+}
+
+export interface TranscriptEntry {
+  type: "transcript" | "function_call" | "function_result";
+  timestamp: string;
+  role?: string;
+  content?: string;
+  name?: string;
+  arguments?: string;
+  result?: Record<string, unknown>;
+}
+
+export interface VoiceCallLog {
+  id: string;
+  courseId: string | null;
+  courseName: string | null;
+  callSid: string | null;
+  channel: "browser" | "twilio";
+  callerPhone: string | null;
+  callerName: string | null;
+  status: string;
+  durationSeconds: number | null;
+  transcript: TranscriptEntry[];
+  summary: VoiceCallLogSummary;
+  startedAt: string;
+  endedAt: string | null;
+  createdAt: string;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;

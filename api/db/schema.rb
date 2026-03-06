@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_06_221930) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_06_230000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -259,6 +259,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_221930) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  create_table "voice_call_logs", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id"
+    t.string "call_sid"
+    t.string "channel", default: "browser", null: false
+    t.string "caller_phone"
+    t.string "caller_name"
+    t.string "status", default: "in_progress", null: false
+    t.integer "duration_seconds"
+    t.jsonb "transcript", default: [], null: false
+    t.jsonb "summary", default: {}, null: false
+    t.datetime "started_at", null: false
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_sid"], name: "index_voice_call_logs_on_call_sid", unique: true, where: "(call_sid IS NOT NULL)"
+    t.index ["channel"], name: "index_voice_call_logs_on_channel"
+    t.index ["course_id"], name: "index_voice_call_logs_on_course_id"
+    t.index ["organization_id", "started_at"], name: "index_voice_call_logs_on_organization_id_and_started_at"
+    t.index ["organization_id"], name: "index_voice_call_logs_on_organization_id"
+    t.index ["status"], name: "index_voice_call_logs_on_status"
+  end
+
   create_table "webhook_endpoints", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.string "url", null: false
@@ -312,6 +335,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_221930) do
   add_foreign_key "tee_sheets", "courses", on_delete: :cascade
   add_foreign_key "tee_times", "tee_sheets", on_delete: :cascade
   add_foreign_key "users", "organizations", on_delete: :cascade
+  add_foreign_key "voice_call_logs", "courses", on_delete: :nullify
+  add_foreign_key "voice_call_logs", "organizations", on_delete: :cascade
   add_foreign_key "webhook_endpoints", "organizations"
   add_foreign_key "webhook_events", "webhook_endpoints"
 end

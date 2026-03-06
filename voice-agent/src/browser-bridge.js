@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import { buildSettings } from "./deepgram-settings.js";
 import { executeFunction } from "./function-handlers.js";
+import { CallLogger } from "./call-logger.js";
 
 const DEEPGRAM_URL = "wss://agent.deepgram.com/v1/agent/converse";
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
@@ -35,6 +36,7 @@ export function handleBrowserConnection(browserSocket, log) {
   let deepgramWs = null;
   let courseId = null;
   let callMeta = {};
+  let callLogger = null;
 
   browserSocket.on("message", async (data) => {
     // Check if it's a JSON control message
@@ -45,6 +47,7 @@ export function handleBrowserConnection(browserSocket, log) {
         if (msg.type === "config") {
           courseId = msg.courseId;
           callMeta = { courseId };
+          callLogger = new CallLogger({ channel: "browser", courseId, log });
           log.info({ courseId }, "Browser playground: starting session");
 
           // Fetch course data (including voice_config and timezone) from Rails
@@ -54,12 +57,12 @@ export function handleBrowserConnection(browserSocket, log) {
           log.info({ hasCourseConfig: !!courseConfig, timezone }, "Course config loaded");
 
           // Connect to Deepgram with browser audio settings
-          // Use separate input/output sample rates: 16kHz mic in, 24kHz TTS out
+          // Use separate input/output sample rates: 16kHz mic in, 48kHz TTS out
           connectToDeepgram(browserSocket, log, {
             inputEncoding: "linear16",
             inputSampleRate: 16000,
             outputEncoding: "linear16",
-            outputSampleRate: 24000,
+            outputSampleRate: 48000,
             courseConfig,
             courseId,
             timezone,
@@ -77,10 +80,13 @@ export function handleBrowserConnection(browserSocket, log) {
     }
   });
 
-  browserSocket.on("close", () => {
+  browserSocket.on("close", async () => {
     log.info("Browser WebSocket closed");
     if (deepgramWs?.readyState === WebSocket.OPEN) {
       deepgramWs.close();
+    }
+    if (callLogger && callLogger.transcript.length > 0) {
+      await callLogger.save();
     }
   });
 
@@ -145,6 +151,7 @@ export function handleBrowserConnection(browserSocket, log) {
             role: msg.role,
             content: msg.content,
           });
+          if (callLogger) callLogger.addTranscript(msg.role, msg.content);
           break;
 
         case "AgentThinking":
@@ -188,6 +195,8 @@ export function handleBrowserConnection(browserSocket, log) {
         arguments: fn.arguments,
       });
 
+      if (callLogger) callLogger.addFunctionCall(fn.name, fn.arguments);
+
       try {
         const args =
           typeof fn.arguments === "string"
@@ -197,6 +206,8 @@ export function handleBrowserConnection(browserSocket, log) {
         const result = await executeFunction(fn.name, args, callMeta);
 
         log.info({ name: fn.name, result }, "Function result (browser)");
+
+        if (callLogger) callLogger.addFunctionResult(fn.name, result);
 
         sendToBrowser({
           type: "function_result",

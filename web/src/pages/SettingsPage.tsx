@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { GET_COURSES_WITH_VOICE_CONFIG } from '../graphql/queries';
+import { GET_COURSES_WITH_VOICE_CONFIG, GET_VOICE_CALL_LOGS, GET_VOICE_CALL_LOG } from '../graphql/queries';
 import { UPDATE_COURSE_VOICE_CONFIG } from '../graphql/mutations';
-import type { Course } from '../types';
+import type { Course, VoiceCallLog, TranscriptEntry } from '../types';
 
 export function SettingsPage() {
   const { data, loading } = useQuery(GET_COURSES_WITH_VOICE_CONFIG);
@@ -19,6 +19,16 @@ export function SettingsPage() {
   const [saved, setSaved] = useState(false);
 
   const [updateVoiceConfig, { loading: saving }] = useMutation(UPDATE_COURSE_VOICE_CONFIG);
+
+  // Call logs
+  const { data: logsData, loading: logsLoading, refetch: refetchLogs } = useQuery(GET_VOICE_CALL_LOGS, {
+    variables: { limit: 50 },
+  });
+  const callLogs: VoiceCallLog[] = logsData?.voiceCallLogs || [];
+
+  const [fetchCallLog, { data: callLogData, loading: callLogLoading }] = useLazyQuery(GET_VOICE_CALL_LOG);
+  const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const selectedLog: VoiceCallLog | null = callLogData?.voiceCallLog || null;
 
   // Load voice config when course selection changes
   useEffect(() => {
@@ -63,6 +73,22 @@ export function SettingsPage() {
     } catch (err) {
       alert('Failed to save voice config');
     }
+  }
+
+  function openCallLog(id: string) {
+    setSelectedLogId(id);
+    fetchCallLog({ variables: { id } });
+  }
+
+  function formatDuration(seconds: number | null) {
+    if (!seconds) return '--';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  }
+
+  function formatTime(iso: string) {
+    return new Date(iso).toLocaleString();
   }
 
   return (
@@ -266,6 +292,134 @@ export function SettingsPage() {
         )}
       </Card>
 
+      {/* Call Logs */}
+      <Card className="p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Call Logs</h2>
+            <p className="text-sm text-gray-500">View voice bot conversation history</p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => refetchLogs()}>
+            Refresh
+          </Button>
+        </div>
+
+        {logsLoading ? (
+          <p className="text-sm text-gray-500">Loading call logs...</p>
+        ) : callLogs.length === 0 ? (
+          <p className="text-sm text-gray-500">No call logs yet. Make a call via the playground or phone to see logs here.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Time</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Channel</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Course</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Caller</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Duration</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Messages</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Booking</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {callLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-900">
+                      {formatTime(log.startedAt)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        log.channel === 'twilio' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {log.channel === 'twilio' ? 'Phone' : 'Browser'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
+                      {log.courseName || '--'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
+                      {log.callerName || log.callerPhone || '--'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
+                      {formatDuration(log.durationSeconds)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
+                      {log.summary?.message_count || 0}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm">
+                      {log.summary?.booking_created ? (
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          {log.summary.confirmation_code || 'Yes'}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">--</span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm">
+                      <button
+                        onClick={() => openCallLog(log.id)}
+                        className="font-medium text-green-600 hover:text-green-800"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Call Log Detail Modal */}
+      {selectedLogId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setSelectedLogId(null)}>
+          <div
+            className="mx-4 max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Call Log</h3>
+                {selectedLog && (
+                  <p className="text-sm text-gray-500">
+                    {formatTime(selectedLog.startedAt)}
+                    {selectedLog.courseName && ` - ${selectedLog.courseName}`}
+                    {selectedLog.durationSeconds && ` - ${formatDuration(selectedLog.durationSeconds)}`}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setSelectedLogId(null)}
+                className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto px-6 py-4" style={{ maxHeight: 'calc(85vh - 8rem)' }}>
+              {callLogLoading ? (
+                <p className="text-sm text-gray-500">Loading transcript...</p>
+              ) : selectedLog?.transcript ? (
+                <div className="space-y-3">
+                  {selectedLog.transcript.map((entry: TranscriptEntry, i: number) => (
+                    <TranscriptRow key={i} entry={entry} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No transcript available.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Integrations */}
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Integrations</h2>
@@ -295,4 +449,80 @@ export function SettingsPage() {
       </Card>
     </div>
   );
+}
+
+function TranscriptRow({ entry }: { entry: TranscriptEntry }) {
+  if (entry.type === 'transcript') {
+    const isUser = entry.role === 'user';
+    return (
+      <div className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+        <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
+          isUser ? 'bg-gray-100 text-gray-900' : 'bg-green-600 text-white'
+        }`}>
+          <div className="mb-0.5 text-xs font-medium opacity-70">
+            {isUser ? 'Caller' : 'Agent'}
+            <span className="ml-2 font-normal">{new Date(entry.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div className="text-sm">{entry.content}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (entry.type === 'function_call') {
+    let argsDisplay = entry.arguments || '';
+    try {
+      argsDisplay = JSON.stringify(JSON.parse(argsDisplay), null, 2);
+    } catch {
+      // keep as-is
+    }
+
+    return (
+      <div className="mx-4 rounded border border-amber-200 bg-amber-50 px-4 py-2">
+        <div className="mb-1 flex items-center gap-2">
+          <span className="inline-flex items-center rounded bg-amber-200 px-1.5 py-0.5 text-xs font-mono font-medium text-amber-900">
+            API Call
+          </span>
+          <span className="text-xs font-semibold text-amber-800">{entry.name}</span>
+          <span className="text-xs text-amber-600">{new Date(entry.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs text-amber-900">{argsDisplay}</pre>
+      </div>
+    );
+  }
+
+  if (entry.type === 'function_result') {
+    const resultStr = typeof entry.result === 'object'
+      ? JSON.stringify(entry.result, null, 2)
+      : String(entry.result);
+
+    const isSuccess = entry.result && typeof entry.result === 'object' && (
+      ('success' in entry.result && entry.result.success) ||
+      ('available' in entry.result && entry.result.available)
+    );
+    const isError = entry.result && typeof entry.result === 'object' && 'error' in entry.result;
+
+    return (
+      <div className={`mx-4 rounded border px-4 py-2 ${
+        isError
+          ? 'border-red-200 bg-red-50'
+          : isSuccess
+          ? 'border-green-200 bg-green-50'
+          : 'border-gray-200 bg-gray-50'
+      }`}>
+        <div className="mb-1 flex items-center gap-2">
+          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-mono font-medium ${
+            isError ? 'bg-red-200 text-red-900' : isSuccess ? 'bg-green-200 text-green-900' : 'bg-gray-200 text-gray-900'
+          }`}>
+            Result
+          </span>
+          <span className="text-xs font-semibold text-gray-700">{entry.name}</span>
+          <span className="text-xs text-gray-500">{new Date(entry.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs text-gray-800">{resultStr}</pre>
+      </div>
+    );
+  }
+
+  return null;
 }
