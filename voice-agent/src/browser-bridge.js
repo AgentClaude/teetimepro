@@ -57,12 +57,12 @@ export function handleBrowserConnection(browserSocket, log) {
           log.info({ hasCourseConfig: !!courseConfig, timezone }, "Course config loaded");
 
           // Connect to Deepgram with browser audio settings
-          // Use separate input/output sample rates: 16kHz mic in, 48kHz TTS out
+          // 16kHz mic in, 24kHz TTS out (Deepgram aura-2 native rate)
           connectToDeepgram(browserSocket, log, {
             inputEncoding: "linear16",
             inputSampleRate: 16000,
             outputEncoding: "linear16",
-            outputSampleRate: 48000,
+            outputSampleRate: 24000,
             courseConfig,
             courseId,
             timezone,
@@ -127,10 +127,7 @@ export function handleBrowserConnection(browserSocket, log) {
           break;
 
         case "AgentAudio":
-          // JSON-wrapped audio (base64 encoded)
-          if (browserSocket.readyState === WebSocket.OPEN) {
-            sendToBrowser({ type: "audio", audio: msg.audio });
-          }
+          // Handled by binary frame handler above — skip to avoid duplicates
           break;
 
         case "FunctionCallRequest":

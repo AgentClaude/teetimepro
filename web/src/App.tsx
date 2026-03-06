@@ -7,6 +7,7 @@ import { TeeSheetPage } from "./pages/TeeSheetPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { CallLogPage } from "./pages/CallLogPage";
 import CampaignsPage from "./pages/CampaignsPage";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/call-logs/:id" element={<CallLogPage />} />
       </Route>
     </Routes>
   );
