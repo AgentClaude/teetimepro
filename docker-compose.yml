@@ -70,7 +70,6 @@ services:
     volumes:
       - rails_storage:/app/storage
       - rails_logs:/app/log
-      - ./api:/app
     command: >
       sh -c "
         rm -f /app/tmp/pids/server.pid &&
@@ -83,6 +82,7 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"]
       interval: 30s
       timeout: 10s
+      start_period: 60s
       retries: 3
 
   # Sidekiq Background Jobs
