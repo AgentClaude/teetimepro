@@ -12,6 +12,10 @@
 export function buildSettings({
   encoding = "mulaw",
   sampleRate = 8000,
+  inputEncoding = null,
+  inputSampleRate = null,
+  outputEncoding = null,
+  outputSampleRate = null,
   courseConfig = null,
   courseId = null,
   timezone = null,
@@ -56,8 +60,15 @@ export function buildSettings({
   return {
     type: "Settings",
     audio: {
-      input: { encoding, sample_rate: sampleRate },
-      output: { encoding, sample_rate: sampleRate, container: "none" },
+      input: {
+        encoding: inputEncoding || encoding,
+        sample_rate: inputSampleRate || sampleRate,
+      },
+      output: {
+        encoding: outputEncoding || encoding,
+        sample_rate: outputSampleRate || sampleRate,
+        container: "none",
+      },
     },
     agent: {
       language: "en",
@@ -98,16 +109,17 @@ Your goal is to help callers book a tee time. You need to collect:
 1. **Date** — when they want to play (e.g., "tomorrow", "this Saturday", "March 8th")
 2. **Number of players** — how many in their group (1-4)
 3. **Time preference** — morning, afternoon, or a specific time
+4. **Name** — the caller's name for the reservation
 
-Once you have all three, use the search_tee_times function to find available slots.
+Once you have date, players, and time preference, use the search_tee_times function to find available slots.
 Present up to 3 options with times and prices.
-When they choose, confirm the details and use create_booking to complete it.
+When they choose, ask for their name if you don't have it yet, confirm the details, and use create_booking to complete it.
 
 #Important Rules
 - Only book dates within the next 14 days.
 - Maximum 4 players per tee time.
 - Always confirm the full booking details before creating it:
-  date, time, number of players, and total price.
+  name, date, time, number of players, and total price.
 - After booking, read the confirmation code letter by letter.
 - If no tee times are available, offer alternative times or dates.
 
@@ -158,12 +170,16 @@ function buildFunctions(courseId) {
             type: "integer",
             description: "Number of players (1-4).",
           },
+          caller_name: {
+            type: "string",
+            description: "The caller's full name for the reservation.",
+          },
           caller_phone: {
             type: "string",
             description: "The caller's phone number for the booking.",
           },
         },
-        required: ["tee_time_id", "players_count"],
+        required: ["tee_time_id", "players_count", "caller_name"],
       },
     },
     {

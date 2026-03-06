@@ -73,12 +73,19 @@ async function searchTeeTimes({ date, players, time_preference }) {
   }
 }
 
-async function createBooking({ tee_time_id, players_count, caller_phone }, callMeta) {
+async function createBooking({ tee_time_id, players_count, caller_name, caller_phone }, callMeta) {
   try {
+    // Split caller name into first/last
+    const nameParts = (caller_name || "Guest Caller").trim().split(/\s+/);
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
     const body = {
       tee_time_id,
       players_count,
       phone: caller_phone || callMeta?.from,
+      first_name: firstName,
+      last_name: lastName,
     };
 
     const res = await apiFetch("/api/v1/bookings", {

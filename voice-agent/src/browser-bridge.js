@@ -54,9 +54,12 @@ export function handleBrowserConnection(browserSocket, log) {
           log.info({ hasCourseConfig: !!courseConfig, timezone }, "Course config loaded");
 
           // Connect to Deepgram with browser audio settings
+          // Use separate input/output sample rates: 16kHz mic in, 24kHz TTS out
           connectToDeepgram(browserSocket, log, {
-            encoding: "linear16",
-            sampleRate: 16000,
+            inputEncoding: "linear16",
+            inputSampleRate: 16000,
+            outputEncoding: "linear16",
+            outputSampleRate: 24000,
             courseConfig,
             courseId,
             timezone,

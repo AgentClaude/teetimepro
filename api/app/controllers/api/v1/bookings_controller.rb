@@ -19,16 +19,18 @@ class Api::V1::BookingsController < Api::V1::BaseController
   end
 
   def create
-    bp = booking_params
+    # Support both nested (booking: { ... }) and flat params (from voice bot)
+    bp = params[:booking].present? ? booking_params : {}
     user_attrs = bp[:user] || {}
 
-    # Support flat params from voice bot (tee_time_id, players_count, phone at top level)
     tee_time_id = bp[:tee_time_id] || params[:tee_time_id]
     players_count = bp[:players_count] || params[:players_count]
     phone = user_attrs[:phone] || params[:phone]
+    first_name = user_attrs[:first_name] || params[:first_name]
+    last_name = user_attrs[:last_name] || params[:last_name]
 
     user = find_or_create_api_user(
-      user_attrs.presence || { phone: phone, first_name: "Guest", last_name: "Caller" }
+      user_attrs.presence || { phone: phone, first_name: first_name.presence || "Guest", last_name: last_name.presence || "Caller" }
     )
     return unless user # find_or_create_api_user renders error
 
@@ -121,7 +123,11 @@ class Api::V1::BookingsController < Api::V1::BaseController
       last_name: user_params[:last_name],
       phone: user_params[:phone]
     )
-    return render_service_error(result) unless result.success?
+
+    unless result.success?
+      render_service_error(result)
+      return nil
+    end
 
     result.data[:user]
   end
