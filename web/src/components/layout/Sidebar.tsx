@@ -6,6 +6,7 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   HomeIcon,
+  MegaphoneIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -13,6 +14,7 @@ const navigation = [
   { name: 'Tee Sheet', href: '/tee-sheet', icon: CalendarDaysIcon },
   { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
   { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+  { name: 'Campaigns', href: '/campaigns', icon: MegaphoneIcon },
   { name: 'Reports', href: '/reports', icon: ChartBarIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];

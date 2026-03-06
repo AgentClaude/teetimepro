@@ -144,3 +144,62 @@ export const GET_AVAILABLE_TEE_TIMES = gql`
     }
   }
 `;
+
+export const GET_SMS_CAMPAIGNS = gql`
+  query GetSmsCampaigns($status: String) {
+    smsCampaigns(status: $status) {
+      id
+      name
+      messageBody
+      status
+      recipientFilter
+      totalRecipients
+      sentCount
+      deliveredCount
+      failedCount
+      progressPercentage
+      scheduledAt
+      sentAt
+      completedAt
+      createdAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+export const GET_SMS_CAMPAIGN = gql`
+  query GetSmsCampaign($id: ID!) {
+    smsCampaign(id: $id) {
+      id
+      name
+      messageBody
+      status
+      recipientFilter
+      filterCriteria
+      totalRecipients
+      sentCount
+      deliveredCount
+      failedCount
+      progressPercentage
+      scheduledAt
+      sentAt
+      completedAt
+      createdAt
+      createdBy {
+        id
+        fullName
+      }
+      smsMessages {
+        id
+        toPhone
+        status
+        errorMessage
+        sentAt
+        deliveredAt
+      }
+    }
+  }
+`;

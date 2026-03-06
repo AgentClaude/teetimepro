@@ -66,6 +66,25 @@ module Types
       scope.includes(tee_time: { tee_sheet: :course }).order("tee_times.starts_at DESC")
     end
 
+    # SMS Campaigns
+    field :sms_campaigns, [Types::SmsCampaignType], null: false do
+      argument :status, String, required: false
+    end
+    def sms_campaigns(status: nil)
+      org = require_auth!
+      scope = org.sms_campaigns.order(created_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      scope.limit(50)
+    end
+
+    field :sms_campaign, Types::SmsCampaignType, null: true do
+      argument :id, ID, required: true
+    end
+    def sms_campaign(id:)
+      org = require_auth!
+      org.sms_campaigns.find(id)
+    end
+
     # Available tee times
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true
