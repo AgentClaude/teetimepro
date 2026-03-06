@@ -23,7 +23,7 @@ RSpec.shared_examples "API authentication" do
   context "with inactive API key" do
     before do
       api_key.update!(active: false)
-      headers["Authorization"] = "Bearer #{api_key.token}"
+      headers["Authorization"] = "Bearer #{api_key.display_key}"
     end
 
     it "returns 401 unauthorized" do
