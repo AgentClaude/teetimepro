@@ -19,18 +19,31 @@ class Api::V1::BookingsController < Api::V1::BaseController
   end
 
   def create
+    bp = booking_params
+    user_attrs = bp[:user] || {}
+
+    # Support flat params from voice bot (tee_time_id, players_count, phone at top level)
+    tee_time_id = bp[:tee_time_id] || params[:tee_time_id]
+    players_count = bp[:players_count] || params[:players_count]
+    phone = user_attrs[:phone] || params[:phone]
+
+    user = find_or_create_api_user(
+      user_attrs.presence || { phone: phone, first_name: "Guest", last_name: "Caller" }
+    )
+    return unless user # find_or_create_api_user renders error
+
     result = Bookings::CreateBookingService.call(
       organization: current_organization,
-      tee_time: find_tee_time(booking_params[:tee_time_id]),
-      user: find_or_create_api_user(booking_params[:user]),
-      players_count: booking_params[:players_count],
-      payment_method_id: booking_params[:payment_method_id],
-      player_names: booking_params[:player_names]
+      tee_time: find_tee_time(tee_time_id),
+      user: user,
+      players_count: players_count,
+      payment_method_id: bp[:payment_method_id],
+      player_names: bp[:player_names]
     )
 
     if result.success?
       render_service_success(
-        OpenStruct.new(data: booking_data(result.booking)),
+        OpenStruct.new(data: booking_data(result.data[:booking])),
         status: :created
       )
     else

@@ -1,0 +1,17 @@
+{
+  "name": "teetimepro-voice-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deepgram Voice Agent bridge for TeeTimePro booking via Twilio",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "fastify": "^5.0.0",
+    "@fastify/websocket": "^11.0.0",
+    "dotenv": "^16.4.0"
+  }
+}

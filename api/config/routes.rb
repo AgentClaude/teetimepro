@@ -18,6 +18,12 @@ Rails.application.routes.draw do
     delete "/auth/logout", to: "sessions#destroy"
     post "/auth/register", to: "registrations#create"
 
+    # Voice Bot — Twilio webhook (redirects to voice-agent service)
+    scope :voice, controller: :voice_bot do
+      post "/incoming", action: :incoming
+      post "/status",   action: :status
+    end
+
     # API v1 - Public REST API with API key authentication
     namespace :v1 do
       # API documentation

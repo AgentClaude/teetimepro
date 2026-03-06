@@ -5,7 +5,7 @@ class Api::V1::TeeTimesController < Api::V1::BaseController
     paginated_tee_times = paginate(tee_times)
 
     render json: {
-      data: tee_times_data(paginated_tee_times.includes(:tee_sheet, :course)),
+      data: tee_times_data(paginated_tee_times.includes(tee_sheet: :course)),
       meta: pagination_meta(paginated_tee_times)
     }
   end
@@ -28,6 +28,24 @@ class Api::V1::TeeTimesController < Api::V1::BaseController
     # Filter by course if specified
     if params[:course_id].present?
       query = query.where(courses: { id: params[:course_id] })
+    end
+
+    # Filter by exact date
+    if params[:date].present?
+      date = Date.parse(params[:date])
+      query = query.where(tee_sheets: { date: date })
+    end
+
+    # Filter by minimum available spots (alias: players)
+    if params[:players].present?
+      min = params[:players].to_i
+      query = query.where(status: [:available, :partially_booked])
+                   .where("tee_times.max_players - tee_times.booked_players >= ?", min)
+    end
+
+    # Filter by time preference
+    if params[:time_preference].present?
+      query = apply_time_preference(query, params[:time_preference], params[:date])
     end
 
     # Filter by date range
@@ -66,6 +84,32 @@ class Api::V1::TeeTimesController < Api::V1::BaseController
     TeeTime.joins(tee_sheet: :course)
            .where(courses: { organization_id: current_organization.id })
            .find(id)
+  end
+
+  def apply_time_preference(query, preference, date_str)
+    date = date_str ? Date.parse(date_str) : Date.current
+    tz = current_organization.timezone || "UTC"
+
+    range = case preference
+            when "early_morning" then { start: 6, end: 8 }
+            when "morning"       then { start: 7, end: 11 }
+            when "midday"        then { start: 11, end: 13 }
+            when "afternoon"     then { start: 12, end: 16 }
+            when "twilight"      then { start: 15, end: 18 }
+            else
+              hour = preference.to_i
+              if hour.between?(5, 20)
+                { start: [hour - 1, 5].max, end: [hour + 1, 20].min }
+              else
+                nil
+              end
+            end
+
+    return query unless range
+
+    start_time = date.in_time_zone(tz).change(hour: range[:start])
+    end_time = date.in_time_zone(tz).change(hour: range[:end])
+    query.where(starts_at: start_time..end_time)
   end
 
   def tee_times_data(tee_times)

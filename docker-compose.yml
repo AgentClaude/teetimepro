@@ -60,6 +60,8 @@ services:
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - VOICE_BOT_BASE_URL=${VOICE_BOT_BASE_URL}
       - DB_HOST=db
       - DB_USERNAME=teetimepro
       - DB_PASSWORD=password
@@ -115,6 +117,33 @@ services:
     command: bundle exec sidekiq
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f sidekiq || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Voice Agent (Deepgram + Twilio bridge)
+  voice-agent:
+    build:
+      context: ./voice-agent
+      dockerfile: Dockerfile
+    container_name: teetimepro_voice_agent
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - API_URL=http://api:3003
+      - TEETIMEPRO_API_KEY=${TEETIMEPRO_API_KEY}
+      - VOICE_AGENT_WS_URL=${VOICE_AGENT_WS_URL:-wss://localhost:3005/voice/stream}
+      - LLM_PROVIDER=${LLM_PROVIDER:-google}
+      - LLM_MODEL=${LLM_MODEL:-gemini-2.5-flash}
+      - TTS_MODEL=${TTS_MODEL:-aura-2-odysseus-en}
+      - PORT=3005
+    ports:
+      - "${VOICE_PORT:-3005}:3005"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3005/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
