@@ -26,10 +26,13 @@ class Api::V1::BookingsController < Api::V1::BaseController
   end
 
   def create
+    user_result = find_or_create_api_user(booking_params[:user])
+    return render_service_error(user_result) unless user_result.success?
+
     result = Bookings::CreateBookingService.call(
       organization: current_organization,
       tee_time: find_tee_time(booking_params[:tee_time_id]),
-      user: find_or_create_user(booking_params[:user]),
+      user: user_result.data[:user],
       players_count: booking_params[:players_count],
       payment_method_id: booking_params[:payment_method_id],
       player_names: booking_params[:player_names]
@@ -106,20 +109,15 @@ class Api::V1::BookingsController < Api::V1::BaseController
            .find(id)
   end
 
-  def find_or_create_user(user_params)
-    # For API, we'll create a simple user record if it doesn't exist
-    # In production, you might want more sophisticated user management
-    User.find_by(email: user_params[:email]) ||
-      User.create!(
-        email: user_params[:email],
-        first_name: user_params[:first_name],
-        last_name: user_params[:last_name],
-        phone: user_params[:phone],
-        organization: current_organization,
-        password: SecureRandom.urlsafe_base64(12) # Generated password for API users
-      )
+  def find_or_create_api_user(user_params)
+    Users::FindOrCreateApiUserService.call(
+      organization: current_organization,
+      email: user_params[:email],
+      first_name: user_params[:first_name],
+      last_name: user_params[:last_name],
+      phone: user_params[:phone]
+    )
   end
-
 
 
   def booking_params

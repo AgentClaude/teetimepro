@@ -5,25 +5,24 @@ RSpec.shared_examples "API authentication" do
     it "returns 401 unauthorized" do
       make_request
       expect(response).to have_http_status(:unauthorized)
-      expect(json_response["error"]).to eq("API key required")
-      expect(json_response["code"]).to eq("unauthorized")
+      expect(json_response["error"]["code"]).to eq("unauthorized")
+      expect(json_response["error"]["message"]).to eq("API key required")
     end
   end
 
   context "with invalid API key" do
-    before { headers["Authorization"] = "Bearer tp_invalid_key" }
+    before { headers["Authorization"] = "Bearer tp_invalid_key_long_enough" }
 
     it "returns 401 unauthorized" do
       make_request
       expect(response).to have_http_status(:unauthorized)
-      expect(json_response["error"]).to eq("Invalid API key")
+      expect(json_response["error"]["code"]).to eq("unauthorized")
     end
   end
 
   context "with inactive API key" do
     before do
       api_key.update!(active: false)
-      headers["Authorization"] = "Bearer #{api_key.token}"
     end
 
     it "returns 401 unauthorized" do
@@ -38,9 +37,6 @@ RSpec.shared_examples "API rate limiting" do |endpoint_path|
     make_request
     expect(api_key.reload.last_used_at).to be_present
   end
-
-  # Note: Rate limiting tests would require Redis and are complex to test
-  # In a real implementation, you'd want integration tests for these
 end
 
 RSpec.shared_examples "API pagination" do

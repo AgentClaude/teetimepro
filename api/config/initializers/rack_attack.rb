@@ -56,23 +56,24 @@ class Rack::Attack
 
   # Custom response for rate limited requests
   self.throttled_responder = lambda do |env|
-    match_data = env['rack.attack.matched']
+    match_data = env['rack.attack.match_data'] || {}
     now = Time.now.to_i
-    period = env['rack.attack.match_discriminator'] || 60
+    retry_after = (match_data[:period] || 60) - (now - (match_data[:epoch] || now))
+    retry_after = [retry_after, 1].max
 
     headers = {
       'Content-Type' => 'application/json',
-      'X-RateLimit-Limit' => match_data.to_s,
+      'X-RateLimit-Limit' => (match_data[:limit] || 60).to_s,
       'X-RateLimit-Remaining' => '0',
-      'X-RateLimit-Reset' => (now + period).to_s,
-      'Retry-After' => period.to_s
+      'X-RateLimit-Reset' => (now + retry_after).to_s,
+      'Retry-After' => retry_after.to_s
     }
 
     body = {
       error: {
         code: 'rate_limit_exceeded',
         message: 'Too many requests. Please slow down.',
-        retry_after: period
+        retry_after: retry_after
       }
     }
 

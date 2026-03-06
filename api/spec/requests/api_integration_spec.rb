@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "API Integration", type: :request do
   let(:organization) { create(:organization) }
   let(:api_key) { create(:api_key, organization: organization) }
-  let(:headers) { { "Authorization" => "Bearer #{api_key.token}", "Content-Type" => "application/json" } }
+  let(:headers) { { "Authorization" => "Bearer #{api_key.display_key}", "Content-Type" => "application/json" } }
 
   def json_response
     JSON.parse(response.body)
@@ -127,8 +127,8 @@ RSpec.describe "API Integration", type: :request do
     it "handles missing resources gracefully" do
       get "/api/v1/courses/99999", headers: headers
       expect(response).to have_http_status(:not_found)
-      expect(json_response["error"]).to eq("Resource not found")
-      expect(json_response["code"]).to eq("not_found")
+      expect(json_response["error"]["code"]).to eq("not_found")
+      expect(json_response["error"]["message"]).to eq("Resource not found")
     end
 
     it "handles invalid parameters" do
