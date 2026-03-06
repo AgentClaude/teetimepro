@@ -184,6 +184,7 @@ export const GET_VOICE_CALL_LOG = gql`
   }
 `;
 
+
 export const GET_CUSTOMERS = gql`
   query GetCustomers($search: String, $role: String) {
     customers(search: $search, role: $role) {
@@ -230,6 +231,92 @@ export const GET_CUSTOMER = gql`
   }
 `;
 
+export const GET_TOURNAMENTS = gql`
+  query GetTournaments($courseId: ID, $status: TournamentStatusEnum, $upcomingOnly: Boolean) {
+    tournaments(courseId: $courseId, status: $status, upcomingOnly: $upcomingOnly) {
+      id
+      name
+      description
+      format
+      status
+      startDate
+      endDate
+      holes
+      teamSize
+      maxParticipants
+      minParticipants
+      entriesCount
+      registrationAvailable
+      entryFeeCents
+      entryFeeCurrency
+      entryFeeDisplay
+      handicapEnabled
+      maxHandicap
+      registrationOpensAt
+      registrationClosesAt
+      days
+      course {
+        id
+        name
+      }
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+export const GET_TOURNAMENT = gql`
+  query GetTournament($id: ID!) {
+    tournament(id: $id) {
+      id
+      name
+      description
+      format
+      status
+      startDate
+      endDate
+      holes
+      teamSize
+      maxParticipants
+      minParticipants
+      entriesCount
+      registrationAvailable
+      entryFeeCents
+      entryFeeCurrency
+      entryFeeDisplay
+      handicapEnabled
+      maxHandicap
+      rules
+      prizeStructure
+      registrationOpensAt
+      registrationClosesAt
+      days
+      course {
+        id
+        name
+      }
+      createdBy {
+        id
+        fullName
+      }
+      tournamentEntries {
+        id
+        status
+        teamName
+        handicapIndex
+        startingHole
+        teeTime
+        user {
+          id
+          fullName
+          email
+        }
+      }
+    }
+  }
+`;
 export const GET_SMS_CAMPAIGNS = gql`
   query GetSmsCampaigns($status: String) {
     smsCampaigns(status: $status) {

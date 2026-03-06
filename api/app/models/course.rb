@@ -4,6 +4,7 @@ class Course < ApplicationRecord
   has_many :tee_times, through: :tee_sheets
   has_many :bookings, through: :tee_times
   has_many :voice_call_logs, dependent: :nullify
+  has_many :tournaments, dependent: :destroy
 
   validates :name, presence: true
   validates :holes, inclusion: { in: [9, 18, 27, 36] }

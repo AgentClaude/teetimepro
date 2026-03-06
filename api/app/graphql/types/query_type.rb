@@ -138,6 +138,29 @@ module Types
       org.users.find(id)
     end
 
+    # Tournaments
+    field :tournaments, [Types::TournamentType], null: false do
+      argument :course_id, ID, required: false
+      argument :status, Types::TournamentStatusEnum, required: false
+      argument :upcoming_only, Boolean, required: false
+    end
+    def tournaments(course_id: nil, status: nil, upcoming_only: nil)
+      org = require_auth!
+      scope = org.tournaments.includes(:course, :created_by)
+      scope = scope.where(course_id: course_id) if course_id.present?
+      scope = scope.where(status: status) if status.present?
+      scope = scope.upcoming if upcoming_only
+      scope.order(start_date: :asc)
+    end
+
+    field :tournament, Types::TournamentType, null: true do
+      argument :id, ID, required: true
+    end
+    def tournament(id:)
+      org = require_auth!
+      org.tournaments.includes(:tournament_entries, :course, :created_by).find(id)
+    end
+
     # Available tee times
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true

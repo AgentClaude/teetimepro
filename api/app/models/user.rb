@@ -6,6 +6,9 @@ class User < ApplicationRecord
   belongs_to :organization
   has_many :bookings, dependent: :destroy
   has_one :golfer_profile, dependent: :destroy
+  has_many :tournament_entries, dependent: :destroy
+  has_many :tournaments_entered, through: :tournament_entries, source: :tournament
+  has_many :created_tournaments, class_name: "Tournament", foreign_key: :created_by_id, dependent: :nullify
 
   enum :role, { golfer: 0, staff: 1, pro_shop: 2, manager: 3, admin: 4, owner: 5 }
 
