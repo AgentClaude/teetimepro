@@ -9,5 +9,9 @@ module Types
     field :send_sms_campaign, mutation: Mutations::SendSmsCampaign
     field :cancel_sms_campaign, mutation: Mutations::CancelSmsCampaign
     field :update_customer, mutation: Mutations::UpdateCustomer
+    field :create_tournament, mutation: Mutations::CreateTournament
+    field :update_tournament, mutation: Mutations::UpdateTournament
+    field :register_for_tournament, mutation: Mutations::RegisterForTournament
+    field :withdraw_from_tournament, mutation: Mutations::WithdrawFromTournament
   end
 end

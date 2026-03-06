@@ -138,6 +138,7 @@ export const UPDATE_TEE_TIME = gql`
   }
 `;
 
+
 export const UPDATE_CUSTOMER = gql`
   mutation UpdateCustomer(
     $id: ID!
@@ -160,6 +161,121 @@ export const UPDATE_CUSTOMER = gql`
         lastName
         fullName
         phone
+      }
+      errors
+    }
+  }
+`;
+
+export const CREATE_TOURNAMENT = gql`
+  mutation CreateTournament(
+    $courseId: ID!
+    $name: String!
+    $format: TournamentFormatEnum!
+    $startDate: ISO8601Date!
+    $endDate: ISO8601Date!
+    $description: String
+    $maxParticipants: Int
+    $minParticipants: Int
+    $teamSize: Int
+    $entryFeeCents: Int
+    $holes: Int
+    $handicapEnabled: Boolean
+    $maxHandicap: Float
+    $registrationOpensAt: ISO8601DateTime
+    $registrationClosesAt: ISO8601DateTime
+  ) {
+    createTournament(
+      courseId: $courseId
+      name: $name
+      format: $format
+      startDate: $startDate
+      endDate: $endDate
+      description: $description
+      maxParticipants: $maxParticipants
+      minParticipants: $minParticipants
+      teamSize: $teamSize
+      entryFeeCents: $entryFeeCents
+      holes: $holes
+      handicapEnabled: $handicapEnabled
+      maxHandicap: $maxHandicap
+      registrationOpensAt: $registrationOpensAt
+      registrationClosesAt: $registrationClosesAt
+    ) {
+      tournament {
+        id
+        name
+        format
+        status
+        startDate
+        endDate
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_TOURNAMENT = gql`
+  mutation UpdateTournament(
+    $id: ID!
+    $name: String
+    $status: TournamentStatusEnum
+    $description: String
+    $maxParticipants: Int
+    $entryFeeCents: Int
+    $registrationOpensAt: ISO8601DateTime
+    $registrationClosesAt: ISO8601DateTime
+  ) {
+    updateTournament(
+      id: $id
+      name: $name
+      status: $status
+      description: $description
+      maxParticipants: $maxParticipants
+      entryFeeCents: $entryFeeCents
+      registrationOpensAt: $registrationOpensAt
+      registrationClosesAt: $registrationClosesAt
+    ) {
+      tournament {
+        id
+        name
+        status
+      }
+      errors
+    }
+  }
+`;
+
+export const REGISTER_FOR_TOURNAMENT = gql`
+  mutation RegisterForTournament(
+    $tournamentId: ID!
+    $handicapIndex: Float
+    $teamName: String
+    $paymentMethodId: String
+  ) {
+    registerForTournament(
+      tournamentId: $tournamentId
+      handicapIndex: $handicapIndex
+      teamName: $teamName
+      paymentMethodId: $paymentMethodId
+    ) {
+      tournamentEntry {
+        id
+        status
+        handicapIndex
+        teamName
+      }
+      errors
+    }
+  }
+`;
+
+export const WITHDRAW_FROM_TOURNAMENT = gql`
+  mutation WithdrawFromTournament($tournamentId: ID!) {
+    withdrawFromTournament(tournamentId: $tournamentId) {
+      tournamentEntry {
+        id
+        status
       }
       errors
     }
