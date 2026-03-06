@@ -26,4 +26,17 @@ class ServiceResult
   def [](key)
     data.respond_to?(key) ? data.send(key) : nil
   end
+
+  # Delegate unknown methods to data (OpenStruct) for convenience
+  def method_missing(method, *args, &block)
+    if data.respond_to?(method)
+      data.send(method, *args, &block)
+    else
+      super
+    end
+  end
+
+  def respond_to_missing?(method, include_private = false)
+    data.respond_to?(method, include_private) || super
+  end
 end

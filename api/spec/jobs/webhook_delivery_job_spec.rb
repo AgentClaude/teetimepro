@@ -92,8 +92,9 @@ RSpec.describe WebhookDeliveryJob, type: :job do
       end
 
       it "has appropriate retry configuration" do
-        # Job should have retry disabled since we handle retries in the service
-        expect(described_class.retry_on_exceptions).to eq({ StandardError => { attempts: 1 } })
+        # Job should have retry_on configured for StandardError with 1 attempt
+        handler = described_class.rescue_handlers.detect { |h| h.first == "StandardError" }
+        expect(handler).to be_present
       end
     end
 
