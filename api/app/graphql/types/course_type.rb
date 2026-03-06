@@ -13,6 +13,7 @@ module Types
     field :address, String, null: true
     field :phone, String, null: true
     field :organization_id, ID, null: false
+    field :voice_config, GraphQL::Types::JSON, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 

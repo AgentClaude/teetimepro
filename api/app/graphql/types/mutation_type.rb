@@ -4,5 +4,6 @@ module Types
     field :cancel_booking, mutation: Mutations::CancelBooking
     field :create_course, mutation: Mutations::CreateCourse
     field :update_tee_time, mutation: Mutations::UpdateTeeTime
+    field :update_course_voice_config, mutation: Mutations::UpdateCourseVoiceConfig
   end
 end

@@ -1,7 +1,70 @@
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { GET_COURSES_WITH_VOICE_CONFIG } from '../graphql/queries';
+import { UPDATE_COURSE_VOICE_CONFIG } from '../graphql/mutations';
+import type { Course } from '../types';
 
 export function SettingsPage() {
+  const { data, loading } = useQuery(GET_COURSES_WITH_VOICE_CONFIG);
+  const courses: Course[] = data?.courses || [];
+
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [greeting, setGreeting] = useState('');
+  const [voiceModel, setVoiceModel] = useState('');
+  const [llmProvider, setLlmProvider] = useState('');
+  const [llmModel, setLlmModel] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const [updateVoiceConfig, { loading: saving }] = useMutation(UPDATE_COURSE_VOICE_CONFIG);
+
+  // Load voice config when course selection changes
+  useEffect(() => {
+    const course = courses.find((c) => c.id === selectedCourseId);
+    if (course?.voiceConfig) {
+      setSystemPrompt(course.voiceConfig.system_prompt || '');
+      setGreeting(course.voiceConfig.greeting || '');
+      setVoiceModel(course.voiceConfig.voice_model || 'aura-2-odysseus-en');
+      setLlmProvider(course.voiceConfig.llm_provider || 'google');
+      setLlmModel(course.voiceConfig.llm_model || 'gemini-2.5-flash');
+    }
+    setSaved(false);
+  }, [selectedCourseId, courses]);
+
+  // Auto-select first course
+  useEffect(() => {
+    if (courses.length > 0 && !selectedCourseId) {
+      setSelectedCourseId(courses[0].id);
+    }
+  }, [courses, selectedCourseId]);
+
+  async function handleSave() {
+    if (!selectedCourseId) return;
+    setSaved(false);
+    try {
+      const { data } = await updateVoiceConfig({
+        variables: {
+          courseId: selectedCourseId,
+          systemPrompt,
+          greeting,
+          voiceModel,
+          llmProvider,
+          llmModel,
+        },
+      });
+      if (data?.updateCourseVoiceConfig?.errors?.length) {
+        alert(data.updateCourseVoiceConfig.errors.join(', '));
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (err) {
+      alert('Failed to save voice config');
+    }
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
@@ -91,6 +154,118 @@ export function SettingsPage() {
         </div>
       </Card>
 
+      {/* Voice Bot Configuration */}
+      <Card className="p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Voice Bot</h2>
+            <p className="text-sm text-gray-500">Configure the AI voice assistant for phone bookings</p>
+          </div>
+          <a
+            href={`${window.location.protocol}//${window.location.hostname}:3005/playground`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Test in Playground
+          </a>
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-gray-500">Loading courses...</p>
+        ) : (
+          <>
+            {/* Course Selector */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700">Course</label>
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              >
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Greeting */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700">Greeting</label>
+              <p className="mb-1 text-xs text-gray-400">The first thing the voice bot says when answering a call</p>
+              <input
+                type="text"
+                value={greeting}
+                onChange={(e) => { setGreeting(e.target.value); setSaved(false); }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              />
+            </div>
+
+            {/* System Prompt */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700">System Prompt</label>
+              <p className="mb-1 text-xs text-gray-400">
+                Instructions that control how the voice bot behaves, what it says, and how it handles bookings
+              </p>
+              <textarea
+                value={systemPrompt}
+                onChange={(e) => { setSystemPrompt(e.target.value); setSaved(false); }}
+                rows={16}
+                className="mt-1 block w-full rounded-md border-gray-300 font-mono text-sm shadow-sm focus:border-green-500 focus:ring-green-500"
+              />
+            </div>
+
+            {/* Model Settings */}
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">LLM Provider</label>
+                <select
+                  value={llmProvider}
+                  onChange={(e) => { setLlmProvider(e.target.value); setSaved(false); }}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                >
+                  <option value="google">Google</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">LLM Model</label>
+                <input
+                  type="text"
+                  value={llmModel}
+                  onChange={(e) => { setLlmModel(e.target.value); setSaved(false); }}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Voice Model</label>
+                <input
+                  type="text"
+                  value={voiceModel}
+                  onChange={(e) => { setVoiceModel(e.target.value); setSaved(false); }}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                />
+              </div>
+            </div>
+
+            {/* Save */}
+            <div className="flex items-center gap-3">
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Voice Config'}
+              </Button>
+              {saved && (
+                <span className="text-sm font-medium text-green-600">Saved successfully</span>
+              )}
+            </div>
+          </>
+        )}
+      </Card>
+
       {/* Integrations */}
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Integrations</h2>
@@ -105,16 +280,16 @@ export function SettingsPage() {
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
               <p className="font-medium text-gray-900">Twilio</p>
-              <p className="text-sm text-gray-500">SMS reminders</p>
+              <p className="text-sm text-gray-500">SMS reminders & phone voice bot</p>
             </div>
             <Button variant="secondary" size="sm">Configure</Button>
           </div>
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
               <p className="font-medium text-gray-900">Deepgram</p>
-              <p className="text-sm text-gray-500">Voice booking bot</p>
+              <p className="text-sm text-gray-500">Voice AI (STT + TTS)</p>
             </div>
-            <Button variant="secondary" size="sm">Coming Soon</Button>
+            <span className="text-sm font-medium text-green-600">Connected</span>
           </div>
         </div>
       </Card>

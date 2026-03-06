@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeeTimePro Voice Bot Playground</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1923;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      width: 100%;
+      padding: 20px 32px;
+      background: #162029;
+      border-bottom: 1px solid #2a3a47;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #4ade80;
+    }
+    .header .subtitle {
+      font-size: 13px;
+      color: #7a8a97;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+
+    /* Course selector */
+    .config-panel {
+      background: #162029;
+      border: 1px solid #2a3a47;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .config-panel label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #7a8a97;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .config-panel select {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f1923;
+      border: 1px solid #2a3a47;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 15px;
+      outline: none;
+    }
+    .config-panel select:focus { border-color: #4ade80; }
+    .course-info {
+      margin-top: 12px;
+      padding: 12px;
+      background: #0f1923;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #7a8a97;
+      line-height: 1.6;
+      display: none;
+    }
+    .course-info.visible { display: block; }
+
+    /* Mic button */
+    .mic-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 32px 0;
+    }
+    .mic-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #2a3a47;
+      background: #162029;
+      color: #7a8a97;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .mic-btn:hover { border-color: #4ade80; color: #4ade80; }
+    .mic-btn.active {
+      border-color: #ef4444;
+      background: #3b1111;
+      color: #ef4444;
+      animation: pulse 1.5s infinite;
+    }
+    .mic-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .mic-btn svg { width: 32px; height: 32px; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+    }
+    .mic-status {
+      font-size: 14px;
+      color: #7a8a97;
+    }
+    .mic-status.listening { color: #ef4444; }
+    .mic-status.connected { color: #4ade80; }
+
+    /* Transcript */
+    .transcript-panel {
+      background: #162029;
+      border: 1px solid #2a3a47;
+      border-radius: 12px;
+      flex: 1;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .transcript-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #2a3a47;
+      font-size: 13px;
+      font-weight: 500;
+      color: #7a8a97;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .transcript-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: #1e3a5f;
+      color: #93c5fd;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.agent {
+      align-self: flex-start;
+      background: #1a3329;
+      color: #86efac;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.system {
+      align-self: center;
+      background: transparent;
+      color: #4b5e6d;
+      font-size: 12px;
+      font-style: italic;
+    }
+    .msg.function {
+      align-self: center;
+      background: #2d2007;
+      color: #fbbf24;
+      font-size: 12px;
+      font-family: monospace;
+      border-radius: 6px;
+    }
+
+    /* Visualizer */
+    .visualizer {
+      height: 40px;
+      width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .visualizer .bar {
+      width: 4px;
+      background: #4ade80;
+      border-radius: 2px;
+      transition: height 0.1s;
+      height: 4px;
+    }
+    .visualizer.active .bar { animation: bounce 0.6s ease-in-out infinite; }
+    .visualizer .bar:nth-child(1) { animation-delay: 0s; }
+    .visualizer .bar:nth-child(2) { animation-delay: 0.1s; }
+    .visualizer .bar:nth-child(3) { animation-delay: 0.2s; }
+    .visualizer .bar:nth-child(4) { animation-delay: 0.3s; }
+    .visualizer .bar:nth-child(5) { animation-delay: 0.4s; }
+    .visualizer .bar:nth-child(6) { animation-delay: 0.5s; }
+    .visualizer .bar:nth-child(7) { animation-delay: 0.35s; }
+    .visualizer .bar:nth-child(8) { animation-delay: 0.15s; }
+    @keyframes bounce {
+      0%, 100% { height: 4px; }
+      50% { height: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>TeeTimePro Voice Bot</h1>
+    <span class="subtitle">Playground</span>
+  </div>
+
+  <div class="container">
+    <div class="config-panel">
+      <label for="courseSelect">Select Course</label>
+      <select id="courseSelect" disabled>
+        <option value="">Loading courses...</option>
+      </select>
+      <div id="courseInfo" class="course-info"></div>
+    </div>
+
+    <div class="mic-area">
+      <div class="visualizer" id="visualizer">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+      </div>
+      <button class="mic-btn" id="micBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <div class="mic-status" id="micStatus">Select a course to begin</div>
+    </div>
+
+    <div class="transcript-panel">
+      <div class="transcript-header">Conversation</div>
+      <div class="transcript-body" id="transcript"></div>
+    </div>
+  </div>
+
+  <script>
+    const courseSelect = document.getElementById("courseSelect");
+    const courseInfo = document.getElementById("courseInfo");
+    const micBtn = document.getElementById("micBtn");
+    const micStatus = document.getElementById("micStatus");
+    const transcript = document.getElementById("transcript");
+    const visualizer = document.getElementById("visualizer");
+
+    let ws = null;
+    let audioContext = null;
+    let mediaStream = null;
+    let mediaProcessor = null;
+    let isActive = false;
+    let courses = [];
+
+    // Audio playback queue
+    let playbackQueue = [];
+    let isPlaying = false;
+
+    // Load courses
+    async function loadCourses() {
+      try {
+        const res = await fetch("/api/courses");
+        const json = await res.json();
+        courses = json.data || json;
+
+        courseSelect.innerHTML = '<option value="">-- Choose a course --</option>';
+        courses.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.name;
+          courseSelect.appendChild(opt);
+        });
+        courseSelect.disabled = false;
+      } catch (err) {
+        courseSelect.innerHTML = '<option value="">Failed to load courses</option>';
+        addMessage("system", "Failed to load courses. Is the API running?");
+      }
+    }
+
+    courseSelect.addEventListener("change", () => {
+      const id = courseSelect.value;
+      const course = courses.find((c) => String(c.id) === id);
+
+      if (course) {
+        const rates = course.rates || {};
+        courseInfo.innerHTML = [
+          `<strong>${course.name}</strong>`,
+          `${course.holes} holes | ${course.first_tee_time} - ${course.last_tee_time}`,
+          `Weekday: $${rates.weekday || "N/A"} | Weekend: $${rates.weekend || "N/A"} | Twilight: $${rates.twilight || "N/A"}`,
+          course.voice_config?.greeting ? `<br><em>Greeting: "${course.voice_config.greeting}"</em>` : "",
+        ].join("<br>");
+        courseInfo.classList.add("visible");
+        micBtn.disabled = false;
+        micStatus.textContent = "Click mic to start";
+      } else {
+        courseInfo.classList.remove("visible");
+        micBtn.disabled = true;
+        micStatus.textContent = "Select a course to begin";
+      }
+
+      // Disconnect if switching courses
+      if (isActive) stopSession();
+    });
+
+    micBtn.addEventListener("click", () => {
+      if (isActive) {
+        stopSession();
+      } else {
+        startSession();
+      }
+    });
+
+    async function startSession() {
+      const courseId = courseSelect.value;
+      if (!courseId) return;
+
+      try {
+        // Get microphone access
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+          },
+        });
+
+        // Setup AudioContext
+        audioContext = new AudioContext({ sampleRate: 16000 });
+        const source = audioContext.createMediaStreamSource(mediaStream);
+
+        // Use ScriptProcessor for raw PCM
+        mediaProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+        mediaProcessor.onaudioprocess = (e) => {
+          if (!isActive || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+          const float32 = e.inputBuffer.getChannelData(0);
+          // Convert float32 to int16 (linear16)
+          const int16 = new Int16Array(float32.length);
+          for (let i = 0; i < float32.length; i++) {
+            const s = Math.max(-1, Math.min(1, float32[i]));
+            int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+          }
+          ws.send(int16.buffer);
+        };
+
+        source.connect(mediaProcessor);
+        mediaProcessor.connect(audioContext.destination);
+
+        // Connect WebSocket
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        ws = new WebSocket(`${protocol}//${location.host}/playground/ws`);
+
+        ws.onopen = () => {
+          ws.send(JSON.stringify({ type: "config", courseId: parseInt(courseId) }));
+          addMessage("system", "Connecting to voice agent...");
+        };
+
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          handleServerMessage(msg);
+        };
+
+        ws.onclose = () => {
+          if (isActive) {
+            addMessage("system", "Connection closed");
+            stopSession();
+          }
+        };
+
+        ws.onerror = () => {
+          addMessage("system", "Connection error");
+          stopSession();
+        };
+
+        isActive = true;
+        micBtn.classList.add("active");
+        micStatus.textContent = "Connecting...";
+        micStatus.className = "mic-status";
+        courseSelect.disabled = true;
+      } catch (err) {
+        addMessage("system", `Microphone error: ${err.message}`);
+      }
+    }
+
+    function stopSession() {
+      isActive = false;
+      micBtn.classList.remove("active");
+      visualizer.classList.remove("active");
+      micStatus.textContent = "Click mic to start";
+      micStatus.className = "mic-status";
+      courseSelect.disabled = false;
+
+      playbackQueue = [];
+      isPlaying = false;
+
+      if (mediaProcessor) {
+        mediaProcessor.disconnect();
+        mediaProcessor = null;
+      }
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((t) => t.stop());
+        mediaStream = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    }
+
+    function handleServerMessage(msg) {
+      switch (msg.type) {
+        case "ready":
+          micStatus.textContent = "Listening...";
+          micStatus.className = "mic-status connected";
+          addMessage("system", "Voice agent connected");
+          break;
+
+        case "audio":
+          queueAudio(msg.audio);
+          break;
+
+        case "transcript":
+          addMessage(msg.role === "user" ? "user" : "agent", msg.content);
+          break;
+
+        case "user_started_speaking":
+          visualizer.classList.add("active");
+          // Barge-in: clear playback
+          playbackQueue = [];
+          isPlaying = false;
+          break;
+
+        case "agent_started_speaking":
+          visualizer.classList.remove("active");
+          break;
+
+        case "thinking":
+          micStatus.textContent = "Thinking...";
+          break;
+
+        case "function_call":
+          addMessage("function", `Calling ${msg.name}...`);
+          break;
+
+        case "function_result":
+          try {
+            const result = JSON.parse(msg.result);
+            if (result.tee_times) {
+              addMessage("function", `Found ${result.tee_times.length} available tee times`);
+            } else if (result.confirmation_code) {
+              addMessage("function", `Booking confirmed: ${result.confirmation_code}`);
+            }
+          } catch {}
+          break;
+
+        case "error":
+          addMessage("system", `Error: ${msg.message}`);
+          break;
+
+        case "closed":
+          addMessage("system", "Session ended");
+          stopSession();
+          break;
+      }
+    }
+
+    function addMessage(type, text) {
+      const el = document.createElement("div");
+      el.className = `msg ${type}`;
+      el.textContent = text;
+      transcript.appendChild(el);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    // Audio playback — decode base64 linear16 and play through AudioContext
+    function queueAudio(base64Audio) {
+      playbackQueue.push(base64Audio);
+      if (!isPlaying) playNext();
+    }
+
+    async function playNext() {
+      if (!playbackQueue.length || !audioContext) {
+        isPlaying = false;
+        return;
+      }
+      isPlaying = true;
+
+      const base64 = playbackQueue.shift();
+      const raw = atob(base64);
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+
+      // linear16 is signed 16-bit PCM
+      const int16 = new Int16Array(bytes.buffer);
+      const float32 = new Float32Array(int16.length);
+      for (let i = 0; i < int16.length; i++) {
+        float32[i] = int16[i] / 32768;
+      }
+
+      const buffer = audioContext.createBuffer(1, float32.length, 16000);
+      buffer.getChannelData(0).set(float32);
+
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.onended = () => playNext();
+      source.start();
+    }
+
+    // Init
+    loadCourses();
+  </script>
+</body>
+</html>

@@ -8,6 +8,14 @@ export interface User {
   organizationId: string;
 }
 
+export interface VoiceConfig {
+  system_prompt?: string;
+  greeting?: string;
+  voice_model?: string;
+  llm_provider?: string;
+  llm_model?: string;
+}
+
 export interface Course {
   id: string;
   name: string;
@@ -21,6 +29,7 @@ export interface Course {
   twilightRateCents: number | null;
   address: string | null;
   phone: string | null;
+  voiceConfig: VoiceConfig;
 }
 
 export interface TeeSheet {

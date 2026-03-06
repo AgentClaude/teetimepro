@@ -45,6 +45,17 @@ export const GET_COURSE = gql`
       twilightRateCents
       address
       phone
+      voiceConfig
+    }
+  }
+`;
+
+export const GET_COURSES_WITH_VOICE_CONFIG = gql`
+  query GetCoursesWithVoiceConfig {
+    courses {
+      id
+      name
+      voiceConfig
     }
   }
 `;

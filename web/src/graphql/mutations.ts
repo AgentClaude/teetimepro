@@ -84,6 +84,33 @@ export const CREATE_COURSE = gql`
   }
 `;
 
+export const UPDATE_COURSE_VOICE_CONFIG = gql`
+  mutation UpdateCourseVoiceConfig(
+    $courseId: ID!
+    $systemPrompt: String
+    $greeting: String
+    $voiceModel: String
+    $llmProvider: String
+    $llmModel: String
+  ) {
+    updateCourseVoiceConfig(
+      courseId: $courseId
+      systemPrompt: $systemPrompt
+      greeting: $greeting
+      voiceModel: $voiceModel
+      llmProvider: $llmProvider
+      llmModel: $llmModel
+    ) {
+      course {
+        id
+        name
+        voiceConfig
+      }
+      errors
+    }
+  }
+`;
+
 export const UPDATE_TEE_TIME = gql`
   mutation UpdateTeeTime(
     $teeTimeId: ID!

@@ -197,6 +197,21 @@ course2 = Course.find_or_create_by!(organization: org2, name: "Sunset Canyon Cou
   c.timezone = "America/Phoenix"
 end
 
+# Set default voice configs for courses
+default_voice_config = {
+  "system_prompt" => "You are the friendly phone booking assistant for a golf course. You help callers book tee times over the phone.\n\nBe warm, friendly, and professional. Keep responses to 1-2 sentences unless more detail is needed. Do not use markdown formatting. Use natural conversational language appropriate for a phone call.\n\nSpeak conversationally — your responses will be spoken aloud. Confirm what the customer said if uncertain. Spell out confirmation codes letter by letter. Say dollar amounts naturally (e.g., \"seventy-five dollars\" not \"$75.00\").\n\nYour goal is to help callers book a tee time. Collect: (1) Date, (2) Number of players (1-4), (3) Time preference. Then use search_tee_times to find available slots. Present up to 3 options with times and prices. When they choose, confirm details and use create_booking to complete it.\n\nOnly book dates within the next 14 days. Maximum 4 players per tee time. Always confirm full booking details before creating. After booking, read the confirmation code letter by letter.\n\nAfter booking, say: \"You're all set! Is there anything else I can help with?\" If they say no: \"Have a great round! Goodbye.\"",
+  "greeting" => "Hello! Thanks for calling. I can help you book a tee time. What date would you like to play?",
+  "voice_model" => "aura-2-odysseus-en",
+  "llm_provider" => "google",
+  "llm_model" => "gemini-2.5-flash"
+}
+
+[course1, course1b, course2].each do |c|
+  c.update!(voice_config: default_voice_config.merge(
+    "greeting" => "Hello! Thanks for calling #{c.name}. I can help you book a tee time. What date would you like to play?"
+  )) if c.voice_config.blank?
+end
+
 puts "  Courses: #{Course.count}"
 
 # ---------------------------------------------------------------------------

@@ -30,15 +30,14 @@ class Api::V1::CoursesController < Api::V1::BaseController
     {
       id: course.id,
       name: course.name,
-      description: course.description,
       address: course.address,
+      city: course.city,
+      state: course.state,
+      zip: course.zip,
       phone: course.phone,
       website: course.website,
+      timezone: course.timezone,
       holes: course.holes,
-      par: course.par,
-      yardage: course.yardage,
-      rating: course.rating,
-      slope: course.slope,
       interval_minutes: course.interval_minutes,
       first_tee_time: course.first_tee_time&.strftime("%H:%M"),
       last_tee_time: course.last_tee_time&.strftime("%H:%M"),
@@ -48,7 +47,7 @@ class Api::V1::CoursesController < Api::V1::BaseController
         weekend: course.weekend_rate&.format(symbol: false),
         twilight: course.twilight_rate&.format(symbol: false)
       },
-      twilight_start_time: course.try(:twilight_start_time)&.strftime("%H:%M"),
+      voice_config: course.voice_config,
       created_at: course.created_at.iso8601,
       updated_at: course.updated_at.iso8601
     }
