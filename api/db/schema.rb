@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_06_000011) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "key_digest", null: false
+    t.string "prefix", limit: 8, null: false
+    t.jsonb "scopes", default: ["read"], null: false
+    t.string "rate_limit_tier", default: "standard", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "expires_at", precision: nil
+    t.datetime "last_used_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key_digest"], name: "index_api_keys_on_key_digest", unique: true
+    t.index ["organization_id", "active"], name: "index_api_keys_on_organization_id_and_active"
+    t.index ["organization_id"], name: "index_api_keys_on_organization_id"
+    t.index ["prefix"], name: "index_api_keys_on_prefix"
+    t.index ["rate_limit_tier"], name: "index_api_keys_on_rate_limit_tier"
+    t.index ["scopes"], name: "index_api_keys_on_scopes", using: :gin
+  end
 
   create_table "booking_players", force: :cascade do |t|
     t.bigint "booking_id", null: false
@@ -171,6 +191,42 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_000011) do
     t.index ["tee_sheet_id"], name: "index_tee_times_on_tee_sheet_id"
   end
 
+  create_table "webhook_endpoints", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "url", null: false
+    t.string "secret", null: false
+    t.json "events", default: [], null: false
+    t.boolean "active", default: true, null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_webhook_endpoints_on_active"
+    t.index ["organization_id", "url"], name: "index_webhook_endpoints_on_organization_id_and_url", unique: true
+    t.index ["organization_id"], name: "index_webhook_endpoints_on_organization_id"
+    t.check_constraint "url LIKE 'https://%'", name: "webhook_endpoints_url_https_check"
+  end
+
+  create_table "webhook_events", force: :cascade do |t|
+    t.bigint "webhook_endpoint_id", null: false
+    t.string "event_type", null: false
+    t.json "payload", default: {}, null: false
+    t.integer "status", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "last_attempted_at"
+    t.datetime "delivered_at"
+    t.integer "response_code"
+    t.text "response_body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_webhook_events_on_event_type"
+    t.index ["last_attempted_at"], name: "index_webhook_events_on_last_attempted_at"
+    t.index ["status", "created_at"], name: "index_webhook_events_on_status_and_created_at"
+    t.index ["webhook_endpoint_id", "created_at"], name: "index_webhook_events_on_webhook_endpoint_id_and_created_at"
+    t.index ["webhook_endpoint_id"], name: "index_webhook_events_on_webhook_endpoint_id"
+    t.check_constraint "attempts >= 0", name: "webhook_events_attempts_positive_check"
+    t.check_constraint "response_code BETWEEN 100 AND 599", name: "webhook_events_response_code_valid_check"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -195,6 +251,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_000011) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "api_keys", "organizations"
   add_foreign_key "booking_players", "bookings", on_delete: :cascade
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
@@ -207,4 +264,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_000011) do
   add_foreign_key "tee_sheets", "courses", on_delete: :cascade
   add_foreign_key "tee_times", "tee_sheets", on_delete: :cascade
   add_foreign_key "users", "organizations", on_delete: :cascade
+  add_foreign_key "webhook_endpoints", "organizations"
+  add_foreign_key "webhook_events", "webhook_endpoints"
 end

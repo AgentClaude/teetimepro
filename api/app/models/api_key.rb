@@ -51,6 +51,8 @@ class ApiKey < ApplicationRecord
     @raw_key if @raw_key_created
   end
 
+  alias_method :key, :display_key
+
   private
 
   def generate_key_and_digest

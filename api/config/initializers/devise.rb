@@ -1,3 +1,8 @@
+# Ensure Devise ORM adapter is loaded before Zeitwerk eager loading.
+# Without this, `config.eager_load = true` (CI) causes User model to
+# load before `devise` class method is available on ActiveRecord::Base.
+require "devise/orm/active_record"
+
 Devise.setup do |config|
   config.mailer_sender = ENV.fetch("FROM_EMAIL", "noreply@teetimespro.com")
   config.navigational_formats = []

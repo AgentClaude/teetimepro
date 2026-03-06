@@ -22,7 +22,7 @@ module Webhooks
         else
           handle_failed_delivery(response.code.to_i, response.body)
         end
-      rescue Net::TimeoutError, Net::OpenTimeout, Net::ReadTimeout => e
+      rescue Timeout::Error, Net::OpenTimeout, Net::ReadTimeout => e
         handle_failed_delivery(nil, "Timeout: #{e.message}")
       rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError => e
         handle_failed_delivery(nil, "Bad response: #{e.message}")

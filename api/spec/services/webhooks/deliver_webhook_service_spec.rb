@@ -187,7 +187,7 @@ RSpec.describe Webhooks::DeliverWebhookService, type: :service do
       it "doesn't make HTTP request when validation fails" do
         described_class.call(webhook_event: nil)
 
-        expect(WebMock).not_to have_requested(:post, anything)
+        expect(WebMock).not_to have_requested(:post, /.*/)
       end
     end
 
@@ -200,8 +200,8 @@ RSpec.describe Webhooks::DeliverWebhookService, type: :service do
 
         expect(WebhookDeliveryJob).to receive(:set) do |options|
           delay = options[:wait]
-          expect(delay).to be_a(ActiveSupport::Duration)
-          expect(delay.value).to be_between(120, 180) # Base 30 * 2^2 = 120 + jitter
+          # After increment_attempts! (2→3), delay = 30 * 2^3 = 240 + jitter (10-30%)
+          expect(delay).to be_between(240, 320)
           double(perform_later: nil)
         end
 

@@ -9,7 +9,7 @@ class WebhookEndpoint < ApplicationRecord
 
   scope :active, -> { where(active: true) }
   scope :for_organization, ->(org) { where(organization: org) }
-  scope :subscribed_to_event, ->(event_type) { where("JSON_EXTRACT(events, '$') LIKE ?", "%\"#{event_type}\"%") }
+  scope :subscribed_to_event, ->(event_type) { where("events::jsonb @> ?", [event_type].to_json) }
 
   # Available event types
   AVAILABLE_EVENTS = [
