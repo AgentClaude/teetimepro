@@ -273,8 +273,9 @@
     let isActive = false;
     let courses = [];
 
-    // Audio playback — scheduled approach (no gaps between chunks)
+    // Audio playback — scheduled with barge-in support
     let nextStartTime = 0;
+    let activeSources = []; // track scheduled sources so we can stop them on barge-in
 
     // Load courses
     async function loadCourses() {
@@ -412,7 +413,7 @@
       micStatus.className = "mic-status";
       courseSelect.disabled = false;
 
-      nextStartTime = 0;
+      stopAllPlayback();
 
       if (mediaProcessor) {
         mediaProcessor.disconnect();
@@ -454,8 +455,8 @@
 
         case "user_started_speaking":
           visualizer.classList.add("active");
-          // Barge-in: reset playback schedule
-          nextStartTime = 0;
+          // Barge-in: immediately stop all playing/scheduled audio
+          stopAllPlayback();
           break;
 
         case "agent_started_speaking":
@@ -500,9 +501,18 @@
       transcript.scrollTop = transcript.scrollHeight;
     }
 
+    // Stop all playing and scheduled audio immediately (barge-in)
+    function stopAllPlayback() {
+      for (const src of activeSources) {
+        try { src.stop(); } catch {}
+      }
+      activeSources = [];
+      nextStartTime = 0;
+    }
+
     // Audio playback — scheduled approach for gapless playback
-    // Based on Deepgram's official demo: schedule each buffer at a precise
-    // future time so chunks seamlessly join without gaps or overlap.
+    // Each buffer is scheduled at a precise future time so they seamlessly join.
+    // All sources are tracked so barge-in can stop them instantly.
     function queueAudio(base64Audio) {
       if (!playbackContext) return;
 
@@ -524,6 +534,12 @@
       source.buffer = buffer;
       source.connect(playbackContext.destination);
 
+      // Clean up finished sources from tracking array
+      source.onended = () => {
+        const idx = activeSources.indexOf(source);
+        if (idx !== -1) activeSources.splice(idx, 1);
+      };
+
       // Schedule precisely: if nextStartTime is in the past, start now
       const now = playbackContext.currentTime;
       if (nextStartTime < now) {
@@ -531,6 +547,7 @@
       }
       source.start(nextStartTime);
       nextStartTime += buffer.duration;
+      activeSources.push(source);
     }
 
     // Init

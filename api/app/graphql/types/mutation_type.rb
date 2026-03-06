@@ -8,5 +8,6 @@ module Types
     field :create_sms_campaign, mutation: Mutations::CreateSmsCampaign
     field :send_sms_campaign, mutation: Mutations::SendSmsCampaign
     field :cancel_sms_campaign, mutation: Mutations::CancelSmsCampaign
+    field :update_customer, mutation: Mutations::UpdateCustomer
   end
 end

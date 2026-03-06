@@ -111,6 +111,33 @@ module Types
       VoiceCallLog.for_organization(org).find(id)
     end
 
+    # Customers (users in the org)
+    field :customers, [Types::UserType], null: false do
+      argument :search, String, required: false
+      argument :role, String, required: false
+    end
+    def customers(search: nil, role: nil)
+      org = require_auth!
+      scope = org.users.order(created_at: :desc)
+      scope = scope.where(role: role) if role.present?
+      if search.present?
+        term = "%#{search}%"
+        scope = scope.where(
+          "first_name ILIKE :q OR last_name ILIKE :q OR email ILIKE :q OR phone ILIKE :q",
+          q: term
+        )
+      end
+      scope.limit(100)
+    end
+
+    field :customer, Types::UserType, null: true do
+      argument :id, ID, required: true
+    end
+    def customer(id:)
+      org = require_auth!
+      org.users.find(id)
+    end
+
     # Available tee times
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true

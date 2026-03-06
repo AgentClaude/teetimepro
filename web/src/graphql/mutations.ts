@@ -138,6 +138,34 @@ export const UPDATE_TEE_TIME = gql`
   }
 `;
 
+export const UPDATE_CUSTOMER = gql`
+  mutation UpdateCustomer(
+    $id: ID!
+    $firstName: String
+    $lastName: String
+    $email: String
+    $phone: String
+  ) {
+    updateCustomer(
+      id: $id
+      firstName: $firstName
+      lastName: $lastName
+      email: $email
+      phone: $phone
+    ) {
+      customer {
+        id
+        email
+        firstName
+        lastName
+        fullName
+        phone
+      }
+      errors
+    }
+  }
+`;
+
 export const CREATE_SMS_CAMPAIGN = gql`
   mutation CreateSmsCampaign(
     $name: String!

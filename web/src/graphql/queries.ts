@@ -184,6 +184,52 @@ export const GET_VOICE_CALL_LOG = gql`
   }
 `;
 
+export const GET_CUSTOMERS = gql`
+  query GetCustomers($search: String, $role: String) {
+    customers(search: $search, role: $role) {
+      id
+      email
+      firstName
+      lastName
+      fullName
+      phone
+      role
+      bookingsCount
+      createdAt
+    }
+  }
+`;
+
+export const GET_CUSTOMER = gql`
+  query GetCustomer($id: ID!) {
+    customer(id: $id) {
+      id
+      email
+      firstName
+      lastName
+      fullName
+      phone
+      role
+      bookingsCount
+      createdAt
+      updatedAt
+      bookings {
+        id
+        confirmationCode
+        status
+        playersCount
+        totalCents
+        createdAt
+        teeTime {
+          id
+          startsAt
+          formattedTime
+        }
+      }
+    }
+  }
+`;
+
 export const GET_SMS_CAMPAIGNS = gql`
   query GetSmsCampaigns($status: String) {
     smsCampaigns(status: $status) {

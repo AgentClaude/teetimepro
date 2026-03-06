@@ -5,8 +5,10 @@ module Types
     field :first_name, String, null: false
     field :last_name, String, null: false
     field :full_name, String, null: false
+    field :phone, String, null: true
     field :role, String, null: false
     field :organization_id, ID, null: false
+    field :bookings_count, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
@@ -16,6 +18,10 @@ module Types
 
     def upcoming_bookings
       object.bookings.upcoming.includes(tee_time: { tee_sheet: :course })
+    end
+
+    def bookings_count
+      object.bookings.count
     end
   end
 end
