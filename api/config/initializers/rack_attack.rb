@@ -1,66 +1,84 @@
 class Rack::Attack
-  # Enable rate limiting middleware
-  enabled = Rails.env.production? || Rails.env.staging? || ENV["RACK_ATTACK_ENABLED"] == "true"
+  # Use Redis as the cache store for rate limiting
+  self.cache.store = Rails.cache
 
-  if enabled
-    # Store in Redis
-    cache.store = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379"))
+  # Extract API key from request for rate limiting
+  def self.extract_api_key(request)
+    auth_header = request.env['HTTP_AUTHORIZATION']
+    return nil unless auth_header&.start_with?('Bearer tp_')
 
-    # Define API key extractor
-    def self.api_key_from_request(req)
-      # Extract API key from Authorization header: "Bearer tp_xxxxx"
-      auth_header = req.env["HTTP_AUTHORIZATION"]
-      return nil unless auth_header&.start_with?("Bearer tp_")
+    auth_header.split(' ').last
+  end
 
-      auth_header.split(" ").last
+  # Extract rate limit tier from API key
+  def self.rate_limit_tier_for_key(api_key)
+    return 'standard' unless api_key
+
+    # Quick lookup without full authentication for rate limiting
+    digest = Digest::SHA256.hexdigest(api_key)
+    cached_tier = Rails.cache.fetch("api_key_tier:#{digest}", expires_in: 5.minutes) do
+      key_record = ::ApiKey.active.find_by(key_digest: digest)
+      key_record&.rate_limit_tier || 'standard'
     end
 
-    # Throttle API requests by API key
-    throttle("api/v1/requests", limit: 1000, period: 1.hour) do |req|
-      next unless req.path.start_with?("/api/v1/")
-      api_key_from_request(req)
-    end
+    cached_tier
+  end
 
-    # More aggressive limit for creation endpoints
-    throttle("api/v1/writes", limit: 100, period: 1.hour) do |req|
-      if req.path.start_with?("/api/v1/") && %w[POST PUT PATCH DELETE].include?(req.env["REQUEST_METHOD"])
-        api_key_from_request(req)
-      end
+  # Rate limit by API key with tier-based limits
+  throttle('api/v1/by_api_key', limit: proc { |req| 
+    api_key = extract_api_key(req)
+    tier = rate_limit_tier_for_key(api_key)
+    
+    case tier
+    when 'premium'
+      300 # 300 requests per minute
+    when 'enterprise'
+      1000 # 1000 requests per minute
+    else
+      60 # standard: 60 requests per minute
     end
-
-    # Per-minute burst protection
-    throttle("api/v1/burst", limit: 60, period: 1.minute) do |req|
-      next unless req.path.start_with?("/api/v1/")
-      api_key_from_request(req)
-    end
-
-    # IP-based fallback for requests without API keys
-    throttle("api/v1/ip", limit: 50, period: 1.hour) do |req|
-      if req.path.start_with?("/api/v1/") && !api_key_from_request(req)
-        req.ip
-      end
-    end
-
-    # Custom response for rate limited requests
-    self.throttled_responder = lambda do |env|
-      retry_after = (env["rack.attack.match_data"] || {})[:period]
-      
-      [
-        429,
-        {
-          "Content-Type" => "application/json",
-          "Retry-After" => retry_after.to_s
-        },
-        [{
-          error: "Rate limit exceeded. Try again in #{retry_after} seconds.",
-          code: "rate_limit_exceeded"
-        }.to_json]
-      ]
-    end
-
-    # Track rate limited requests
-    ActiveSupport::Notifications.subscribe("throttle.rack_attack") do |name, start, finish, request_id, payload|
-      Rails.logger.warn "API Rate limit exceeded for #{payload[:request].env['rack.attack.throttle_data']}"
+  }, period: 1.minute) do |req|
+    if req.path.start_with?('/api/v1/')
+      api_key = extract_api_key(req)
+      api_key ? Digest::SHA256.hexdigest(api_key)[0..15] : req.ip
     end
   end
+
+  # Fallback rate limit for requests without API keys
+  throttle('api/v1/by_ip', limit: 30, period: 1.minute) do |req|
+    req.ip if req.path.start_with?('/api/v1/') && !extract_api_key(req)
+  end
+
+  # Aggressive rate limiting for potential abuse
+  throttle('api/abuse', limit: 5, period: 1.minute) do |req|
+    req.ip if req.path.start_with?('/api/') && req.user_agent.blank?
+  end
+
+  # Custom response for rate limited requests
+  self.throttled_responder = lambda do |env|
+    match_data = env['rack.attack.matched']
+    now = Time.now.to_i
+    period = env['rack.attack.match_discriminator'] || 60
+
+    headers = {
+      'Content-Type' => 'application/json',
+      'X-RateLimit-Limit' => match_data.to_s,
+      'X-RateLimit-Remaining' => '0',
+      'X-RateLimit-Reset' => (now + period).to_s,
+      'Retry-After' => period.to_s
+    }
+
+    body = {
+      error: {
+        code: 'rate_limit_exceeded',
+        message: 'Too many requests. Please slow down.',
+        retry_after: period
+      }
+    }
+
+    [429, headers, [body.to_json]]
+  end
 end
+
+# Enable rack-attack
+Rails.application.config.middleware.use Rack::Attack

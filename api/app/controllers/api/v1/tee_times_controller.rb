@@ -1,20 +1,21 @@
 class Api::V1::TeeTimesController < Api::V1::BaseController
   def index
-    tee_times = build_tee_times_query
+    tee_times = build_tee_times_query.includes(:tee_sheet, tee_sheet: :course)
 
     paginated_tee_times = paginate(tee_times)
 
-    render json: {
-      data: tee_times_data(paginated_tee_times.includes(:tee_sheet, :course)),
-      meta: pagination_meta(paginated_tee_times)
-    }
+    render_paginated(
+      paginated_tee_times,
+      paginated_tee_times,
+      Api::V1::TeeTimeSerializer
+    )
   end
 
   def show
     tee_time = find_tee_time(params[:id])
 
     render json: {
-      data: tee_time_data(tee_time)
+      data: Api::V1::TeeTimeSerializer.new(tee_time).as_json
     }
   end
 
@@ -68,28 +69,5 @@ class Api::V1::TeeTimesController < Api::V1::BaseController
            .find(id)
   end
 
-  def tee_times_data(tee_times)
-    tee_times.map { |tee_time| tee_time_data(tee_time) }
-  end
 
-  def tee_time_data(tee_time)
-    {
-      id: tee_time.id,
-      starts_at: tee_time.starts_at.iso8601,
-      formatted_time: tee_time.formatted_time,
-      status: tee_time.status,
-      max_players: tee_time.max_players,
-      booked_players: tee_time.booked_players,
-      available_spots: tee_time.available_spots,
-      price: tee_time.price&.format(symbol: false),
-      price_cents: tee_time.price_cents,
-      date: tee_time.date.iso8601,
-      course: {
-        id: tee_time.course.id,
-        name: tee_time.course.name
-      },
-      created_at: tee_time.created_at.iso8601,
-      updated_at: tee_time.updated_at.iso8601
-    }
-  end
 end

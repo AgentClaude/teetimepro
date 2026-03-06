@@ -1,20 +1,27 @@
 class Api::V1::BookingsController < Api::V1::BaseController
   def index
-    bookings = build_bookings_query
+    bookings = build_bookings_query.includes(
+      :tee_time, 
+      :user, 
+      :booking_players,
+      :payment,
+      tee_time: { tee_sheet: :course }
+    )
 
     paginated_bookings = paginate(bookings)
 
-    render json: {
-      data: bookings_data(paginated_bookings.includes(:tee_time, :user, :course)),
-      meta: pagination_meta(paginated_bookings)
-    }
+    render_paginated(
+      paginated_bookings,
+      paginated_bookings,
+      Api::V1::BookingSerializer
+    )
   end
 
   def show
     booking = find_booking(params[:id])
 
     render json: {
-      data: booking_data(booking)
+      data: Api::V1::BookingSerializer.new(booking).as_json
     }
   end
 
@@ -29,10 +36,9 @@ class Api::V1::BookingsController < Api::V1::BaseController
     )
 
     if result.success?
-      render_service_success(
-        OpenStruct.new(data: booking_data(result.booking)),
-        status: :created
-      )
+      render json: {
+        data: Api::V1::BookingSerializer.new(result.data[:booking]).as_json
+      }, status: :created
     else
       render_service_error(result)
     end
@@ -47,9 +53,9 @@ class Api::V1::BookingsController < Api::V1::BaseController
     )
 
     if result.success?
-      render_service_success(
-        OpenStruct.new(data: booking_data(result.booking))
-      )
+      render json: {
+        data: Api::V1::BookingSerializer.new(result.data[:booking]).as_json
+      }
     else
       render_service_error(result)
     end
@@ -114,46 +120,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
       )
   end
 
-  def bookings_data(bookings)
-    bookings.map { |booking| booking_data(booking) }
-  end
 
-  def booking_data(booking)
-    {
-      id: booking.id,
-      confirmation_code: booking.confirmation_code,
-      status: booking.status,
-      players_count: booking.players_count,
-      total: booking.total.format(symbol: false),
-      total_cents: booking.total_cents,
-      notes: booking.notes,
-      tee_time: {
-        id: booking.tee_time.id,
-        starts_at: booking.tee_time.starts_at.iso8601,
-        formatted_time: booking.tee_time.formatted_time,
-        date: booking.tee_time.date.iso8601
-      },
-      course: {
-        id: booking.course.id,
-        name: booking.course.name
-      },
-      user: {
-        id: booking.user.id,
-        email: booking.user.email,
-        first_name: booking.user.first_name,
-        last_name: booking.user.last_name,
-        phone: booking.user.phone
-      },
-      booking_players: booking.booking_players.map do |player|
-        {
-          id: player.id,
-          name: player.name
-        }
-      end,
-      created_at: booking.created_at.iso8601,
-      updated_at: booking.updated_at.iso8601
-    }
-  end
 
   def booking_params
     params.require(:booking).permit(
