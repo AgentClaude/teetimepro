@@ -7,8 +7,18 @@ module TeeSheets
     def call
       return validation_failure(self) unless valid?
 
+      # Idempotent: return existing tee sheet if already generated
       existing = TeeSheet.find_by(course: course, date: date)
-      return failure(["Tee sheet already exists for #{date}"]) if existing
+      if existing
+        return success(
+          tee_sheet: existing,
+          tee_times_count: existing.tee_times.count,
+          already_existed: true
+        )
+      end
+
+      return failure(["Course must have first_tee_time configured"]) unless course.first_tee_time.present?
+      return failure(["Course must have last_tee_time configured"]) unless course.last_tee_time.present?
 
       ActiveRecord::Base.transaction do
         tee_sheet = TeeSheet.create!(course: course, date: date)
@@ -19,7 +29,8 @@ module TeeSheets
 
         success(
           tee_sheet: tee_sheet,
-          tee_times_count: tee_sheet.tee_times.count
+          tee_times_count: tee_sheet.tee_times.count,
+          already_existed: false
         )
       end
     rescue ActiveRecord::RecordInvalid => e

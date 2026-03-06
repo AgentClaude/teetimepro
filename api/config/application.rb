@@ -8,8 +8,8 @@ require "rails"
 Rails::Engine.prepend(Module.new do
   private
 
-  def _all_load_paths
-    super.dup
+  def _all_load_paths(...)
+    super(...).dup
   end
 end)
 # Pick the frameworks you want:
