@@ -55,4 +55,8 @@ Rails.application.configure do
 
   # Allow all hosts in development (Docker internal hostnames, etc.)
   config.hosts.clear
+
+  # ActionCable
+  config.action_cable.disable_request_forgery_protection = true
+  config.action_cable.allowed_request_origins = [/http:\/\/localhost.*/]
 end

@@ -58,6 +58,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # ActionCable WebSocket
+  mount ActionCable.server => "/cable"
+
   # Catch all unmatched routes
   match "*path", to: proc { [404, { "Content-Type" => "application/json" }, ['{"error":"Not Found"}']] }, via: :all
 end

@@ -10,6 +10,7 @@ import { CustomersPage } from "./pages/CustomersPage";
 import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { CallLogPage } from "./pages/CallLogPage";
+import { NotificationsPage } from "./pages/NotificationsPage";
 import CampaignsPage from "./pages/CampaignsPage";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/bookings/:id" element={<BookingDetailPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/call-logs/:id" element={<CallLogPage />} />

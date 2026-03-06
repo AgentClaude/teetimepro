@@ -41,6 +41,9 @@ module Bookings
         # Send cancellation notification
         notify_cancellation(booking)
 
+        # Broadcast real-time notification
+        broadcast_notification(booking)
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e
@@ -48,6 +51,28 @@ module Bookings
     end
 
     private
+
+    def broadcast_notification(booking)
+      ActionCable.server.broadcast(
+        "notifications_#{booking.organization.id}",
+        {
+          type: "booking.cancelled",
+          booking: {
+            id: booking.id,
+            confirmation_code: booking.confirmation_code,
+            status: booking.status,
+            players_count: booking.players_count,
+            total_cents: booking.total_cents,
+            customer_name: booking.user.full_name,
+            tee_time: booking.tee_time.formatted_time,
+            date: booking.tee_time.date.iso8601,
+            course_name: booking.course.name,
+            cancellation_reason: booking.cancellation_reason
+          },
+          timestamp: Time.current.iso8601
+        }
+      )
+    end
 
     def notify_cancellation(booking)
       # Fire-and-forget notification

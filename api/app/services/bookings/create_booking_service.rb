@@ -64,6 +64,9 @@ module Bookings
           payload: webhook_payload
         )
 
+        # Broadcast real-time notification
+        broadcast_notification(booking, "booking.created")
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e
@@ -89,6 +92,27 @@ module Bookings
           name: names[i] || (i.zero? ? user.full_name : "Player #{i + 1}")
         )
       end
+    end
+
+    def broadcast_notification(booking, event)
+      ActionCable.server.broadcast(
+        "notifications_#{booking.organization.id}",
+        {
+          type: event,
+          booking: {
+            id: booking.id,
+            confirmation_code: booking.confirmation_code,
+            status: booking.status,
+            players_count: booking.players_count,
+            total_cents: booking.total_cents,
+            customer_name: booking.user.full_name,
+            tee_time: booking.tee_time.formatted_time,
+            date: booking.tee_time.date.iso8601,
+            course_name: booking.course.name
+          },
+          timestamp: Time.current.iso8601
+        }
+      )
     end
 
     def build_booking_webhook_payload(booking)
