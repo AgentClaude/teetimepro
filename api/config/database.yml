@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
+  port: <%= ENV.fetch("DB_PORT", "5432") %>
+  username: <%= ENV.fetch("DB_USERNAME", "teetimepro") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "password") %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "teetimepro_development") %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("DB_TEST_NAME", "teetimepro_test") %>
+
+production:
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 10 } %>

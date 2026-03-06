@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-rough-50 text-rough-900 antialiased;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-fairway-600 text-white px-4 py-2 rounded-lg font-medium
+           hover:bg-fairway-700 focus:outline-none focus:ring-2 focus:ring-fairway-500 focus:ring-offset-2
+           transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-rough-700 px-4 py-2 rounded-lg font-medium border border-rough-300
+           hover:bg-rough-50 focus:outline-none focus:ring-2 focus:ring-fairway-500 focus:ring-offset-2
+           transition-colors duration-150;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium
+           hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+           transition-colors duration-150;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-rough-200 p-6;
+  }
+
+  .input-field {
+    @apply block w-full rounded-lg border border-rough-300 px-3 py-2
+           focus:border-fairway-500 focus:ring-fairway-500 focus:outline-none
+           text-rough-900 placeholder-rough-400;
+  }
+}

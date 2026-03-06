@@ -1,0 +1,52 @@
+source "https://rubygems.org"
+
+ruby ">= 3.3.0"
+
+gem "rails", "~> 8.0.0"
+gem "pg", "~> 1.5"
+gem "devise", "~> 4.9"
+gem "devise-jwt", "~> 0.11"
+gem "graphql", "~> 2.2"
+gem "graphiql-rails", "~> 1.9", group: :development
+gem "sidekiq", "~> 7.2"
+gem "sidekiq-cron", "~> 2.0"
+gem "faraday", "~> 2.8"
+gem "faraday-retry", "~> 2.2"
+gem "oj", "~> 3.16"
+gem "redis", "~> 5.0"
+gem "rack-cors", "~> 2.0"
+gem "dotenv-rails", "~> 2.8"
+gem "bootsnap", "~> 1.17", require: false
+gem "puma", "~> 6.4"
+gem "strong_migrations", "~> 1.8"
+gem "money-rails", "~> 1.15"
+gem "kaminari", "~> 1.2"
+gem "pundit", "~> 2.4"
+gem "rack-attack", "~> 6.8"
+gem "stripe", "~> 10.0"
+gem "twilio-ruby", "~> 6.0"
+gem "actioncable"
+gem "request_store", "~> 1.6"
+
+group :development, :test do
+  gem "debug", "~> 1.8"
+  gem "rspec-rails", "~> 6.1"
+  gem "factory_bot_rails", "~> 6.4"
+  gem "faker", "~> 3.2"
+  gem "webmock", "~> 3.19"
+  gem "vcr", "~> 6.2"
+end
+
+group :development do
+  gem "rubocop", "~> 1.58", require: false
+  gem "rubocop-rails", "~> 2.22", require: false
+  gem "rubocop-rspec", "~> 2.25", require: false
+  gem "rubocop-performance", "~> 1.19", require: false
+end
+
+group :test do
+  gem "shoulda-matchers", "~> 5.3"
+  gem "database_cleaner-active_record", "~> 2.1"
+  gem "simplecov", "~> 0.22", require: false
+  gem "stripe-ruby-mock", "~> 4.0", require: "stripe_mock"
+end

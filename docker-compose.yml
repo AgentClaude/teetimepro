@@ -1,0 +1,158 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: teetimepro_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-teetimepro_development}
+      POSTGRES_USER: ${POSTGRES_USER:-teetimepro}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-teetimepro} -d ${POSTGRES_DB:-teetimepro_development}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Job Queue
+  redis:
+    image: redis:7-alpine
+    container_name: teetimepro_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Rails API Backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: teetimepro_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - RAILS_ENV=${RAILS_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgres://teetimepro:password@db:5432/teetimepro_development}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3004}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - DB_HOST=db
+      - DB_USERNAME=teetimepro
+      - DB_PASSWORD=password
+      - DB_NAME=teetimepro_development
+      - DB_TEST_NAME=teetimepro_test
+    ports:
+      - "${API_PORT:-3003}:3003"
+    volumes:
+      - rails_storage:/app/storage
+      - rails_logs:/app/log
+      - ./api:/app
+    command: >
+      sh -c "
+        rm -f /app/tmp/pids/server.pid &&
+        echo 'Waiting for database...' &&
+        bundle exec rails db:prepare &&
+        echo 'Database ready, starting server...' &&
+        bundle exec rails server -b 0.0.0.0 -p 3003
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sidekiq Background Jobs
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: teetimepro_sidekiq
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      - RAILS_ENV=${RAILS_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgres://teetimepro:password@db:5432/teetimepro_development}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - SIDEKIQ_REDIS_URL=${SIDEKIQ_REDIS_URL:-redis://redis:6379/1}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+    volumes:
+      - rails_storage:/app/storage
+      - rails_logs:/app/log
+    command: bundle exec sidekiq
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f sidekiq || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3003}
+    container_name: teetimepro_web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3003}
+      - VITE_GRAPHQL_URL=/graphql
+    ports:
+      - "${WEB_PORT:-3004}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rails_storage:
+    driver: local
+  rails_logs:
+    driver: local
+
+networks:
+  default:
+    name: teetimepro_network

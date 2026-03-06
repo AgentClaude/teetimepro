@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+vendor/bundle/
+
+# Build output
+web/dist/
+web/storybook-static/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rails
+api/log/*
+api/tmp/*
+api/storage/*
+!api/log/.keep
+!api/tmp/.keep
+!api/storage/.keep
+
+# Test
+coverage/
+test-results/
+
+# Generated
+web/src/generated/graphql.ts
