@@ -64,6 +64,9 @@ jobs:
           bundler-cache: true
           working-directory: api
 
+      - name: Clear bootsnap cache
+        run: rm -rf tmp/cache/bootsnap*
+
       - name: Setup database
         run: |
           mkdir -p log tmp

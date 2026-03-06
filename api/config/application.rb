@@ -25,6 +25,9 @@ module TeeTimePro
 
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Rails 8 default — prevents FrozenError when engines add to $LOAD_PATH
+    config.add_autoload_paths_to_load_path = false
+
     # API-only mode
     config.api_only = true
 
