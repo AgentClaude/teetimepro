@@ -1,14 +1,13 @@
 class GenerateDailyTeeSheetJob < ApplicationJob
   queue_as :default
 
-  # Generate tee sheets for the next N days for all courses
-  DAYS_AHEAD = 14
+  # Generate tee sheets for the next 7 days for all courses
+  DAYS_AHEAD = 7
 
   def perform
     Course.find_each do |course|
       DAYS_AHEAD.times do |offset|
         date = Date.current + offset.days
-        next if TeeSheet.exists?(course: course, date: date)
 
         result = TeeSheets::GenerateTeeSheetService.call(
           course: course,
@@ -16,10 +15,16 @@ class GenerateDailyTeeSheetJob < ApplicationJob
         )
 
         if result.success?
-          Rails.logger.info(
-            "Generated tee sheet for #{course.name} on #{date}: " \
-            "#{result.data.tee_times_count} tee times"
-          )
+          if result.data.already_existed
+            Rails.logger.debug(
+              "Tee sheet already exists for #{course.name} on #{date}, skipping"
+            )
+          else
+            Rails.logger.info(
+              "Generated tee sheet for #{course.name} on #{date}: " \
+              "#{result.data.tee_times_count} tee times"
+            )
+          end
         else
           Rails.logger.error(
             "Failed to generate tee sheet for #{course.name} on #{date}: " \

@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   # Custom API authentication routes
   namespace :api do
     post "/auth/login", to: "sessions#create"
+    post "/auth/refresh", to: "sessions#refresh"
     delete "/auth/logout", to: "sessions#destroy"
     post "/auth/register", to: "registrations#create"
   end
