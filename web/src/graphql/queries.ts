@@ -422,3 +422,27 @@ export const GET_SMS_CAMPAIGN = gql`
     }
   }
 `;
+
+export const GET_DASHBOARD_STATS = gql`
+  query GetDashboardStats($courseId: ID, $date: ISO8601Date) {
+    dashboardStats(courseId: $courseId, date: $date) {
+      todaysBookings
+      todaysRevenueCents
+      activeMembers
+      utilizationPercentage
+      upcomingBookings {
+        id
+        confirmationCode
+        userName
+        courseName
+        teeTime
+        playersCount
+        totalCents
+      }
+      weeklyRevenue {
+        date
+        revenueCents
+      }
+    }
+  }
+`;

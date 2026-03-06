@@ -6,6 +6,26 @@ module Types
       context[:current_user]
     end
 
+    # Dashboard stats
+    field :dashboard_stats, Types::DashboardStatsType, null: false do
+      argument :course_id, ID, required: false
+      argument :date, GraphQL::Types::ISO8601Date, required: false
+    end
+    def dashboard_stats(course_id: nil, date: nil)
+      org = require_auth!
+      result = Dashboard::StatsService.call(
+        organization: org,
+        course_id: course_id,
+        date: date
+      )
+      
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
     # Single course
     field :course, Types::CourseType, null: true do
       argument :id, ID, required: true
