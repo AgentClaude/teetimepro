@@ -6,6 +6,7 @@
 
 services:
   api:
+    user: root
     volumes:
       - ./api:/app
       - bundle_cache:/usr/local/bundle
