@@ -17,6 +17,26 @@ Rails.application.routes.draw do
     post "/auth/refresh", to: "sessions#refresh"
     delete "/auth/logout", to: "sessions#destroy"
     post "/auth/register", to: "registrations#create"
+
+    # API v1 - Public REST API with API key authentication
+    namespace :v1 do
+      # API documentation
+      get "/", to: "docs#index"
+      get "/docs", to: "docs#index"
+
+      # Courses
+      resources :courses, only: [:index, :show]
+
+      # Tee Times
+      resources :tee_times, only: [:index, :show]
+
+      # Bookings
+      resources :bookings, only: [:index, :show, :create] do
+        member do
+          patch :cancel
+        end
+      end
+    end
   end
 
   # Catch all unmatched routes
