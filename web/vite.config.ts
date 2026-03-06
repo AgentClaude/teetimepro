@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
+const proxyTarget = process.env.API_PROXY_TARGET || "http://localhost:3003";
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -13,11 +15,11 @@ export default defineConfig({
     port: 3004,
     proxy: {
       "/graphql": {
-        target: "http://localhost:3003",
+        target: proxyTarget,
         changeOrigin: true,
       },
       "/api": {
-        target: "http://localhost:3003",
+        target: proxyTarget,
         changeOrigin: true,
       },
     },

@@ -47,8 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    const response = await fetch(`${apiUrl}/api/auth/login`, {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -60,12 +59,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const data = await response.json();
-    localStorage.setItem("auth_token", data.token);
+    const token = data.access_token;
+    localStorage.setItem("auth_token", token);
     localStorage.setItem("auth_user", JSON.stringify(data.user));
 
     setState({
       user: data.user,
-      token: data.token,
+      token,
       isAuthenticated: true,
       isLoading: false,
     });

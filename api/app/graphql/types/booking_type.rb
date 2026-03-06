@@ -19,10 +19,4 @@ module Types
       object.cancellable?
     end
   end
-
-  class BookingPlayerType < Types::BaseObject
-    field :id, ID, null: false
-    field :name, String, null: false
-    field :handicap, Float, null: true
-  end
 end

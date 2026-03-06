@@ -18,11 +18,4 @@ module Types
       object.bookings.upcoming.includes(tee_time: { tee_sheet: :course })
     end
   end
-
-  class GolferProfileType < Types::BaseObject
-    field :id, ID, null: false
-    field :handicap_index, Float, null: true
-    field :display_handicap, String, null: false
-    field :created_at, GraphQL::Types::ISO8601DateTime, null: false
-  end
 end
