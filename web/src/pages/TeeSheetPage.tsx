@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { TeeSheet } from '../components/tee-sheet/TeeSheet';
 import { BookingForm } from '../components/booking/BookingForm';
 import { Modal } from '../components/ui/Modal';
+import { useCourse } from '../contexts/CourseContext';
 
 export function TeeSheetPage() {
   const [bookingTeeTimeId, setBookingTeeTimeId] = useState<string | null>(null);
-
-  // TODO: Get from course selector context
-  const courseId = '1';
+  const { selectedCourseId: courseId } = useCourse();
 
   return (
     <div className="space-y-6">

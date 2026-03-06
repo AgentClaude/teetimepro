@@ -3,15 +3,21 @@ import { Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { GET_COURSES_WITH_VOICE_CONFIG, GET_VOICE_CALL_LOGS } from '../graphql/queries';
+import { useCourse } from '../contexts/CourseContext';
+import { GET_COURSE, GET_VOICE_CALL_LOGS } from '../graphql/queries';
 import { UPDATE_COURSE_VOICE_CONFIG } from '../graphql/mutations';
-import type { Course, VoiceCallLog } from '../types';
+import type { VoiceCallLog } from '../types';
 
 export function SettingsPage() {
-  const { data, loading } = useQuery(GET_COURSES_WITH_VOICE_CONFIG);
-  const courses: Course[] = data?.courses || [];
+  const { selectedCourseId, selectedCourse, loading } = useCourse();
 
-  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+  // Fetch voice config for selected course
+  const { data: courseData } = useQuery(GET_COURSE, {
+    variables: { id: selectedCourseId },
+    skip: !selectedCourseId,
+  });
+  const voiceConfig = courseData?.course?.voiceConfig || selectedCourse?.voiceConfig;
+
   const [systemPrompt, setSystemPrompt] = useState('');
   const [greeting, setGreeting] = useState('');
   const [voiceModel, setVoiceModel] = useState('');
@@ -21,31 +27,23 @@ export function SettingsPage() {
 
   const [updateVoiceConfig, { loading: saving }] = useMutation(UPDATE_COURSE_VOICE_CONFIG);
 
-  // Call logs
+  // Call logs — filter by selected course
   const { data: logsData, loading: logsLoading, refetch: refetchLogs } = useQuery(GET_VOICE_CALL_LOGS, {
-    variables: { limit: 50 },
+    variables: { courseId: selectedCourseId || undefined, limit: 50 },
   });
   const callLogs: VoiceCallLog[] = logsData?.voiceCallLogs || [];
 
   // Load voice config when course selection changes
   useEffect(() => {
-    const course = courses.find((c) => c.id === selectedCourseId);
-    if (course?.voiceConfig) {
-      setSystemPrompt(course.voiceConfig.system_prompt || '');
-      setGreeting(course.voiceConfig.greeting || '');
-      setVoiceModel(course.voiceConfig.voice_model || 'aura-2-odysseus-en');
-      setLlmProvider(course.voiceConfig.llm_provider || 'google');
-      setLlmModel(course.voiceConfig.llm_model || 'gemini-2.5-flash');
+    if (voiceConfig) {
+      setSystemPrompt(voiceConfig.system_prompt || '');
+      setGreeting(voiceConfig.greeting || '');
+      setVoiceModel(voiceConfig.voice_model || 'aura-2-odysseus-en');
+      setLlmProvider(voiceConfig.llm_provider || 'google');
+      setLlmModel(voiceConfig.llm_model || 'gemini-2.5-flash');
     }
     setSaved(false);
-  }, [selectedCourseId, courses]);
-
-  // Auto-select first course
-  useEffect(() => {
-    if (courses.length > 0 && !selectedCourseId) {
-      setSelectedCourseId(courses[0].id);
-    }
-  }, [courses, selectedCourseId]);
+  }, [selectedCourseId, voiceConfig]);
 
   async function handleSave() {
     if (!selectedCourseId) return;
@@ -194,23 +192,11 @@ export function SettingsPage() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-gray-500">Loading courses...</p>
+          <p className="text-sm text-gray-500">Loading...</p>
+        ) : !selectedCourseId ? (
+          <p className="text-sm text-gray-500">Select a course from the sidebar to configure voice settings.</p>
         ) : (
           <>
-            {/* Course Selector */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700">Course</label>
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-              >
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Greeting */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700">Greeting</label>

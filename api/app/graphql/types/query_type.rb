@@ -49,10 +49,11 @@ module Types
 
     # Bookings list (filtered)
     field :bookings, [Types::BookingType], null: false do
+      argument :course_id, ID, required: false
       argument :date, GraphQL::Types::ISO8601Date, required: false
       argument :status, String, required: false
     end
-    def bookings(date: nil, status: nil)
+    def bookings(course_id: nil, date: nil, status: nil)
       require_auth!
       user = context[:current_user]
       scope = if user.can_manage_bookings?
@@ -61,6 +62,9 @@ module Types
                 user.bookings
               end
 
+      if course_id.present?
+        scope = scope.joins(tee_time: { tee_sheet: :course }).where(courses: { id: course_id })
+      end
       scope = scope.for_date(date) if date
       scope = scope.where(status: status) if status
       scope.includes(tee_time: { tee_sheet: :course }).order("tee_times.starts_at DESC")
