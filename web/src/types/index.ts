@@ -91,6 +91,11 @@ export interface VoiceCallLogSummary {
   function_calls: number;
   booking_created: boolean;
   confirmation_code: string | null;
+  booking_id: number | null;
+  booking_status: string | null;
+  booking_players: number | null;
+  booking_time: string | null;
+  booking_date: string | null;
 }
 
 export interface TranscriptEntry {

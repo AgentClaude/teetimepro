@@ -49,11 +49,14 @@ class Api::V1::VoiceCallLogsController < Api::V1::BaseController
   private
 
   def log_params
-    params.permit(
+    permitted = params.permit(
       :course_id, :call_sid, :channel, :caller_phone, :caller_name,
-      :status, :duration_seconds, :started_at, :ended_at,
-      transcript: [:type, :timestamp, :role, :content, :name, :arguments, :result]
+      :status, :duration_seconds, :started_at, :ended_at
     )
+    # Permit transcript as raw JSON array — strong params can't handle
+    # arbitrary nested structures in function_call results
+    permitted[:transcript] = params[:transcript].map(&:to_unsafe_h) if params[:transcript].present?
+    permitted
   end
 
   def build_summary(transcript)
@@ -61,16 +64,34 @@ class Api::V1::VoiceCallLogsController < Api::V1::BaseController
     function_calls = transcript.select { |e| e["type"] == "function_call" }
     function_results = transcript.select { |e| e["type"] == "function_result" }
 
-    booking_result = function_results.find { |e| e["name"] == "create_booking" }
+    # Find the successful booking result
+    booking_result = function_results.select { |e| e["name"] == "create_booking" }
+                                     .find { |e| e.dig("result", "success") == true }
+    confirmation_code = booking_result&.dig("result", "confirmation_code")
 
-    {
+    summary = {
       message_count: messages.size,
       user_messages: messages.count { |e| e["role"] == "user" },
       agent_messages: messages.count { |e| e["role"] == "agent" },
       function_calls: function_calls.size,
-      booking_created: booking_result.present? && booking_result.dig("result", "success") == true,
-      confirmation_code: booking_result&.dig("result", "confirmation_code")
+      booking_created: confirmation_code.present?,
+      confirmation_code: confirmation_code
     }
+
+    # Enrich with actual booking data if found
+    if confirmation_code.present?
+      booking = Booking.for_organization(current_organization)
+                       .find_by(confirmation_code: confirmation_code)
+      if booking
+        summary[:booking_id] = booking.id
+        summary[:booking_status] = booking.status
+        summary[:booking_players] = booking.players_count
+        summary[:booking_time] = booking.tee_time.formatted_time
+        summary[:booking_date] = booking.tee_time.date.iso8601
+      end
+    end
+
+    summary
   end
 
   def call_log_data(log, include_transcript: false)

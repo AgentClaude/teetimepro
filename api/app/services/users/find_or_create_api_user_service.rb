@@ -10,7 +10,10 @@ module Users
 
       user = find_existing_user
 
-      unless user
+      if user
+        # Update name if provided and user still has placeholder name
+        update_name_if_needed(user)
+      else
         generated_email = email.presence || "voice-#{phone.to_s.gsub(/\D/, '')}@#{organization.slug}.local"
 
         user = User.new(
@@ -42,6 +45,14 @@ module Users
       elsif phone.present?
         User.find_by(phone: phone, organization: organization)
       end
+    end
+
+    def update_name_if_needed(user)
+      attrs = {}
+      attrs[:first_name] = first_name if first_name.present? && user.first_name.in?(["Guest", nil])
+      attrs[:last_name] = last_name if last_name.present? && user.last_name.in?(["Caller", nil])
+      attrs[:phone] = phone if phone.present? && user.phone.blank?
+      user.update(attrs) if attrs.present?
     end
   end
 end

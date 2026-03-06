@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -70,20 +70,54 @@ export function CallLogPage() {
                 <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">API Calls</dt>
                 <dd className="mt-1 text-sm text-gray-900">{log.summary?.function_calls || 0}</dd>
               </div>
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wider text-gray-500">Booking</dt>
-                <dd className="mt-1">
-                  {log.summary?.booking_created ? (
-                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                      {log.summary.confirmation_code || 'Yes'}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-gray-400">None</span>
-                  )}
-                </dd>
-              </div>
             </div>
           </Card>
+
+          {/* Linked Booking */}
+          {log.summary?.booking_created && (
+            <Card className="p-6">
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">Booking Created</h2>
+              <Link
+                to={`/bookings`}
+                className="block rounded-lg border border-green-200 bg-green-50 p-4 transition hover:bg-green-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <div className="text-xs font-medium uppercase tracking-wider text-gray-500">Confirmation</div>
+                      <div className="mt-0.5 font-mono text-sm font-semibold text-gray-900">{log.summary.confirmation_code}</div>
+                    </div>
+                    {log.summary.booking_date && (
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wider text-gray-500">Tee Time</div>
+                        <div className="mt-0.5 text-sm text-gray-900">
+                          {new Date(log.summary.booking_date + 'T00:00:00').toLocaleDateString()} at {log.summary.booking_time}
+                        </div>
+                      </div>
+                    )}
+                    {log.summary.booking_players && (
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wider text-gray-500">Players</div>
+                        <div className="mt-0.5 text-sm text-gray-900">{log.summary.booking_players}</div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {log.summary.booking_status && (
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        log.summary.booking_status === 'confirmed' ? 'bg-green-100 text-green-800'
+                          : log.summary.booking_status === 'cancelled' ? 'bg-red-100 text-red-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {log.summary.booking_status}
+                      </span>
+                    )}
+                    <span className="text-sm font-medium text-green-600">View →</span>
+                  </div>
+                </div>
+              </Link>
+            </Card>
+          )}
 
           {/* Transcript */}
           <Card className="p-6">
