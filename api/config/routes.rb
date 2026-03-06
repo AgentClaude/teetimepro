@@ -36,6 +36,13 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+
+      # Webhooks
+      resources :webhooks, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          post :test
+        end
+      end
     end
   end
 

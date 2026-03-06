@@ -30,6 +30,10 @@ class Booking < ApplicationRecord
 
   delegate :starts_at, to: :tee_time
   delegate :course, to: :tee_time
+  
+  def organization
+    course.organization
+  end
 
   def cancellable?
     confirmed? && starts_at > 24.hours.from_now
