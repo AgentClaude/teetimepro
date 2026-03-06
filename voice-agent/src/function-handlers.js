@@ -23,12 +23,27 @@ export async function executeFunction(name, args, callMeta) {
   }
 }
 
-async function searchTeeTimes({ date, players, time_preference }) {
+/**
+ * Search for available tee times, with support for multi-day ranges and alternatives.
+ * @param {object} args
+ * @param {string} args.date - Primary date (YYYY-MM-DD)
+ * @param {number} args.players - Number of players
+ * @param {string} [args.time_preference] - Time preference
+ * @param {string} [args.date_end] - End date for multi-day search (YYYY-MM-DD)
+ */
+async function searchTeeTimes({ date, players, time_preference, date_end }) {
   try {
-    const params = new URLSearchParams({
-      date,
-      players: String(players),
-    });
+    const params = new URLSearchParams();
+
+    if (date_end) {
+      // Multi-day search (e.g., "this weekend")
+      params.set("start_date", date);
+      params.set("end_date", date_end);
+    } else {
+      params.set("date", date);
+    }
+
+    params.set("players", String(players));
 
     if (time_preference) {
       params.set("time_preference", time_preference);
@@ -39,23 +54,51 @@ async function searchTeeTimes({ date, players, time_preference }) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       return JSON.stringify({
-        error: err.error || "Could not search tee times",
+        error: err.error || "Could not search tee times. Please try again.",
       });
     }
 
     const data = await res.json();
-    const teeTimes = data.data || data;
+    const teeTimes = data.data || [];
 
     if (!teeTimes.length) {
+      // Check for alternatives from the API
+      if (data.alternatives && data.alternatives.length > 0) {
+        const altSlots = data.alternatives.slice(0, 3).map((tt) => ({
+          id: tt.id,
+          date: tt.date,
+          time: tt.formatted_time || tt.starts_at,
+          available_spots: tt.available_spots,
+          price_per_player_dollars: (tt.price_cents / 100).toFixed(2),
+          total_dollars: ((tt.price_cents * players) / 100).toFixed(2),
+        }));
+
+        const dateLabel = date_end
+          ? `${date} to ${date_end}`
+          : date;
+
+        return JSON.stringify({
+          available: false,
+          message: data.message || `No tee times available on ${dateLabel} for ${players} players.`,
+          has_alternatives: true,
+          alternatives: altSlots,
+        });
+      }
+
+      const dateLabel = date_end
+        ? `${date} to ${date_end}`
+        : date;
+
       return JSON.stringify({
         available: false,
-        message: `No tee times available on ${date} for ${players} players around that time.`,
+        message: `No tee times available on ${dateLabel} for ${players} players. Would you like to try a different date or time?`,
       });
     }
 
     // Format for the agent
     const slots = teeTimes.slice(0, 5).map((tt) => ({
       id: tt.id,
+      date: tt.date,
       time: tt.formatted_time || tt.starts_at,
       available_spots: tt.available_spots,
       price_per_player_dollars: (tt.price_cents / 100).toFixed(2),
@@ -64,7 +107,7 @@ async function searchTeeTimes({ date, players, time_preference }) {
 
     return JSON.stringify({
       available: true,
-      date,
+      date: date_end ? `${date} to ${date_end}` : date,
       players,
       tee_times: slots,
     });
