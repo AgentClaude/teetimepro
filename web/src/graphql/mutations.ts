@@ -137,3 +137,54 @@ export const UPDATE_TEE_TIME = gql`
     }
   }
 `;
+
+export const CREATE_SMS_CAMPAIGN = gql`
+  mutation CreateSmsCampaign(
+    $name: String!
+    $messageBody: String!
+    $recipientFilter: String
+    $filterCriteria: JSON
+    $scheduledAt: ISO8601DateTime
+  ) {
+    createSmsCampaign(
+      name: $name
+      messageBody: $messageBody
+      recipientFilter: $recipientFilter
+      filterCriteria: $filterCriteria
+      scheduledAt: $scheduledAt
+    ) {
+      smsCampaign {
+        id
+        name
+        status
+      }
+      errors
+    }
+  }
+`;
+
+export const SEND_SMS_CAMPAIGN = gql`
+  mutation SendSmsCampaign($id: ID!) {
+    sendSmsCampaign(id: $id) {
+      smsCampaign {
+        id
+        status
+        totalRecipients
+        sentCount
+      }
+      errors
+    }
+  }
+`;
+
+export const CANCEL_SMS_CAMPAIGN = gql`
+  mutation CancelSmsCampaign($id: ID!) {
+    cancelSmsCampaign(id: $id) {
+      smsCampaign {
+        id
+        status
+      }
+      errors
+    }
+  }
+`;

@@ -7,6 +7,7 @@ import { TeeSheetPage } from "./pages/TeeSheetPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import CampaignsPage from "./pages/CampaignsPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/tee-sheet" element={<TeeSheetPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
         <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
     </Routes>

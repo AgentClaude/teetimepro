@@ -9,6 +9,11 @@ Sidekiq.configure_server do |config|
         "class" => "GenerateDailyTeeSheetJob",
         "description" => "Generate tee sheets for upcoming days"
       },
+      "send_scheduled_campaigns" => {
+        "cron" => "*/5 * * * *", # Every 5 minutes
+        "class" => "SendScheduledCampaignsJob",
+        "description" => "Send scheduled SMS campaigns that are due"
+      },
       "morning_reminders" => {
         "cron" => "0 6 * * *", # Every day at 6 AM
         "class" => "SendReminderJob",
