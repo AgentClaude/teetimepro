@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_06_221930) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,6 +93,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "voice_config", default: {}, null: false
     t.index ["active"], name: "index_courses_on_active"
     t.index ["organization_id", "name"], name: "index_courses_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_courses_on_organization_id"
@@ -164,6 +165,49 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
     t.index ["stripe_payment_intent_id"], name: "index_payments_on_stripe_payment_intent_id", unique: true
   end
 
+  create_table "sms_campaigns", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "name", null: false
+    t.text "message_body", null: false
+    t.integer "status", default: 0, null: false
+    t.string "recipient_filter", default: "all", null: false
+    t.jsonb "filter_criteria", default: {}, null: false
+    t.integer "total_recipients", default: 0, null: false
+    t.integer "sent_count", default: 0, null: false
+    t.integer "delivered_count", default: 0, null: false
+    t.integer "failed_count", default: 0, null: false
+    t.datetime "scheduled_at"
+    t.datetime "sent_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_sms_campaigns_on_created_by_id"
+    t.index ["organization_id", "status"], name: "index_sms_campaigns_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_sms_campaigns_on_organization_id"
+    t.index ["scheduled_at"], name: "index_sms_campaigns_on_scheduled_at", where: "(status = 1)"
+    t.check_constraint "char_length(message_body) <= 1600", name: "sms_campaigns_message_length_check"
+  end
+
+  create_table "sms_messages", force: :cascade do |t|
+    t.bigint "sms_campaign_id", null: false
+    t.bigint "user_id", null: false
+    t.string "to_phone", null: false
+    t.string "twilio_sid"
+    t.integer "status", default: 0, null: false
+    t.string "error_code"
+    t.string "error_message"
+    t.datetime "sent_at"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sms_campaign_id", "status"], name: "index_sms_messages_on_sms_campaign_id_and_status"
+    t.index ["sms_campaign_id", "user_id"], name: "index_sms_messages_on_sms_campaign_id_and_user_id", unique: true
+    t.index ["sms_campaign_id"], name: "index_sms_messages_on_sms_campaign_id"
+    t.index ["twilio_sid"], name: "index_sms_messages_on_twilio_sid", unique: true, where: "(twilio_sid IS NOT NULL)"
+    t.index ["user_id"], name: "index_sms_messages_on_user_id"
+  end
+
   create_table "tee_sheets", force: :cascade do |t|
     t.bigint "course_id", null: false
     t.date "date", null: false
@@ -191,42 +235,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
     t.index ["tee_sheet_id"], name: "index_tee_times_on_tee_sheet_id"
   end
 
-  create_table "webhook_endpoints", force: :cascade do |t|
-    t.bigint "organization_id", null: false
-    t.string "url", null: false
-    t.string "secret", null: false
-    t.json "events", default: [], null: false
-    t.boolean "active", default: true, null: false
-    t.text "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["active"], name: "index_webhook_endpoints_on_active"
-    t.index ["organization_id", "url"], name: "index_webhook_endpoints_on_organization_id_and_url", unique: true
-    t.index ["organization_id"], name: "index_webhook_endpoints_on_organization_id"
-    t.check_constraint "url LIKE 'https://%'", name: "webhook_endpoints_url_https_check"
-  end
-
-  create_table "webhook_events", force: :cascade do |t|
-    t.bigint "webhook_endpoint_id", null: false
-    t.string "event_type", null: false
-    t.json "payload", default: {}, null: false
-    t.integer "status", default: 0, null: false
-    t.integer "attempts", default: 0, null: false
-    t.datetime "last_attempted_at"
-    t.datetime "delivered_at"
-    t.integer "response_code"
-    t.text "response_body"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["event_type"], name: "index_webhook_events_on_event_type"
-    t.index ["last_attempted_at"], name: "index_webhook_events_on_last_attempted_at"
-    t.index ["status", "created_at"], name: "index_webhook_events_on_status_and_created_at"
-    t.index ["webhook_endpoint_id", "created_at"], name: "index_webhook_events_on_webhook_endpoint_id_and_created_at"
-    t.index ["webhook_endpoint_id"], name: "index_webhook_events_on_webhook_endpoint_id"
-    t.check_constraint "attempts >= 0", name: "webhook_events_attempts_positive_check"
-    t.check_constraint "response_code BETWEEN 100 AND 599", name: "webhook_events_response_code_valid_check"
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -251,6 +259,42 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  create_table "webhook_endpoints", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "url", null: false
+    t.string "secret", null: false
+    t.json "events", default: [], null: false
+    t.boolean "active", default: true, null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_webhook_endpoints_on_active"
+    t.index ["organization_id", "url"], name: "index_webhook_endpoints_on_organization_id_and_url", unique: true
+    t.index ["organization_id"], name: "index_webhook_endpoints_on_organization_id"
+    t.check_constraint "url::text ~~ 'https://%'::text", name: "webhook_endpoints_url_https_check"
+  end
+
+  create_table "webhook_events", force: :cascade do |t|
+    t.bigint "webhook_endpoint_id", null: false
+    t.string "event_type", null: false
+    t.json "payload", default: {}, null: false
+    t.integer "status", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "last_attempted_at"
+    t.datetime "delivered_at"
+    t.integer "response_code"
+    t.text "response_body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_webhook_events_on_event_type"
+    t.index ["last_attempted_at"], name: "index_webhook_events_on_last_attempted_at"
+    t.index ["status", "created_at"], name: "index_webhook_events_on_status_and_created_at"
+    t.index ["webhook_endpoint_id", "created_at"], name: "index_webhook_events_on_webhook_endpoint_id_and_created_at"
+    t.index ["webhook_endpoint_id"], name: "index_webhook_events_on_webhook_endpoint_id"
+    t.check_constraint "attempts >= 0", name: "webhook_events_attempts_positive_check"
+    t.check_constraint "response_code >= 100 AND response_code <= 599", name: "webhook_events_response_code_valid_check"
+  end
+
   add_foreign_key "api_keys", "organizations"
   add_foreign_key "booking_players", "bookings", on_delete: :cascade
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
@@ -261,6 +305,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_213200) do
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
   add_foreign_key "payments", "bookings", on_delete: :cascade
+  add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
+  add_foreign_key "sms_campaigns", "users", column: "created_by_id", on_delete: :cascade
+  add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade
+  add_foreign_key "sms_messages", "users", on_delete: :cascade
   add_foreign_key "tee_sheets", "courses", on_delete: :cascade
   add_foreign_key "tee_times", "tee_sheets", on_delete: :cascade
   add_foreign_key "users", "organizations", on_delete: :cascade
