@@ -56,6 +56,14 @@ module Bookings
           SendReminderJob.set(wait_until: reminder_time).perform_later(booking.id)
         end
 
+        # Dispatch webhook event
+        webhook_payload = build_booking_webhook_payload(booking)
+        Webhooks::DispatchEventService.call(
+          organization: booking.organization,
+          event_type: "booking.created",
+          payload: webhook_payload
+        )
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e
@@ -81,6 +89,39 @@ module Bookings
           name: names[i] || (i.zero? ? user.full_name : "Player #{i + 1}")
         )
       end
+    end
+
+    def build_booking_webhook_payload(booking)
+      {
+        id: booking.id,
+        type: "booking",
+        attributes: {
+          confirmation_code: booking.confirmation_code,
+          status: booking.status,
+          players_count: booking.players_count,
+          total_cents: booking.total_cents,
+          total_currency: booking.total_currency,
+          notes: booking.notes,
+          created_at: booking.created_at.iso8601
+        },
+        tee_time: {
+          id: booking.tee_time.id,
+          starts_at: booking.tee_time.starts_at.iso8601,
+          date: booking.tee_time.date.iso8601
+        },
+        course: {
+          id: booking.course.id,
+          name: booking.course.name
+        },
+        user: {
+          id: booking.user.id,
+          email: booking.user.email,
+          first_name: booking.user.first_name,
+          last_name: booking.user.last_name
+        },
+        timestamp: Time.current.iso8601,
+        organization_id: booking.organization.id
+      }
     end
   end
 end

@@ -2,6 +2,7 @@ class Organization < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :courses, dependent: :destroy
   has_many :memberships, dependent: :destroy
+  has_many :webhook_endpoints, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
