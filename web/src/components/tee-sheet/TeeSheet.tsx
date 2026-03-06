@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format, addDays, subDays } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { TeeTimeSlot } from './TeeTimeSlot';
+import { TeeTimeSlot, type TeeTimeData } from './TeeTimeSlot';
 import { useTeeSheet } from '../../hooks/useTeeSheet';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 
@@ -13,7 +13,7 @@ interface TeeSheetProps {
 
 export function TeeSheet({ courseId, onBookTeeTime, onEditTeeTime }: TeeSheetProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { teeSheet, loading, error } = useTeeSheet(courseId, format(selectedDate, 'yyyy-MM-dd'));
+  const { teeSheet, loading, error } = useTeeSheet({ courseId, date: format(selectedDate, 'yyyy-MM-dd') });
 
   const goToPreviousDay = () => setSelectedDate((d) => subDays(d, 1));
   const goToNextDay = () => setSelectedDate((d) => addDays(d, 1));
@@ -80,7 +80,7 @@ export function TeeSheet({ courseId, onBookTeeTime, onEditTeeTime }: TeeSheetPro
               teeSheet.teeTimes.map((teeTime) => (
                 <TeeTimeSlot
                   key={teeTime.id}
-                  teeTime={teeTime}
+                  teeTime={teeTime as unknown as TeeTimeData}
                   onBook={() => onBookTeeTime?.(teeTime.id)}
                   onEdit={() => onEditTeeTime?.(teeTime.id)}
                 />

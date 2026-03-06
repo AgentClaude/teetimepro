@@ -41,6 +41,7 @@ export function Badge({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function statusBadgeVariant(
   status: string
 ): BadgeVariant {

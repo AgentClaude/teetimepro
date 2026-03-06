@@ -6,7 +6,7 @@ const meta: Meta<typeof BookingForm> = {
   component: BookingForm,
   tags: ['autodocs'],
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
         <Story />
       </div>
@@ -26,7 +26,7 @@ export const Default: Story = {
       priceCents: 5500,
       courseName: 'Mountain View Golf Club',
     },
-    onSubmit: (data) => console.log('Submit:', data),
+    onSubmit: (data: Record<string, unknown>) => console.log('Submit:', data),
     onCancel: () => console.log('Cancel'),
   },
 };
@@ -40,7 +40,7 @@ export const LimitedAvailability: Story = {
       priceCents: 7500,
       courseName: 'Eagle Ridge Country Club',
     },
-    onSubmit: (data) => console.log('Submit:', data),
+    onSubmit: (data: Record<string, unknown>) => console.log('Submit:', data),
     onCancel: () => console.log('Cancel'),
   },
 };
@@ -54,7 +54,7 @@ export const Loading: Story = {
       priceCents: 3500,
       courseName: 'Sunset Links',
     },
-    onSubmit: (data) => console.log('Submit:', data),
+    onSubmit: (data: Record<string, unknown>) => console.log('Submit:', data),
     onCancel: () => console.log('Cancel'),
     loading: true,
   },

@@ -6,7 +6,7 @@ const meta: Meta<typeof TeeTimeSlot> = {
   component: TeeTimeSlot,
   tags: ['autodocs'],
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="mx-auto max-w-4xl rounded-lg bg-white shadow">
         <Story />
       </div>
