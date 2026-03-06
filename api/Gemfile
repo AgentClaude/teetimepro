@@ -4,8 +4,8 @@ ruby ">= 3.3.0"
 
 gem "rails", "~> 8.0.0"
 gem "pg", "~> 1.5"
-gem "devise", "~> 5.0"
-gem "devise-jwt", "~> 0.13"
+gem "devise", "~> 4.9"
+gem "devise-jwt", "~> 0.11"
 gem "graphql", "~> 2.2"
 # gem "graphiql-rails", "~> 1.9", group: :development # requires sprockets, skip for API-only
 gem "sidekiq", "~> 7.2"
