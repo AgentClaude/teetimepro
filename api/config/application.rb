@@ -2,16 +2,6 @@ require_relative "boot"
 
 require "rails"
 
-# Workaround: Devise 4.9.x tries to modify frozen load path arrays in Rails 8.
-# Rails 8 freezes _all_load_paths after collection; Devise's Engine initializer
-# then fails with FrozenError. This ensures the array is always mutable.
-Rails::Engine.prepend(Module.new do
-  private
-
-  def _all_load_paths(...)
-    super(...).dup
-  end
-end)
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"

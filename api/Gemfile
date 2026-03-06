@@ -4,10 +4,11 @@ ruby ">= 3.3.0"
 
 gem "rails", "~> 8.0.0"
 gem "pg", "~> 1.5"
-gem "devise", "~> 4.9"
-gem "devise-jwt", "~> 0.11"
+gem "devise", "~> 5.0"
+gem "devise-jwt", "~> 0.13"
 gem "graphql", "~> 2.2"
 # gem "graphiql-rails", "~> 1.9", group: :development # requires sprockets, skip for API-only
+gem "connection_pool", "~> 2.4"  # Pin: 3.x breaks Sidekiq 7.x scheduler
 gem "sidekiq", "~> 7.2"
 gem "sidekiq-cron", "~> 2.0"
 gem "faraday", "~> 2.8"
