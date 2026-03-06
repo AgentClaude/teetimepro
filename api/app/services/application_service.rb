@@ -56,7 +56,3 @@ class ApplicationService
     Organization.current
   end
 end
-
-# Custom error classes
-class AuthorizationError < StandardError; end
-class ServiceError < StandardError; end

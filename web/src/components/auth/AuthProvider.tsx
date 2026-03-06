@@ -13,6 +13,7 @@ interface AuthContextValue extends AuthState {
   logout: () => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface AuthProviderProps {

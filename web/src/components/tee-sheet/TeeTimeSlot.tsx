@@ -2,12 +2,19 @@ import { format, parseISO } from 'date-fns';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 
+export type TeeTimeStatus =
+  | 'AVAILABLE' | 'available'
+  | 'PARTIALLY_BOOKED' | 'partially_booked'
+  | 'FULLY_BOOKED' | 'fully_booked'
+  | 'BLOCKED' | 'blocked'
+  | 'MAINTENANCE' | 'maintenance';
+
 export interface TeeTimeData {
   id: string;
   startsAt: string;
   maxPlayers: number;
   bookedPlayers: number;
-  status: 'AVAILABLE' | 'PARTIALLY_BOOKED' | 'FULLY_BOOKED' | 'BLOCKED' | 'MAINTENANCE';
+  status: TeeTimeStatus;
   priceCents: number | null;
   bookings?: {
     id: string;
@@ -23,25 +30,31 @@ interface TeeTimeSlotProps {
   onEdit?: () => void;
 }
 
-const STATUS_CONFIG = {
-  AVAILABLE: { label: 'Open', variant: 'success' as const },
-  PARTIALLY_BOOKED: { label: 'Partial', variant: 'warning' as const },
-  FULLY_BOOKED: { label: 'Full', variant: 'error' as const },
-  BLOCKED: { label: 'Blocked', variant: 'default' as const },
-  MAINTENANCE: { label: 'Maintenance', variant: 'default' as const },
+const STATUS_CONFIG: Record<string, { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }> = {
+  AVAILABLE: { label: 'Open', variant: 'success' },
+  available: { label: 'Open', variant: 'success' },
+  PARTIALLY_BOOKED: { label: 'Partial', variant: 'warning' },
+  partially_booked: { label: 'Partial', variant: 'warning' },
+  FULLY_BOOKED: { label: 'Full', variant: 'danger' },
+  fully_booked: { label: 'Full', variant: 'danger' },
+  BLOCKED: { label: 'Blocked', variant: 'default' },
+  blocked: { label: 'Blocked', variant: 'default' },
+  MAINTENANCE: { label: 'Maintenance', variant: 'default' },
+  maintenance: { label: 'Maintenance', variant: 'default' },
 };
 
 export function TeeTimeSlot({ teeTime, onBook, onEdit }: TeeTimeSlotProps) {
   const time = format(parseISO(teeTime.startsAt), 'h:mm a');
   const availableSpots = teeTime.maxPlayers - teeTime.bookedPlayers;
-  const statusConfig = STATUS_CONFIG[teeTime.status];
-  const isBookable = teeTime.status === 'AVAILABLE' || teeTime.status === 'PARTIALLY_BOOKED';
+  const statusConfig = STATUS_CONFIG[teeTime.status] ?? { label: teeTime.status, variant: 'default' as const };
+  const upperStatus = teeTime.status.toUpperCase();
+  const isBookable = upperStatus === 'AVAILABLE' || upperStatus === 'PARTIALLY_BOOKED';
   const price = teeTime.priceCents ? `$${(teeTime.priceCents / 100).toFixed(2)}` : '—';
 
   return (
     <div
       className={`grid grid-cols-12 items-center gap-px px-4 py-3 transition-colors hover:bg-gray-50 ${
-        teeTime.status === 'BLOCKED' || teeTime.status === 'MAINTENANCE'
+        upperStatus === 'BLOCKED' || upperStatus === 'MAINTENANCE'
           ? 'bg-gray-50 opacity-60'
           : ''
       }`}

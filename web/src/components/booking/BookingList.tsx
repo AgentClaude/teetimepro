@@ -20,12 +20,12 @@ interface BookingListProps {
   onCancelBooking?: (id: string) => void;
 }
 
-const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
+const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'danger' | 'default'> = {
   CONFIRMED: 'success',
   CHECKED_IN: 'warning',
   COMPLETED: 'default',
-  CANCELLED: 'error',
-  NO_SHOW: 'error',
+  CANCELLED: 'danger',
+  NO_SHOW: 'danger',
 };
 
 export function BookingList({ bookings, onViewBooking, onCancelBooking }: BookingListProps) {
