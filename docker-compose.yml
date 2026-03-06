@@ -126,7 +126,7 @@ services:
       dockerfile: Dockerfile.web
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3003}
-    container_name: teetimepro_web
+    container_name: teetimepro_frontend
     restart: unless-stopped
     depends_on:
       api:

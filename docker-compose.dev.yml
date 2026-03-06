@@ -28,7 +28,7 @@ services:
       - RAILS_ENV=development
 
   web:
-    image: node:22-alpine
+    image: node:22
     working_dir: /app
     volumes:
       - ./web:/app
@@ -36,7 +36,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:3003
-    ports:
+    ports: !override
       - "${WEB_PORT:-3004}:3004"
     command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host 0.0.0.0"
     healthcheck:
