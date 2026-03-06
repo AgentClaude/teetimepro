@@ -209,8 +209,8 @@ def generate_tee_sheets(course, date_range)
     end
 
     tz = course.timezone
-    start_time = date.in_time_zone(tz).change(hour: course.first_tee_time.to_i, min: course.first_tee_time.split(":").last.to_i)
-    end_time   = date.in_time_zone(tz).change(hour: course.last_tee_time.to_i,  min: course.last_tee_time.split(":").last.to_i)
+    start_time = date.in_time_zone(tz).change(hour: course.first_tee_time.hour, min: course.first_tee_time.min)
+    end_time   = date.in_time_zone(tz).change(hour: course.last_tee_time.hour,  min: course.last_tee_time.min)
 
     current_time = start_time
     while current_time <= end_time
@@ -294,8 +294,10 @@ booking_specs.each_with_index do |spec, idx|
     b.status = spec[:status]
   end
 
-  # Mark tee time as booked
-  tee_time.update!(status: :booked) unless spec[:status] == :cancelled
+  # Update tee time availability
+  unless spec[:status] == :cancelled
+    tee_time.book_spots!(spec[:players]) if tee_time.available_spots >= spec[:players]
+  end
 
   # Booking players
   spec[:players].times do |p|
@@ -398,25 +400,26 @@ webhook3 = WebhookEndpoint.find_or_create_by!(organization: org2, url: "https://
 end
 
 # Sample webhook events (delivered + failed)
-[
-  { endpoint: webhook1, event_type: "booking.created",   status: :delivered, code: 200 },
-  { endpoint: webhook1, event_type: "booking.cancelled", status: :delivered, code: 200 },
-  { endpoint: webhook1, event_type: "booking.checked_in", status: :failed,  code: 500 },
-  { endpoint: webhook2, event_type: "payment.completed", status: :delivered, code: 200 },
-  { endpoint: webhook3, event_type: "booking.created",   status: :delivered, code: 200 },
-  { endpoint: webhook3, event_type: "payment.completed", status: :pending,  code: nil },
-].each do |spec|
-  WebhookEvent.find_or_create_by!(
-    webhook_endpoint: spec[:endpoint],
-    event_type: spec[:event_type],
-    payload: { event: spec[:event_type], data: { id: rand(1..100) }, timestamp: Time.current.iso8601 }.to_json
-  ) do |e|
-    e.status = spec[:status]
-    e.attempts = spec[:status] == :pending ? 0 : rand(1..3)
-    e.response_code = spec[:code]
-    e.response_body = spec[:code] == 200 ? '{"ok":true}' : (spec[:code] ? '{"error":"internal"}' : nil)
-    e.delivered_at = Time.current if spec[:status] == :delivered
-    e.last_attempted_at = Time.current unless spec[:status] == :pending
+unless WebhookEvent.any?
+  [
+    { endpoint: webhook1, event_type: "booking.created",    status: :delivered, code: 200 },
+    { endpoint: webhook1, event_type: "booking.cancelled",  status: :delivered, code: 200 },
+    { endpoint: webhook1, event_type: "booking.checked_in", status: :failed,    code: 500 },
+    { endpoint: webhook2, event_type: "payment.completed",  status: :delivered, code: 200 },
+    { endpoint: webhook3, event_type: "booking.created",    status: :delivered, code: 200 },
+    { endpoint: webhook3, event_type: "payment.completed",  status: :pending,   code: nil },
+  ].each do |spec|
+    WebhookEvent.create!(
+      webhook_endpoint: spec[:endpoint],
+      event_type: spec[:event_type],
+      payload: { event: spec[:event_type], data: { id: rand(1..100) }, timestamp: Time.current.iso8601 }.to_json,
+      status: spec[:status],
+      attempts: spec[:status] == :pending ? 0 : rand(1..3),
+      response_code: spec[:code],
+      response_body: spec[:code] == 200 ? '{"ok":true}' : (spec[:code] ? '{"error":"internal"}' : nil),
+      delivered_at: spec[:status] == :delivered ? Time.current : nil,
+      last_attempted_at: spec[:status] == :pending ? nil : Time.current
+    )
   end
 end
 

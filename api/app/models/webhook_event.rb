@@ -6,11 +6,7 @@ class WebhookEvent < ApplicationRecord
   validates :status, presence: true
   validates :attempts, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
-  enum status: {
-    pending: 0,
-    delivered: 1,
-    failed: 2
-  }
+  enum :status, { pending: 0, delivered: 1, failed: 2 }
 
   scope :for_organization, ->(org) { joins(:webhook_endpoint).where(webhook_endpoints: { organization: org }) }
   scope :recent, -> { order(created_at: :desc) }
