@@ -2,29 +2,65 @@ class ApiKey < ApplicationRecord
   belongs_to :organization
 
   validates :name, presence: true
-  validates :token, presence: true, uniqueness: true
+  validates :key_digest, presence: true, uniqueness: true
+  validates :prefix, presence: true, length: { is: 8 }
 
-  before_create :generate_token
+  before_validation :generate_key_and_digest, on: :create
 
-  scope :active, -> { where(active: true) }
+  scope :active, -> { where(active: true).where("expires_at IS NULL OR expires_at > ?", Time.current) }
 
-  def self.authenticate(token)
-    active.find_by(token: token)&.tap do |key|
-      key.update_column(:last_used_at, Time.current)
+  # Rate limit mappings
+  RATE_LIMITS = {
+    'standard' => 60,
+    'premium' => 300,
+    'enterprise' => 1000
+  }.freeze
+
+  def self.authenticate(key)
+    return nil unless key&.start_with?('tp_')
+
+    digest = Digest::SHA256.hexdigest(key)
+    active.find_by(key_digest: digest)&.tap do |api_key|
+      api_key.update_column(:last_used_at, Time.current)
     end
+  end
+
+  def self.generate_unique_token
+    "tp_#{SecureRandom.urlsafe_base64(48)}"
+  end
+
+  def rate_limit
+    RATE_LIMITS[rate_limit_tier] || RATE_LIMITS['standard']
+  end
+
+  def has_scope?(scope)
+    return true if scopes.blank? # Legacy keys without scopes have full access
+    scopes.include?(scope.to_s)
   end
 
   def revoke!
     update!(active: false)
   end
 
-  def self.generate_secure_token
-    "tp_#{SecureRandom.urlsafe_base64(48)}"
+  def expired?
+    expires_at.present? && expires_at <= Time.current
+  end
+
+  # Returns the raw key only during creation, never again
+  def display_key
+    @raw_key if @raw_key_created
   end
 
   private
 
-  def generate_token
-    self.token ||= self.class.generate_secure_token
+  def generate_key_and_digest
+    return if key_digest.present?
+
+    raw_key = self.class.generate_unique_token
+    @raw_key = raw_key
+    @raw_key_created = true
+
+    self.key_digest = Digest::SHA256.hexdigest(raw_key)
+    self.prefix = raw_key[0..7]
   end
 end

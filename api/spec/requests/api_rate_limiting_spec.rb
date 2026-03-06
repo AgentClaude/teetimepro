@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "API Rate Limiting", type: :request do
   let(:organization) { create(:organization) }
   let(:api_key) { create(:api_key, organization: organization) }
-  let(:headers) { { "Authorization" => "Bearer #{api_key.token}" } }
+  let(:headers) { { "Authorization" => "Bearer #{api_key.display_key}" } }
 
   before do
     # Enable rack-attack for testing

@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "API Integration", type: :request do
   let(:organization) { create(:organization) }
   let(:api_key) { create(:api_key, organization: organization) }
-  let(:headers) { { "Authorization" => "Bearer #{api_key.token}", "Content-Type" => "application/json" } }
+  let(:headers) { { "Authorization" => "Bearer #{api_key.display_key}", "Content-Type" => "application/json" } }
 
   def json_response
     JSON.parse(response.body)

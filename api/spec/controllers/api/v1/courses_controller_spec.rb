@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Api::V1::CoursesController, type: :controller do
   let(:organization) { create(:organization) }
   let(:api_key) { create(:api_key, organization: organization) }
-  let(:headers) { { "Authorization" => "Bearer #{api_key.token}" } }
+  let(:headers) { { "Authorization" => "Bearer #{api_key.display_key}" } }
 
   def json_response
     JSON.parse(response.body)
