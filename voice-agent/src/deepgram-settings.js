@@ -132,14 +132,14 @@ function buildFunctions(courseId) {
     {
       name: "search_tee_times",
       description:
-        "Search for available tee times on a specific date. Returns a list of available time slots with prices.",
+        "Search for available tee times. Supports single date or multi-day range (e.g., 'this weekend' uses date + date_end). Returns available time slots with prices, and suggests alternatives if nothing is found.",
       parameters: {
         type: "object",
         properties: {
           date: {
             type: "string",
             description:
-              "The date to search for tee times in YYYY-MM-DD format.",
+              "The date to search for tee times in YYYY-MM-DD format. For multi-day searches, this is the start date.",
           },
           players: {
             type: "integer",
@@ -149,6 +149,11 @@ function buildFunctions(courseId) {
             type: "string",
             description:
               "Preferred time of day: 'early_morning' (6-8am), 'morning' (7-11am), 'midday' (11am-1pm), 'afternoon' (12-4pm), 'twilight' (3-6pm), or a specific hour like '8' or '14'.",
+          },
+          date_end: {
+            type: "string",
+            description:
+              "Optional end date for multi-day search in YYYY-MM-DD format (e.g., for 'this weekend', date is Saturday and date_end is Sunday).",
           },
         },
         required: ["date", "players"],
