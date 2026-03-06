@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  has_paper_trail ignore: [:encrypted_password, :reset_password_token, :reset_password_sent_at, :remember_created_at, :updated_at]
+
   devise :database_authenticatable, :registerable, :recoverable,
          :rememberable, :validatable, :jwt_authenticatable,
          jwt_revocation_strategy: JwtDenylist

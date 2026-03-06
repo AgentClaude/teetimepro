@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { TeeSheetPage } from "./pages/TeeSheetPage";
 import { BookingsPage } from "./pages/BookingsPage";
+import { BookingDetailPage } from "./pages/BookingDetailPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/tee-sheet" element={<TeeSheetPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
+        <Route path="/bookings/:id" element={<BookingDetailPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_06_230000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_06_235059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -235,6 +235,57 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_230000) do
     t.index ["tee_sheet_id"], name: "index_tee_times_on_tee_sheet_id"
   end
 
+  create_table "tournament_entries", force: :cascade do |t|
+    t.bigint "tournament_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "payment_id"
+    t.integer "status", default: 0, null: false
+    t.string "team_name"
+    t.decimal "handicap_index", precision: 4, scale: 1
+    t.integer "starting_hole"
+    t.time "tee_time"
+    t.json "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["payment_id"], name: "index_tournament_entries_on_payment_id"
+    t.index ["status"], name: "index_tournament_entries_on_status"
+    t.index ["tournament_id", "user_id"], name: "index_tournament_entries_on_tournament_id_and_user_id", unique: true
+    t.index ["tournament_id"], name: "index_tournament_entries_on_tournament_id"
+    t.index ["user_id"], name: "index_tournament_entries_on_user_id"
+  end
+
+  create_table "tournaments", force: :cascade do |t|
+    t.bigint "course_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.integer "format", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.integer "max_participants"
+    t.integer "min_participants", default: 2
+    t.integer "team_size", default: 1
+    t.integer "entry_fee_cents", default: 0
+    t.string "entry_fee_currency", default: "USD"
+    t.integer "holes", default: 18
+    t.boolean "handicap_enabled", default: true
+    t.decimal "max_handicap", precision: 4, scale: 1
+    t.json "rules", default: {}
+    t.json "prize_structure", default: {}
+    t.datetime "registration_opens_at"
+    t.datetime "registration_closes_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id", "start_date"], name: "index_tournaments_on_course_id_and_start_date"
+    t.index ["course_id"], name: "index_tournaments_on_course_id"
+    t.index ["created_by_id"], name: "index_tournaments_on_created_by_id"
+    t.index ["organization_id", "start_date"], name: "index_tournaments_on_organization_id_and_start_date"
+    t.index ["organization_id"], name: "index_tournaments_on_organization_id"
+    t.index ["status"], name: "index_tournaments_on_status"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -257,6 +308,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_230000) do
     t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
+  end
+
+  create_table "versions", force: :cascade do |t|
+    t.string "whodunnit"
+    t.datetime "created_at"
+    t.bigint "item_id", null: false
+    t.string "item_type", null: false
+    t.string "event", null: false
+    t.text "object"
+    t.text "object_changes"
+    t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
   create_table "voice_call_logs", force: :cascade do |t|
@@ -334,6 +396,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_230000) do
   add_foreign_key "sms_messages", "users", on_delete: :cascade
   add_foreign_key "tee_sheets", "courses", on_delete: :cascade
   add_foreign_key "tee_times", "tee_sheets", on_delete: :cascade
+  add_foreign_key "tournament_entries", "payments", on_delete: :nullify
+  add_foreign_key "tournament_entries", "tournaments", on_delete: :cascade
+  add_foreign_key "tournament_entries", "users", on_delete: :cascade
+  add_foreign_key "tournaments", "courses", on_delete: :cascade
+  add_foreign_key "tournaments", "organizations", on_delete: :cascade
+  add_foreign_key "tournaments", "users", column: "created_by_id"
   add_foreign_key "users", "organizations", on_delete: :cascade
   add_foreign_key "voice_call_logs", "courses", on_delete: :nullify
   add_foreign_key "voice_call_logs", "organizations", on_delete: :cascade

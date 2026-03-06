@@ -44,6 +44,7 @@ class TeeTime < ApplicationRecord
   end
 
   def formatted_time
-    starts_at.strftime("%-I:%M %p")
+    tz = course&.timezone || course&.organization&.timezone || "UTC"
+    starts_at.in_time_zone(tz).strftime("%-I:%M %p")
   end
 end

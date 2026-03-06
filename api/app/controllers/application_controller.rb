@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::API
   include Pundit::Authorization
   include OrgScoped
+  include PaperTrail::Rails::Controller
 
   rescue_from Pundit::NotAuthorizedError, with: :not_authorized
   rescue_from ActiveRecord::RecordNotFound, with: :not_found

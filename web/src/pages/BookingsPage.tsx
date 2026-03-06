@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { BookingList } from '../components/booking/BookingList';
 import { useCourse } from '../contexts/CourseContext';
 import { GET_BOOKINGS } from '../graphql/queries';
 
 export function BookingsPage() {
+  const navigate = useNavigate();
   const { selectedCourseId } = useCourse();
   const { data, loading } = useQuery(GET_BOOKINGS, {
     variables: { courseId: selectedCourseId || undefined },
@@ -30,8 +32,8 @@ export function BookingsPage() {
       ) : (
         <BookingList
           bookings={bookings}
-          onViewBooking={(id) => console.log('View:', id)}
-          onCancelBooking={(id) => console.log('Cancel:', id)}
+          onViewBooking={(id) => navigate(`/bookings/${id}`)}
+          onCancelBooking={(id) => navigate(`/bookings/${id}`)}
         />
       )}
     </div>

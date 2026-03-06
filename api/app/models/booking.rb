@@ -1,4 +1,6 @@
 class Booking < ApplicationRecord
+  has_paper_trail ignore: [:updated_at, :created_at]
+
   belongs_to :tee_time
   belongs_to :user
   has_many :booking_players, dependent: :destroy

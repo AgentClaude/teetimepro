@@ -15,6 +15,11 @@ module Types
     field :bookings, [Types::BookingType], null: false
     field :upcoming_bookings, [Types::BookingType], null: false
     field :golfer_profile, Types::GolferProfileType, null: true
+    field :audit_log, [Types::AuditLogType], null: false
+
+    def audit_log
+      object.versions.order(created_at: :desc)
+    end
 
     def upcoming_bookings
       object.bookings.upcoming.includes(tee_time: { tee_sheet: :course })

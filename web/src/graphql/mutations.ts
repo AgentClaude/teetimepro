@@ -138,6 +138,37 @@ export const UPDATE_TEE_TIME = gql`
   }
 `;
 
+export const UPDATE_BOOKING = gql`
+  mutation UpdateBooking(
+    $id: ID!
+    $status: String
+    $playersCount: Int
+    $notes: String
+  ) {
+    updateBooking(
+      id: $id
+      status: $status
+      playersCount: $playersCount
+      notes: $notes
+    ) {
+      booking {
+        id
+        status
+        playersCount
+        notes
+        updatedAt
+        auditLog {
+          id
+          event
+          changedBy
+          changes
+          createdAt
+        }
+      }
+      errors
+    }
+  }
+`;
 
 export const UPDATE_CUSTOMER = gql`
   mutation UpdateCustomer(

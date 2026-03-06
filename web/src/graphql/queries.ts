@@ -129,6 +129,46 @@ export const GET_BOOKINGS = gql`
   }
 `;
 
+export const GET_BOOKING = gql`
+  query GetBooking($id: ID!) {
+    booking(id: $id) {
+      id
+      confirmationCode
+      status
+      playersCount
+      totalCents
+      notes
+      cancellable
+      cancelledAt
+      cancellationReason
+      createdAt
+      updatedAt
+      teeTime {
+        id
+        startsAt
+        formattedTime
+      }
+      user {
+        id
+        fullName
+        email
+        phone
+      }
+      bookingPlayers {
+        id
+        name
+      }
+      auditLog {
+        id
+        event
+        changedBy
+        changes
+        createdAt
+      }
+    }
+  }
+`;
+
 export const GET_AVAILABLE_TEE_TIMES = gql`
   query GetAvailableTeeTimes(
     $courseId: ID!
@@ -226,6 +266,13 @@ export const GET_CUSTOMER = gql`
           startsAt
           formattedTime
         }
+      }
+      auditLog {
+        id
+        event
+        changedBy
+        changes
+        createdAt
       }
     }
   }

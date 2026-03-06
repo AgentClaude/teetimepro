@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { AuditLog } from '../components/AuditLog';
 import { GET_CUSTOMER } from '../graphql/queries';
 import { UPDATE_CUSTOMER } from '../graphql/mutations';
 
@@ -201,6 +202,12 @@ export function CustomerDetailPage() {
                 </table>
               </div>
             )}
+          </Card>
+
+          {/* Audit Log */}
+          <Card className="p-6">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Activity Log</h2>
+            <AuditLog entries={customer.auditLog || []} />
           </Card>
         </>
       )}

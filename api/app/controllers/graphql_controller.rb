@@ -1,5 +1,6 @@
 class GraphqlController < ApplicationController
   before_action :authenticate_user_from_token
+  before_action :set_paper_trail_whodunnit
 
   def execute
     variables = prepare_variables(params[:variables])
