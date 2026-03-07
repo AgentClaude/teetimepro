@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -360,6 +360,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.string "preferred_tee"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "total_rounds", default: 0, null: false
+    t.integer "best_score"
+    t.decimal "average_score", precision: 5, scale: 1
+    t.date "last_played_on"
+    t.datetime "handicap_updated_at"
     t.index ["user_id"], name: "index_golfer_profiles_on_user_id", unique: true
   end
 
@@ -388,6 +393,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["filter_criteria"], name: "index_golfer_segments_on_filter_criteria", using: :gin
     t.index ["organization_id", "name"], name: "index_golfer_segments_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_golfer_segments_on_organization_id"
+  end
+
+  create_table "handicap_revisions", force: :cascade do |t|
+    t.bigint "golfer_profile_id", null: false
+    t.decimal "handicap_index", precision: 4, scale: 1, null: false
+    t.decimal "previous_index", precision: 4, scale: 1
+    t.integer "rounds_used", default: 0, null: false
+    t.date "effective_date", null: false
+    t.string "source", default: "calculated", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["golfer_profile_id", "effective_date"], name: "idx_on_golfer_profile_id_effective_date_e541a980ad"
+    t.index ["golfer_profile_id"], name: "index_handicap_revisions_on_golfer_profile_id"
   end
 
   create_table "inventory_levels", force: :cascade do |t|
@@ -687,6 +706,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["organization_id", "rule_type"], name: "index_pricing_rules_on_organization_id_and_rule_type"
     t.index ["organization_id"], name: "index_pricing_rules_on_organization_id"
     t.index ["priority"], name: "index_pricing_rules_on_priority"
+  end
+
+  create_table "rounds", force: :cascade do |t|
+    t.bigint "golfer_profile_id", null: false
+    t.bigint "course_id"
+    t.string "course_name", null: false
+    t.date "played_on", null: false
+    t.integer "score", null: false
+    t.integer "holes_played", default: 18, null: false
+    t.decimal "course_rating", precision: 4, scale: 1
+    t.integer "slope_rating"
+    t.decimal "differential", precision: 5, scale: 1
+    t.string "tee_color"
+    t.text "notes"
+    t.integer "putts"
+    t.integer "fairways_hit"
+    t.integer "greens_in_regulation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_rounds_on_course_id"
+    t.index ["golfer_profile_id", "played_on"], name: "index_rounds_on_golfer_profile_id_and_played_on"
+    t.index ["golfer_profile_id"], name: "index_rounds_on_golfer_profile_id"
+    t.index ["played_on"], name: "index_rounds_on_played_on"
   end
 
   create_table "sms_campaigns", force: :cascade do |t|
@@ -1056,6 +1098,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
   add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
   add_foreign_key "golfer_segments", "users", column: "created_by_id"
+  add_foreign_key "handicap_revisions", "golfer_profiles", on_delete: :cascade
   add_foreign_key "inventory_levels", "courses"
   add_foreign_key "inventory_levels", "organizations"
   add_foreign_key "inventory_levels", "pos_products"
@@ -1088,6 +1131,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   add_foreign_key "pos_products", "organizations"
   add_foreign_key "pricing_rules", "courses"
   add_foreign_key "pricing_rules", "organizations"
+  add_foreign_key "rounds", "courses", on_delete: :nullify
+  add_foreign_key "rounds", "golfer_profiles", on_delete: :cascade
   add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
   add_foreign_key "sms_campaigns", "users", column: "created_by_id", on_delete: :cascade
   add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade

@@ -416,6 +416,22 @@ module Types
       end
     end
 
+    # Golfer Profiles
+    field :golfer_profile, Types::GolferProfileType, null: true do
+      argument :id, ID, required: false
+      argument :user_id, ID, required: false
+    end
+    def golfer_profile(id: nil, user_id: nil)
+      require_auth!
+      if id
+        GolferProfile.find(id)
+      elsif user_id
+        GolferProfile.find_by!(user_id: user_id)
+      else
+        context[:current_user].golfer_profile
+      end
+    end
+
     # Tournaments
     field :tournaments, [Types::TournamentType], null: false do
       argument :course_id, ID, required: false
