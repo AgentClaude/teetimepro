@@ -18,6 +18,7 @@ import CampaignsPage from "./pages/CampaignsPage";
 import { SegmentsPage } from "./pages/SegmentsPage";
 import { TournamentsPage } from "./pages/TournamentsPage";
 import { TournamentDetailPage } from "./pages/TournamentDetailPage";
+import { PosPage } from "./pages/PosPage";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/voice-analytics" element={<VoiceAnalyticsPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/segments" element={<SegmentsPage />} />
+        <Route path="/pos" element={<PosPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/call-logs/:id" element={<CallLogPage />} />
       </Route>
