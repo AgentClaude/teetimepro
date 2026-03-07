@@ -10,6 +10,7 @@ import {
   MegaphoneIcon,
   BellIcon,
   FunnelIcon,
+  PhoneIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Segments', href: '/segments', icon: FunnelIcon },
   { name: 'Campaigns', href: '/campaigns', icon: MegaphoneIcon },
   { name: 'Reports', href: '/reports', icon: ChartBarIcon },
+  { name: 'Voice Analytics', href: '/voice-analytics', icon: PhoneIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 

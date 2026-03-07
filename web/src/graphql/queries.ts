@@ -578,3 +578,72 @@ export const PREVIEW_GOLFER_SEGMENT = gql`
     golferSegmentPreview(filterCriteria: $filterCriteria)
   }
 `;
+
+export const GET_VOICE_ANALYTICS = gql`
+  query GetVoiceAnalytics(
+    $courseId: ID
+    $startDate: ISO8601Date!
+    $endDate: ISO8601Date!
+  ) {
+    voiceAnalytics(
+      courseId: $courseId
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      totalCalls
+      completedCalls
+      errorRate
+      averageDurationSeconds
+      bookingConversionRate
+      callsByChannel {
+        channel
+        count
+      }
+      callsByDay {
+        date
+        count
+      }
+      topCallers {
+        phone
+        name
+        totalCalls
+        averageDurationSeconds
+      }
+    }
+  }
+`;
+
+export const GET_VOICE_CALL_LOGS_PAGINATED = gql`
+  query GetVoiceCallLogsPaginated(
+    $courseId: ID
+    $channel: String
+    $status: String
+    $startDate: ISO8601Date
+    $endDate: ISO8601Date
+    $limit: Int
+    $offset: Int
+  ) {
+    voiceCallLogs(
+      courseId: $courseId
+      channel: $channel
+      status: $status
+      startDate: $startDate
+      endDate: $endDate
+      limit: $limit
+      offset: $offset
+    ) {
+      id
+      courseId
+      courseName
+      callSid
+      channel
+      callerPhone
+      callerName
+      status
+      durationSeconds
+      startedAt
+      endedAt
+      createdAt
+    }
+  }
+`;
