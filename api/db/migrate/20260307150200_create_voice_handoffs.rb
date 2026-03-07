@@ -4,7 +4,7 @@ class CreateVoiceHandoffs < ActiveRecord::Migration[7.1]
       t.references :organization, null: false, foreign_key: true, type: :bigint, index: true
       t.references :voice_call_log, null: true, foreign_key: true, type: :bigint, index: true
       
-      t.string :call_sid, null: false, index: true
+      t.string :call_sid, null: false
       t.string :caller_phone, null: false
       t.string :caller_name
       t.string :reason, null: false

@@ -28,6 +28,6 @@ class TournamentPrize < ApplicationRecord
   end
 
   def amount
-    Money.new(amount_cents, tournament.organization.currency || 'USD')
+    Money.new(amount_cents, 'USD')
   end
 end
