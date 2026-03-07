@@ -50,9 +50,4 @@ FactoryBot.define do
     stripe_payment_intent_id { "pi_#{SecureRandom.hex(12)}" }
   end
 
-  factory :golfer_profile do
-    user
-    handicap_index { rand(0.0..36.0).round(1) }
   end
-
-end

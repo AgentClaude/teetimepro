@@ -101,5 +101,9 @@ module Types
     # Waitlist
     field :join_waitlist, mutation: Mutations::JoinWaitlist
     field :leave_waitlist, mutation: Mutations::LeaveWaitlist
+
+    # Golfer profiles
+    field :record_round, mutation: Mutations::RecordRound
+    field :update_handicap, mutation: Mutations::UpdateHandicap
   end
 end
