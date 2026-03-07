@@ -35,7 +35,7 @@ services:
         nginx -g 'daemon off;'
       "
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost/nginx-health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/nginx-health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -100,7 +100,8 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - FORCE_SSL=true
-    ports: []  # Only accessible via nginx
+    ports:
+      - "127.0.0.1:3007:3000"  # Host nginx proxies /graphql, /api, /health
     command: >
       sh -c "
         rm -f /app/tmp/pids/server.pid &&
@@ -127,7 +128,7 @@ services:
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     command: bundle exec sidekiq -c 10 -q default -q mailers
     healthcheck:
-      test: ["CMD-SHELL", "bundle exec ruby -e 'require "sidekiq/api"; Sidekiq::ProcessSet.new.size > 0 || exit(1)' || exit 0"]
+      test: ["CMD-SHELL", "ps aux | grep sidekiq | grep -v grep || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -147,9 +148,10 @@ services:
           memory: 512M
 
   web:
-    ports: []  # Served via nginx
+    ports:
+      - "127.0.0.1:3008:3000"  # Host nginx proxies / (frontend)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3002/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 5
