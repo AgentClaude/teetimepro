@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useMutation } from '@apollo/client';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { StripeProvider } from '../payment/StripeProvider';
+import { PaymentForm } from '../payment/PaymentForm';
+import { CREATE_PAYMENT_INTENT } from '../../graphql/mutations';
 
 const bookingSchema = z.object({
   playersCount: z.number().min(1).max(5),
@@ -26,11 +31,21 @@ interface BookingFormProps {
   loading?: boolean;
 }
 
+enum BookingStep {
+  DETAILS = 'details',
+  PAYMENT = 'payment',
+}
+
 export function BookingForm({ teeTime, onSubmit, onCancel, loading }: BookingFormProps) {
+  const [currentStep, setCurrentStep] = useState<BookingStep>(BookingStep.DETAILS);
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [paymentError, setPaymentError] = useState<string>('');
+
   const {
     register,
     handleSubmit,
     watch,
+    getValues,
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -41,11 +56,115 @@ export function BookingForm({ teeTime, onSubmit, onCancel, loading }: BookingFor
     },
   });
 
+  const [createPaymentIntent, { loading: creatingIntent }] = useMutation(CREATE_PAYMENT_INTENT, {
+    onCompleted: (data) => {
+      if (data.createPaymentIntent.clientSecret) {
+        setClientSecret(data.createPaymentIntent.clientSecret);
+        setCurrentStep(BookingStep.PAYMENT);
+      } else {
+        setPaymentError('Failed to create payment intent. Please try again.');
+      }
+    },
+    onError: (error) => {
+      setPaymentError(error.message);
+    },
+  });
+
   const playersCount = watch('playersCount');
-  const totalPrice = (teeTime.priceCents * (playersCount || 1)) / 100;
+  const totalPriceCents = teeTime.priceCents * (playersCount || 1);
+  const totalPrice = totalPriceCents / 100;
+
+  const handleDetailsSubmit = (data: BookingFormData) => {
+    setPaymentError('');
+    createPaymentIntent({
+      variables: {
+        teeTimeId: teeTime.id,
+        playersCount: data.playersCount,
+      },
+    });
+  };
+
+  const handlePaymentSuccess = (paymentMethodId: string) => {
+    const formData = getValues();
+    onSubmit({
+      ...formData,
+      paymentMethodId,
+    });
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentError(error);
+  };
+
+  const handleBackToDetails = () => {
+    setCurrentStep(BookingStep.DETAILS);
+    setClientSecret('');
+    setPaymentError('');
+  };
+
+  if (currentStep === BookingStep.PAYMENT && clientSecret) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleBackToDetails}
+              className="p-2"
+            >
+              ← Back
+            </Button>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Complete Payment</h3>
+              <p className="text-sm text-gray-500">
+                {teeTime.courseName} · {new Date(teeTime.startsAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Booking Summary */}
+        <div className="rounded-lg bg-gray-50 p-4">
+          <h4 className="font-medium text-gray-900 mb-2">Booking Summary</h4>
+          <div className="space-y-1 text-sm text-gray-600">
+            <div className="flex justify-between">
+              <span>Players:</span>
+              <span>{playersCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Price per player:</span>
+              <span>${(teeTime.priceCents / 100).toFixed(2)}</span>
+            </div>
+            <hr className="my-2" />
+            <div className="flex justify-between font-medium text-gray-900">
+              <span>Total:</span>
+              <span>${totalPrice.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {paymentError && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+            <p className="text-sm text-red-800">{paymentError}</p>
+          </div>
+        )}
+
+        <StripeProvider clientSecret={clientSecret}>
+          <PaymentForm
+            clientSecret={clientSecret}
+            amount={totalPriceCents}
+            onSuccess={handlePaymentSuccess}
+            onError={handlePaymentError}
+            loading={loading}
+          />
+        </StripeProvider>
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleDetailsSubmit)} className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-900">Book Tee Time</h3>
         <p className="mt-1 text-sm text-gray-500">
@@ -107,10 +226,16 @@ export function BookingForm({ teeTime, onSubmit, onCancel, loading }: BookingFor
         </div>
       </div>
 
+      {paymentError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+          <p className="text-sm text-red-800">{paymentError}</p>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-3">
-        <Button type="submit" variant="primary" className="flex-1" disabled={loading}>
-          {loading ? 'Booking...' : `Confirm Booking · $${totalPrice.toFixed(2)}`}
+        <Button type="submit" variant="primary" className="flex-1" disabled={creatingIntent}>
+          {creatingIntent ? 'Setting up payment...' : 'Continue to Payment'}
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
