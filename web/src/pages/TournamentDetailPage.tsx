@@ -77,7 +77,7 @@ const getStatusBadgeVariant = (status: string) => {
     case 'COMPLETED':
       return 'default';
     case 'CANCELLED':
-      return 'error';
+      return 'danger';
     default:
       return 'default';
   }
@@ -187,7 +187,7 @@ export function TournamentDetailPage() {
     entry => entry.status === 'WAITLISTED'
   );
 
-  const handleRegister = async (formData: any) => {
+  const handleRegister = async (formData: RegistrationFormData) => {
     try {
       await registerForTournament({
         variables: {
@@ -213,7 +213,7 @@ export function TournamentDetailPage() {
     }
   };
 
-  const handleUpdateTournament = async (formData: any) => {
+  const handleUpdateTournament = async (formData: EditTournamentFormData) => {
     try {
       await updateTournament({
         variables: {
@@ -523,11 +523,16 @@ export function TournamentDetailPage() {
 }
 
 // Registration Modal Component
+interface RegistrationFormData {
+  handicapIndex: string;
+  teamName: string;
+}
+
 interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   tournament: Tournament;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: RegistrationFormData) => void;
   loading: boolean;
 }
 
@@ -602,11 +607,18 @@ function RegistrationModal({ isOpen, onClose, tournament, onSubmit, loading }: R
 }
 
 // Edit Tournament Modal Component
+interface EditTournamentFormData {
+  name: string;
+  description: string;
+  maxParticipants: string;
+  status: string;
+}
+
 interface EditTournamentModalProps {
   isOpen: boolean;
   onClose: () => void;
   tournament: Tournament;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: EditTournamentFormData) => void;
 }
 
 function EditTournamentModal({ isOpen, onClose, tournament, onSubmit }: EditTournamentModalProps) {
@@ -621,8 +633,8 @@ function EditTournamentModal({ isOpen, onClose, tournament, onSubmit }: EditTour
     e.preventDefault();
     onSubmit({
       name: formData.name,
-      description: formData.description || undefined,
-      maxParticipants: formData.maxParticipants || undefined,
+      description: formData.description || '',
+      maxParticipants: formData.maxParticipants || '',
       status: formData.status,
     });
   };

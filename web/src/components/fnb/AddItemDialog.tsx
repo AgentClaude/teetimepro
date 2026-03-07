@@ -84,7 +84,7 @@ export const AddItemDialog: React.FC<AddItemDialogProps> = ({
     onClose();
   };
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

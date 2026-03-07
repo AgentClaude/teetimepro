@@ -7,7 +7,7 @@ import { PricingRulesList } from './PricingRulesList';
 import { GET_PRICING_RULES } from '../../graphql/queries';
 import { DELETE_PRICING_RULE } from '../../graphql/mutations';
 import { useCourse } from '../../contexts/CourseContext';
-import type { PricingRule, PricingRuleFormData } from '../../types';
+import type { PricingRule } from '../../types';
 
 export function PricingRulesSection() {
   const { selectedCourseId } = useCourse();
