@@ -591,6 +591,30 @@ module Types
       org.pricing_rules.includes(:course).find(id)
     end
 
+    # Utilization heat map
+    field :utilization_heat_map, Types::UtilizationHeatMapType, null: false do
+      argument :course_id, ID, required: false
+      argument :start_date, GraphQL::Types::ISO8601Date, required: true
+      argument :end_date, GraphQL::Types::ISO8601Date, required: true
+    end
+    def utilization_heat_map(course_id: nil, start_date:, end_date:)
+      org = require_auth!
+      require_role!(:manager)
+
+      result = Dashboard::UtilizationHeatMapService.call(
+        organization: org,
+        course_id: course_id,
+        start_date: start_date,
+        end_date: end_date
+      )
+
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
     # Marketplace connections
     field :marketplace_connections, [Types::MarketplaceConnectionType], null: false do
       argument :course_id, ID, required: false
