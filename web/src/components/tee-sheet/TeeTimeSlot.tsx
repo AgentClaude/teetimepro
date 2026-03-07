@@ -9,6 +9,16 @@ export type TeeTimeStatus =
   | 'BLOCKED' | 'blocked'
   | 'MAINTENANCE' | 'maintenance';
 
+export interface TeeTimeBooking {
+  id: string;
+  confirmationCode: string;
+  playersCount: number;
+  status: string;
+  hasTurnOrder: boolean;
+  user: { fullName: string };
+  bookingPlayers: { name: string }[];
+}
+
 export interface TeeTimeData {
   id: string;
   startsAt: string;
@@ -16,18 +26,14 @@ export interface TeeTimeData {
   bookedPlayers: number;
   status: TeeTimeStatus;
   priceCents: number | null;
-  bookings?: {
-    id: string;
-    confirmationCode: string;
-    playersCount: number;
-    user: { fullName: string };
-  }[];
+  bookings?: TeeTimeBooking[];
 }
 
 interface TeeTimeSlotProps {
   teeTime: TeeTimeData;
   onBook?: () => void;
   onEdit?: () => void;
+  onOrderFood?: (bookingId: string, golferName: string) => void;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }> = {
@@ -43,7 +49,7 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'success' | 'warni
   maintenance: { label: 'Maintenance', variant: 'default' },
 };
 
-export function TeeTimeSlot({ teeTime, onBook, onEdit }: TeeTimeSlotProps) {
+export function TeeTimeSlot({ teeTime, onBook, onEdit, onOrderFood }: TeeTimeSlotProps) {
   const time = format(parseISO(teeTime.startsAt), 'h:mm a');
   const availableSpots = teeTime.maxPlayers - teeTime.bookedPlayers;
   const statusConfig = STATUS_CONFIG[teeTime.status] ?? { label: teeTime.status, variant: 'default' as const };
@@ -86,11 +92,33 @@ export function TeeTimeSlot({ teeTime, onBook, onEdit }: TeeTimeSlotProps) {
         {/* Booked player names */}
         {teeTime.bookings && teeTime.bookings.length > 0 && (
           <div className="mt-1 space-y-0.5">
-            {teeTime.bookings.map((booking) => (
-              <div key={booking.id} className="text-xs text-gray-600">
-                {booking.user.fullName} ({booking.playersCount}p) · {booking.confirmationCode}
-              </div>
-            ))}
+            {teeTime.bookings.map((booking) => {
+              const golferName = booking.bookingPlayers?.[0]?.name ?? booking.user.fullName;
+              const canOrderFood = booking.status === 'confirmed' || booking.status === 'checked_in';
+              return (
+                <div key={booking.id} className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>
+                    {booking.user.fullName} ({booking.playersCount}p) · {booking.confirmationCode}
+                  </span>
+                  {booking.hasTurnOrder && (
+                    <span className="inline-flex items-center rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-medium text-orange-700">
+                      🍔 ordered
+                    </span>
+                  )}
+                  {canOrderFood && !booking.hasTurnOrder && onOrderFood && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOrderFood(booking.id, golferName);
+                      }}
+                      className="inline-flex items-center rounded bg-orange-50 px-1.5 py-0.5 text-[10px] font-medium text-orange-600 hover:bg-orange-100"
+                    >
+                      🍔 Order food
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

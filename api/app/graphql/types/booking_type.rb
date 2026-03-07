@@ -15,10 +15,21 @@ module Types
     field :tee_time, Types::TeeTimeType, null: false
     field :user, Types::UserType, null: false
     field :booking_players, [Types::BookingPlayerType], null: false
+    field :fnb_tabs, [Types::FnbTabType], null: false, description: "F&B tabs linked to this booking"
+    field :turn_order, Types::FnbTabType, null: true, description: "Active turn order for this booking"
+    field :has_turn_order, Boolean, null: false
     field :audit_log, [Types::AuditLogType], null: false
 
     def cancellable
       object.cancellable?
+    end
+
+    def turn_order
+      object.fnb_tabs.turn_orders.open_tabs.first
+    end
+
+    def has_turn_order
+      object.fnb_tabs.turn_orders.open_tabs.exists?
     end
 
     def audit_log

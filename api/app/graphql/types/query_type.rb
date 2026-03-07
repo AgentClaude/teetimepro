@@ -490,6 +490,23 @@ module Types
       org.pos_products.find_by(id: id)
     end
 
+    # Turn orders
+    field :turn_orders, [Types::FnbTabType], null: false do
+      argument :date, GraphQL::Types::ISO8601Date, required: false,
+               description: 'Filter by tee sheet date (defaults to today)'
+      argument :status, String, required: false, default_value: 'open'
+    end
+    def turn_orders(date: nil, status: 'open')
+      org = require_auth!
+      target_date = date || Date.current
+
+      scope = org.fnb_tabs.turn_orders
+                 .joins(booking: { tee_time: :tee_sheet })
+                 .where(tee_sheets: { date: target_date })
+      scope = scope.where(status: status) if status.present?
+      scope.order(created_at: :desc)
+    end
+
     # Pricing rules
     field :pricing_rules, [Types::PricingRuleType], null: false do
       argument :course_id, ID, required: false

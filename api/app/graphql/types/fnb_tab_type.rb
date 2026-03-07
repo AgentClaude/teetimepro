@@ -12,7 +12,13 @@ module Types
     field :organization, Types::OrganizationType, null: false
     field :course, Types::CourseType, null: false
     field :user, Types::UserType, null: false, description: "Server who opened the tab"
+    field :booking, Types::BookingType, null: true, description: "Linked booking (for turn orders)"
     field :fnb_tab_items, [Types::FnbTabItemType], null: false
+
+    # Turn order fields
+    field :turn_order, Boolean, null: false
+    field :delivery_hole, Integer, null: true
+    field :delivery_notes, String, null: true
 
     # Computed fields
     field :item_count, Integer, null: false
