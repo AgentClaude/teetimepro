@@ -309,6 +309,32 @@ export interface MarketplaceConnection {
   updatedAt: string;
 }
 
+// Utilization Heat Map
+export interface UtilizationHeatMapCell {
+  date: string;
+  hour: number;
+  utilizationPercentage: number;
+  bookedPlayers: number;
+  totalCapacity: number;
+  slotCount: number;
+}
+
+export interface UtilizationHeatMapSummary {
+  overallUtilization: number;
+  totalBookedPlayers: number;
+  totalCapacity: number;
+  peakHour: number | null;
+  peakHourUtilization: number;
+  peakDayOfWeek: string | null;
+  peakDayUtilization: number;
+  dateRangeDays: number;
+}
+
+export interface UtilizationHeatMap {
+  cells: UtilizationHeatMapCell[];
+  summary: UtilizationHeatMapSummary;
+}
+
 export interface MarketplaceListing {
   id: string;
   status: MarketplaceListingStatus;
