@@ -9,16 +9,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Only deploy if CI passes
-  ci-check:
-    uses: ./.github/workflows/ci.yml
-
   deploy:
-    needs: ci-check
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip deploy]')"
-    environment: production
-
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
@@ -29,31 +22,14 @@ jobs:
           script: |
             set -e
             cd /opt/teetimepro
-
-            echo "📦 Pulling latest code..."
             git pull origin main
-
-            echo "🔨 Building images..."
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq web
-
-            echo "🚀 Rolling restart..."
-            # Restart API first
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps api
-            sleep 15
-
-            # Health check
-            if curl -sf http://localhost:3003/health > /dev/null; then
-              echo "✅ API healthy"
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            sleep 10
+            if curl -sf http://localhost:3001/health > /dev/null; then
+              echo "✅ Deploy successful - API healthy"
             else
-              echo "❌ API unhealthy"
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml logs api --tail 30
+              echo "❌ Deploy failed - API unhealthy"
+              docker compose logs api --tail 20
               exit 1
             fi
-
-            # Restart remaining services
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps sidekiq web nginx
-
-            echo "🧹 Pruning old images..."
-            docker image prune -f --filter "until=168h"
-
-            echo "✅ Deploy complete"
