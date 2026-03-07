@@ -31,6 +31,7 @@ module Types
     field :registration_closes_at, GraphQL::Types::ISO8601DateTime, null: true
 
     field :tournament_entries, [Types::TournamentEntryType], null: false
+    field :tournament_rounds, [Types::TournamentRoundType], null: false
     field :days, Integer, null: false
 
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -46,6 +47,10 @@ module Types
 
     def tournament_entries
       object.tournament_entries.active.includes(:user)
+    end
+
+    def tournament_rounds
+      object.tournament_rounds.chronological
     end
   end
 end

@@ -278,7 +278,43 @@ module Types
     end
     def tournament(id:)
       org = require_auth!
-      org.tournaments.includes(:tournament_entries, :course, :created_by).find(id)
+      org.tournaments.includes(:tournament_entries, :tournament_rounds, :course, :created_by).find(id)
+    end
+
+    # Tournament Leaderboard
+    field :tournament_leaderboard, Types::LeaderboardType, null: false do
+      description "Get the current leaderboard for a tournament"
+      argument :tournament_id, ID, required: true
+    end
+    def tournament_leaderboard(tournament_id:)
+      org = require_auth!
+      tournament = org.tournaments.find(tournament_id)
+
+      result = Leaderboard::CalculateService.call(tournament: tournament)
+
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
+    # Tournament Scorecard for a specific entry
+    field :tournament_scorecard, [Types::TournamentScoreType], null: false do
+      description "Get hole-by-hole scores for a tournament entry"
+      argument :tournament_entry_id, ID, required: true
+      argument :round_number, Integer, required: false
+    end
+    def tournament_scorecard(tournament_entry_id:, round_number: nil)
+      org = require_auth!
+      entry = TournamentEntry.joins(:tournament).where(tournaments: { organization_id: org.id }).find(tournament_entry_id)
+
+      scope = entry.tournament_scores.includes(:tournament_round).by_hole
+      if round_number
+        round = entry.tournament.tournament_rounds.find_by!(round_number: round_number)
+        scope = scope.for_round(round)
+      end
+      scope
     end
 
     # Reports summary

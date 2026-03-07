@@ -3,6 +3,7 @@ class Tournament < ApplicationRecord
   belongs_to :organization
   belongs_to :created_by, class_name: "User"
   has_many :tournament_entries, dependent: :destroy
+  has_many :tournament_rounds, dependent: :destroy
   has_many :participants, through: :tournament_entries, source: :user
 
   enum :format, { stroke: 0, match_play: 1, scramble: 2, best_ball: 3, stableford: 4 }
