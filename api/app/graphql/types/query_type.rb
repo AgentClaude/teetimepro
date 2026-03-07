@@ -826,5 +826,85 @@ module Types
       org = require_auth!
       CallRecording.for_organization(org).includes(:call_transcriptions, :voice_call_log).find(id)
     end
+
+    # Loyalty Program
+    field :loyalty_program, Types::LoyaltyProgramType, null: true
+    def loyalty_program
+      org = require_auth!
+      org.loyalty_programs.active.first
+    end
+
+    # Current user's loyalty account
+    field :loyalty_account, Types::LoyaltyAccountType, null: true
+    def loyalty_account
+      require_auth!
+      current_user.loyalty_account
+    end
+
+    # Loyalty rewards
+    field :loyalty_rewards, [Types::LoyaltyRewardType], null: false do
+      argument :reward_type, Types::LoyaltyRewardTypeEnum, required: false
+      argument :affordable_only, Boolean, required: false
+      argument :active_only, Boolean, required: false, default_value: true
+    end
+    def loyalty_rewards(reward_type: nil, affordable_only: false, active_only: true)
+      org = require_auth!
+      scope = org.loyalty_rewards.order(:points_cost)
+      scope = scope.active if active_only
+      scope = scope.by_type(reward_type) if reward_type.present?
+      
+      if affordable_only && current_user&.loyalty_account
+        scope = scope.affordable_for(current_user.loyalty_account.points_balance)
+      end
+      
+      scope
+    end
+
+    # Loyalty transactions
+    field :loyalty_transactions, [Types::LoyaltyTransactionType], null: false do
+      argument :user_id, ID, required: false
+      argument :transaction_type, String, required: false
+      argument :limit, Integer, required: false, default_value: 50
+    end
+    def loyalty_transactions(user_id: nil, transaction_type: nil, limit: 50)
+      org = require_auth!
+      
+      if user_id.present?
+        # Manager can view other users' transactions
+        require_role!(:manager)
+        account = org.loyalty_accounts.where(user_id: user_id).first
+        return [] unless account
+      else
+        # Regular users see their own transactions
+        account = current_user.loyalty_account
+        return [] unless account
+      end
+      
+      scope = account.loyalty_transactions.recent.includes(:source)
+      scope = scope.by_type(transaction_type) if transaction_type.present?
+      scope.limit([limit, 100].min)
+    end
+
+    # Loyalty redemptions (admin view)
+    field :loyalty_redemptions, [Types::LoyaltyRedemptionType], null: false do
+      argument :status, String, required: false
+      argument :reward_id, ID, required: false
+      argument :user_id, ID, required: false
+      argument :limit, Integer, required: false, default_value: 50
+    end
+    def loyalty_redemptions(status: nil, reward_id: nil, user_id: nil, limit: 50)
+      org = require_auth!
+      require_role!(:staff) # Staff and above can view redemptions
+      
+      scope = LoyaltyRedemption.joins(:loyalty_account)
+                               .where(loyalty_accounts: { organization_id: org.id })
+                               .includes(:loyalty_account, :loyalty_reward, :booking)
+                               .order(created_at: :desc)
+      
+      scope = scope.where(status: status) if status.present?
+      scope = scope.where(loyalty_reward_id: reward_id) if reward_id.present?
+      scope = scope.where(loyalty_accounts: { user_id: user_id }) if user_id.present?
+      scope.limit([limit, 100].min)
+    end
   end
 end

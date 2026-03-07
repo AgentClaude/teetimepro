@@ -17,6 +17,9 @@ class Organization < ApplicationRecord
   has_many :marketplace_connections, dependent: :destroy
   has_many :call_recordings, dependent: :destroy
   has_many :call_transcriptions, dependent: :destroy
+  has_many :loyalty_programs, dependent: :destroy
+  has_many :loyalty_accounts, dependent: :destroy
+  has_many :loyalty_rewards, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
