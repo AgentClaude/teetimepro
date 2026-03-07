@@ -2,6 +2,7 @@ class TournamentEntry < ApplicationRecord
   belongs_to :tournament
   belongs_to :user
   belongs_to :payment, optional: true
+  has_many :tournament_scores, dependent: :destroy
 
   enum :status, { registered: 0, confirmed: 1, withdrawn: 2, disqualified: 3 }
 

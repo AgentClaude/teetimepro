@@ -25,6 +25,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
+import { Leaderboard } from '../components/tournament';
 
 interface Tournament {
   id: string;
@@ -368,6 +369,15 @@ export function TournamentDetailPage() {
               )}
             </div>
           </Card>
+
+          {/* Leaderboard — shown when tournament is in progress or completed */}
+          {(tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') && (
+            <Leaderboard
+              tournamentId={tournament.id}
+              tournamentName={tournament.name}
+              realTime={tournament.status === 'IN_PROGRESS'}
+            />
+          )}
 
           {/* Participants */}
           <Card>

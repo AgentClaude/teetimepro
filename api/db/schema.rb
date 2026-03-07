@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_130000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -514,6 +514,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_130000) do
     t.index ["user_id"], name: "index_tournament_entries_on_user_id"
   end
 
+  create_table "tournament_rounds", force: :cascade do |t|
+    t.bigint "tournament_id", null: false
+    t.integer "round_number", default: 1, null: false
+    t.date "play_date", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tournament_id", "round_number"], name: "index_tournament_rounds_on_tournament_id_and_round_number", unique: true
+    t.index ["tournament_id"], name: "index_tournament_rounds_on_tournament_id"
+  end
+
+  create_table "tournament_scores", force: :cascade do |t|
+    t.bigint "tournament_round_id", null: false
+    t.bigint "tournament_entry_id", null: false
+    t.integer "hole_number", null: false
+    t.integer "strokes", null: false
+    t.integer "par", null: false
+    t.integer "putts"
+    t.boolean "fairway_hit"
+    t.boolean "green_in_regulation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tournament_entry_id"], name: "index_tournament_scores_on_tournament_entry_id"
+    t.index ["tournament_round_id", "tournament_entry_id", "hole_number"], name: "idx_scores_on_round_entry_hole", unique: true
+    t.index ["tournament_round_id"], name: "index_tournament_scores_on_tournament_round_id"
+  end
+
   create_table "tournaments", force: :cascade do |t|
     t.bigint "course_id", null: false
     t.bigint "organization_id", null: false
@@ -692,6 +719,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_130000) do
   add_foreign_key "tournament_entries", "payments", on_delete: :nullify
   add_foreign_key "tournament_entries", "tournaments", on_delete: :cascade
   add_foreign_key "tournament_entries", "users", on_delete: :cascade
+  add_foreign_key "tournament_rounds", "tournaments"
+  add_foreign_key "tournament_scores", "tournament_entries"
+  add_foreign_key "tournament_scores", "tournament_rounds"
   add_foreign_key "tournaments", "courses", on_delete: :cascade
   add_foreign_key "tournaments", "organizations", on_delete: :cascade
   add_foreign_key "tournaments", "users", column: "created_by_id"
