@@ -1,6 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { MarketplaceListingsTable } from "./MarketplaceListingsTable";
-import type { MarketplaceListing } from "../../types";
+import type { MarketplaceListing, TeeTime } from "../../types";
+
+const makeMockTeeTime = (id: string, startsAt: string): TeeTime => ({
+  id,
+  startsAt,
+  formattedTime: new Date(startsAt).toLocaleTimeString(),
+  status: "available",
+  maxPlayers: 4,
+  bookedPlayers: 0,
+  availableSpots: 4,
+  priceCents: 7500,
+  notes: null,
+  bookings: [],
+});
 
 const mockListings: MarketplaceListing[] = [
   {
@@ -15,7 +28,7 @@ const mockListings: MarketplaceListing[] = [
     netRevenueCents: 5737,
     listedAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 86400000).toISOString(),
-    teeTime: { id: "1", startsAt: new Date(Date.now() + 86400000).toISOString() } as any,
+    teeTime: makeMockTeeTime("1", new Date(Date.now() + 86400000).toISOString()),
     providerLabel: "GolfNow",
     createdAt: new Date().toISOString(),
   },
@@ -31,7 +44,7 @@ const mockListings: MarketplaceListing[] = [
     netRevenueCents: 7225,
     listedAt: new Date(Date.now() - 3600000).toISOString(),
     expiresAt: new Date(Date.now() + 172800000).toISOString(),
-    teeTime: { id: "2", startsAt: new Date(Date.now() + 172800000).toISOString() } as any,
+    teeTime: makeMockTeeTime("2", new Date(Date.now() + 172800000).toISOString()),
     providerLabel: "GolfNow",
     createdAt: new Date().toISOString(),
   },
@@ -47,7 +60,7 @@ const mockListings: MarketplaceListing[] = [
     netRevenueCents: 4840,
     listedAt: new Date(Date.now() - 86400000).toISOString(),
     expiresAt: new Date(Date.now() - 3600000).toISOString(),
-    teeTime: { id: "3", startsAt: new Date(Date.now() - 3600000).toISOString() } as any,
+    teeTime: makeMockTeeTime("3", new Date(Date.now() - 3600000).toISOString()),
     providerLabel: "TeeOff",
     createdAt: new Date().toISOString(),
   },

@@ -1,14 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { MarketplaceConnectionCard } from "./MarketplaceConnectionCard";
-import type { MarketplaceConnection } from "../../types";
+import type { MarketplaceConnection, Course } from "../../types";
 
-const mockCourse = {
+const mockCourse: Course = {
   id: "1",
   name: "Pine Valley Golf Club",
   holes: 18,
   intervalMinutes: 8,
-  slug: "pine-valley",
   maxPlayersPerSlot: 4,
+  firstTeeTime: "06:00",
+  lastTeeTime: "18:00",
+  weekdayRateCents: 15000,
+  weekendRateCents: 20000,
+  twilightRateCents: 10000,
+  address: null,
+  phone: null,
+  voiceConfig: {},
 };
 
 const baseConnection: MarketplaceConnection = {
@@ -35,7 +42,7 @@ const baseConnection: MarketplaceConnection = {
   },
   lastSyncedAt: new Date().toISOString(),
   lastError: null,
-  course: mockCourse as any,
+  course: mockCourse,
   activeListingsCount: 24,
   totalListingsCount: 156,
   createdAt: "2026-01-15T00:00:00Z",
