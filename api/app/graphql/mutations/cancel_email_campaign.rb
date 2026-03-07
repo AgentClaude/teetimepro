@@ -13,8 +13,7 @@ module Mutations
 
       campaign = org.email_campaigns.find(id)
 
-      # Reuse the existing cancel campaign service
-      result = Campaigns::CancelCampaignService.call(campaign: campaign)
+      result = Campaigns::CancelEmailCampaignService.call(campaign: campaign)
 
       if result.success?
         { email_campaign: result.data[:campaign], errors: [] }

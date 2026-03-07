@@ -36,7 +36,7 @@ class EmailCampaign < ApplicationRecord
   scope :automated, -> { where(is_automated: true) }
   scope :due_for_automation, -> do
     automated.where(status: :completed)
-      .where("completed_at + INTERVAL recurrence_interval_days DAY <= ?", Time.current)
+      .where("completed_at + (recurrence_interval_days * INTERVAL '1 day') <= ?", Time.current)
   end
 
   def progress_percentage

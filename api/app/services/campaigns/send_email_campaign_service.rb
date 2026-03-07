@@ -95,7 +95,7 @@ module Campaigns
       campaign.reload
       campaign.update!(
         sent_count: campaign.email_messages.successful.count,
-        failed_count: campaign.email_messages.failed.count
+        failed_count: campaign.email_messages.unsuccessful.count
       )
     end
   end

@@ -209,7 +209,7 @@ export const Loading: Story = {
   ],
 };
 
-export const Error: Story = {
+export const ErrorState: Story = {
   decorators: [
     (Story) => (
       <MockedProvider mocks={[errorMock]}>

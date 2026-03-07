@@ -19,13 +19,15 @@ class EmailMessage < ApplicationRecord
 
   scope :by_campaign, ->(campaign) { where(email_campaign: campaign) }
   scope :successful, -> { where(status: [:sent, :delivered, :opened, :clicked]) }
-  scope :failed, -> { where(status: [:bounced, :failed]) }
+  scope :unsuccessful, -> { where(status: [:bounced, :failed]) }
 
-  def delivered?
+  # Check if the message has been successfully delivered (includes opened/clicked)
+  def delivery_confirmed?
     %w[delivered opened clicked].include?(status)
   end
 
-  def failed?
+  # Check if the message encountered any error (bounced or failed)
+  def errored?
     %w[bounced failed].include?(status)
   end
 
@@ -34,7 +36,7 @@ class EmailMessage < ApplicationRecord
   end
 
   def mark_clicked!
-    update!(status: :clicked, clicked_at: Time.current) unless failed?
+    update!(status: :clicked, clicked_at: Time.current) unless errored?
   end
 
   def mark_delivered!

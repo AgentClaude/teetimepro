@@ -62,9 +62,9 @@ RSpec.describe EmailMessage, type: :model do
       end
     end
 
-    describe '.failed' do
-      it 'returns messages with failed statuses' do
-        expect(EmailMessage.failed).to contain_exactly(message3, message4)
+    describe '.unsuccessful' do
+      it 'returns messages with failed/bounced statuses' do
+        expect(EmailMessage.unsuccessful).to contain_exactly(message3, message4)
       end
     end
   end
@@ -72,42 +72,42 @@ RSpec.describe EmailMessage, type: :model do
   describe 'instance methods' do
     let(:message) { create(:email_message, email_campaign: campaign, user: user, status: :sent) }
 
-    describe '#delivered?' do
+    describe '#delivery_confirmed?' do
       it 'returns true for delivered status' do
         message.update!(status: :delivered)
-        expect(message.delivered?).to be true
+        expect(message.delivery_confirmed?).to be true
       end
 
       it 'returns true for opened status' do
         message.update!(status: :opened)
-        expect(message.delivered?).to be true
+        expect(message.delivery_confirmed?).to be true
       end
 
       it 'returns true for clicked status' do
         message.update!(status: :clicked)
-        expect(message.delivered?).to be true
+        expect(message.delivery_confirmed?).to be true
       end
 
       it 'returns false for other statuses' do
         message.update!(status: :pending)
-        expect(message.delivered?).to be false
+        expect(message.delivery_confirmed?).to be false
       end
     end
 
-    describe '#failed?' do
+    describe '#errored?' do
       it 'returns true for bounced status' do
         message.update!(status: :bounced)
-        expect(message.failed?).to be true
+        expect(message.errored?).to be true
       end
 
       it 'returns true for failed status' do
         message.update!(status: :failed)
-        expect(message.failed?).to be true
+        expect(message.errored?).to be true
       end
 
       it 'returns false for other statuses' do
         message.update!(status: :sent)
-        expect(message.failed?).to be false
+        expect(message.errored?).to be false
       end
     end
 

@@ -26,7 +26,7 @@ interface EmailMessage {
 }
 
 export function EmailCampaignDetail({ campaignId }: EmailCampaignDetailProps) {
-  const { data, loading, error, refetch } = useQuery(GET_EMAIL_CAMPAIGN, {
+  const { data, loading, error } = useQuery(GET_EMAIL_CAMPAIGN, {
     variables: { id: campaignId },
     pollInterval: 10000, // Poll for updates
   });
