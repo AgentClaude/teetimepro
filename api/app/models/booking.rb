@@ -8,7 +8,7 @@ class Booking < ApplicationRecord
   has_many :fnb_tabs, dependent: :nullify
   has_many :accounting_syncs, as: :syncable, dependent: :destroy
 
-  enum :status, { confirmed: 0, checked_in: 1, completed: 2, cancelled: 3, no_show: 4 }
+  enum :status, { confirmed: 0, checked_in: 1, completed: 2, cancelled: 3, no_show: 4, pending_voice_confirmation: 5 }
 
   validates :players_count, presence: true, numericality: { in: 1..5 }
 

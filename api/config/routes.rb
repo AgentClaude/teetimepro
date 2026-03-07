@@ -55,6 +55,13 @@ Rails.application.routes.draw do
       # Voice handoffs
       resources :voice_handoffs, only: [:index, :show, :create, :update]
 
+      # Voice bookings
+      scope :voice_bookings, controller: :voice_bookings do
+        post "/reserve", action: :reserve
+        post "/confirm", action: :confirm
+        post "/cancel", action: :cancel
+      end
+
       # Call recordings webhook (Twilio webhook)
       post "/recordings/webhook", to: "recordings/webhook#create"
 

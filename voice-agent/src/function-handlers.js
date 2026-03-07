@@ -14,8 +14,12 @@ export async function executeFunction(name, args, callMeta) {
   switch (name) {
     case "search_tee_times":
       return await searchTeeTimes(args);
-    case "create_booking":
-      return await createBooking(args, callMeta);
+    case "reserve_booking":
+      return await reserveBooking(args, callMeta);
+    case "confirm_booking":
+      return await confirmBooking(args, callMeta);
+    case "cancel_booking":
+      return await cancelBooking(args, callMeta);
     case "get_course_info":
       return await getCourseInfo();
     case "transfer_to_human":
@@ -118,22 +122,16 @@ async function searchTeeTimes({ date, players, time_preference, date_end }) {
   }
 }
 
-async function createBooking({ tee_time_id, players_count, caller_name, caller_phone }, callMeta) {
+async function reserveBooking({ tee_time_id, players_count, caller_name, caller_phone }, callMeta) {
   try {
-    // Split caller name into first/last
-    const nameParts = (caller_name || "Guest Caller").trim().split(/\s+/);
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
-
     const body = {
       tee_time_id,
       players_count,
-      phone: caller_phone || callMeta?.from,
-      first_name: firstName,
-      last_name: lastName,
+      caller_name: caller_name || "Guest Caller",
+      caller_phone: caller_phone || callMeta?.from,
     };
 
-    const res = await apiFetch("/api/v1/bookings", {
+    const res = await apiFetch("/api/v1/voice_bookings/reserve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -144,20 +142,103 @@ async function createBooking({ tee_time_id, players_count, caller_name, caller_p
     if (!res.ok) {
       return JSON.stringify({
         success: false,
-        error: data.error || "Booking failed",
+        error: data.error || "Reservation failed",
       });
     }
 
-    const booking = data.data || data;
+    const booking = data.data;
     return JSON.stringify({
       success: true,
+      booking_id: booking.booking_id,
       confirmation_code: booking.confirmation_code,
-      date: booking.tee_time?.starts_at || booking.date,
-      players: booking.players_count,
-      total_dollars: ((booking.total_cents || 0) / 100).toFixed(2),
+      status: booking.status,
+      date: booking.date,
+      formatted_time: booking.formatted_time,
+      players: booking.players,
+      price_per_player_dollars: (booking.price_per_player_cents / 100).toFixed(2),
+      total_dollars: (booking.total_cents / 100).toFixed(2),
+      course_name: booking.course_name,
     });
   } catch (err) {
-    return JSON.stringify({ error: `Booking failed: ${err.message}` });
+    return JSON.stringify({ error: `Reservation failed: ${err.message}` });
+  }
+}
+
+async function confirmBooking({ booking_id }, callMeta) {
+  try {
+    const body = {
+      booking_id,
+    };
+
+    const res = await apiFetch("/api/v1/voice_bookings/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return JSON.stringify({
+        success: false,
+        error: data.error || "Confirmation failed",
+      });
+    }
+
+    const booking = data.data;
+    return JSON.stringify({
+      success: true,
+      booking_id: booking.booking_id,
+      confirmation_code: booking.confirmation_code,
+      status: booking.status,
+      date: booking.date,
+      formatted_time: booking.formatted_time,
+      players: booking.players,
+      total_dollars: (booking.total_cents / 100).toFixed(2),
+      course_name: booking.course_name,
+    });
+  } catch (err) {
+    return JSON.stringify({ error: `Confirmation failed: ${err.message}` });
+  }
+}
+
+async function cancelBooking({ booking_id, reason }, callMeta) {
+  try {
+    const body = {
+      booking_id,
+      reason: reason || "Caller cancelled during confirmation",
+    };
+
+    const res = await apiFetch("/api/v1/voice_bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return JSON.stringify({
+        success: false,
+        error: data.error || "Cancellation failed",
+      });
+    }
+
+    const booking = data.data;
+    return JSON.stringify({
+      success: true,
+      booking_id: booking.booking_id,
+      confirmation_code: booking.confirmation_code,
+      status: booking.status,
+      cancelled_at: booking.cancelled_at,
+      cancellation_reason: booking.cancellation_reason,
+      date: booking.date,
+      formatted_time: booking.formatted_time,
+      players: booking.players,
+      course_name: booking.course_name,
+    });
+  } catch (err) {
+    return JSON.stringify({ error: `Cancellation failed: ${err.message}` });
   }
 }
 
