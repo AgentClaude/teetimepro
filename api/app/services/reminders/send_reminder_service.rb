@@ -64,7 +64,6 @@ module Reminders
     end
 
     def bookings_needing_morning_reminder
-      today_start = Time.current.beginning_of_day
       today_end = Time.current.end_of_day
 
       Booking
