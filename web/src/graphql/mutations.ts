@@ -917,3 +917,102 @@ export const CANCEL_EMAIL_CAMPAIGN = gql`
     }
   }
 `;
+
+// Email Provider
+export const CONFIGURE_EMAIL_PROVIDER = gql`
+  mutation ConfigureEmailProvider(
+    $providerType: String!
+    $apiKey: String!
+    $fromEmail: String!
+    $fromName: String
+    $isDefault: Boolean
+    $settings: JSON
+  ) {
+    configureEmailProvider(
+      providerType: $providerType
+      apiKey: $apiKey
+      fromEmail: $fromEmail
+      fromName: $fromName
+      isDefault: $isDefault
+      settings: $settings
+    ) {
+      provider {
+        id
+        providerType
+        fromEmail
+        fromName
+        isActive
+        isDefault
+        verificationStatus
+        maskedApiKey
+      }
+      verified
+      errors
+    }
+  }
+`;
+
+// Email Templates
+export const CREATE_EMAIL_TEMPLATE = gql`
+  mutation CreateEmailTemplate(
+    $name: String!
+    $subject: String!
+    $bodyHtml: String!
+    $bodyText: String
+    $category: String
+    $mergeFields: [String!]
+  ) {
+    createEmailTemplate(
+      name: $name
+      subject: $subject
+      bodyHtml: $bodyHtml
+      bodyText: $bodyText
+      category: $category
+      mergeFields: $mergeFields
+    ) {
+      template {
+        id
+        name
+        subject
+        bodyHtml
+        category
+        isActive
+        createdAt
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_EMAIL_TEMPLATE = gql`
+  mutation UpdateEmailTemplate(
+    $id: ID!
+    $name: String
+    $subject: String
+    $bodyHtml: String
+    $bodyText: String
+    $category: String
+    $isActive: Boolean
+  ) {
+    updateEmailTemplate(
+      id: $id
+      name: $name
+      subject: $subject
+      bodyHtml: $bodyHtml
+      bodyText: $bodyText
+      category: $category
+      isActive: $isActive
+    ) {
+      template {
+        id
+        name
+        subject
+        bodyHtml
+        category
+        isActive
+        updatedAt
+      }
+      errors
+    }
+  }
+`;

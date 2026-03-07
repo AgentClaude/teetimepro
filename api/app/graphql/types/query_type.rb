@@ -160,6 +160,32 @@ module Types
       org.email_campaigns.find(id)
     end
 
+    # Email Providers
+    field :email_providers, [Types::EmailProviderType], null: false
+    def email_providers
+      org = require_auth!
+      org.email_providers.order(created_at: :desc)
+    end
+
+    # Email Templates
+    field :email_templates, [Types::EmailTemplateType], null: false do
+      argument :category, String, required: false
+    end
+    def email_templates(category: nil)
+      org = require_auth!
+      scope = org.email_templates.active.order(created_at: :desc)
+      scope = scope.by_category(category) if category.present?
+      scope.limit(50)
+    end
+
+    field :email_template, Types::EmailTemplateType, null: true do
+      argument :id, ID, required: true
+    end
+    def email_template(id:)
+      org = require_auth!
+      org.email_templates.find(id)
+    end
+
     # Voice analytics
     field :voice_analytics, Types::VoiceAnalyticsType, null: false do
       argument :course_id, ID, required: false
