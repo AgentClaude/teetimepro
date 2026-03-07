@@ -1,5 +1,5 @@
 Sidekiq.configure_server do |config|
-  config.redis = { url: ENV.fetch("SIDEKIQ_REDIS_URL", "redis://localhost:6379/1") }
+  config.redis = { url: AppConfig.sidekiq_redis_url }
 
   # Schedule recurring jobs
   config.on(:startup) do
@@ -27,5 +27,5 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: ENV.fetch("SIDEKIQ_REDIS_URL", "redis://localhost:6379/1") }
+  config.redis = { url: AppConfig.sidekiq_redis_url }
 end

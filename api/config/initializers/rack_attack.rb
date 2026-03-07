@@ -4,7 +4,7 @@ class Rack::Attack
 
   if enabled
     # Store in Redis
-    cache.store = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379"))
+    cache.store = Redis.new(url: AppConfig.redis_url)
 
     # Define API key extractor
     def self.api_key_from_request(req)

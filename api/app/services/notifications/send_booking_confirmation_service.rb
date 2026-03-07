@@ -56,15 +56,10 @@ module Notifications
     end
 
     def send_sms(phone_number, message)
-      return unless ENV["TWILIO_ACCOUNT_SID"].present?
+      return unless TwilioConfig.configured?
 
-      client = Twilio::REST::Client.new(
-        ENV.fetch("TWILIO_ACCOUNT_SID"),
-        ENV.fetch("TWILIO_AUTH_TOKEN")
-      )
-
-      client.messages.create(
-        from: ENV.fetch("TWILIO_PHONE_NUMBER"),
+      TwilioConfig.client.messages.create(
+        from: TwilioConfig.from_number,
         to: phone_number,
         body: message
       )

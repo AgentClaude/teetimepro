@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Twilio client configuration
-# Requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER env vars
+# Uses AppConfig for centralized env var access
 
 module TwilioConfig
   class << self
@@ -10,19 +10,19 @@ module TwilioConfig
     end
 
     def from_number
-      ENV.fetch("TWILIO_PHONE_NUMBER")
+      AppConfig.twilio_phone_number
     end
 
     def account_sid
-      ENV.fetch("TWILIO_ACCOUNT_SID")
+      AppConfig.twilio_account_sid
     end
 
     def auth_token
-      ENV.fetch("TWILIO_AUTH_TOKEN")
+      AppConfig.twilio_auth_token
     end
 
     def configured?
-      ENV["TWILIO_ACCOUNT_SID"].present? && ENV["TWILIO_AUTH_TOKEN"].present? && ENV["TWILIO_PHONE_NUMBER"].present?
+      AppConfig.twilio_configured?
     end
   end
 end
