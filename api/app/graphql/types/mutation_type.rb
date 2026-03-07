@@ -20,5 +20,10 @@ module Types
     field :disconnect_accounting_integration, mutation: Mutations::DisconnectAccountingIntegration
     field :sync_accounting_data, mutation: Mutations::SyncAccountingData
     field :configure_accounting_mapping, mutation: Mutations::ConfigureAccountingMapping
+    
+    # Calendar integrations
+    field :connect_google_calendar, mutation: Mutations::ConnectGoogleCalendar
+    field :disconnect_calendar, mutation: Mutations::DisconnectCalendar
+    field :toggle_calendar_sync, mutation: Mutations::ToggleCalendarSync
   end
 end

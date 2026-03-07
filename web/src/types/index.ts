@@ -6,6 +6,17 @@ export interface User {
   fullName: string;
   role: "golfer" | "staff" | "pro_shop" | "manager" | "admin" | "owner";
   organizationId: string;
+  calendarConnections: CalendarConnection[];
+}
+
+export interface CalendarConnection {
+  id: string;
+  provider: "google" | "apple";
+  enabled: boolean;
+  calendarId?: string;
+  calendarName: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AccountingIntegration {

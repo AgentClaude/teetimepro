@@ -18,6 +18,33 @@ class Api::V1::BookingsController < Api::V1::BaseController
     }
   end
 
+  def ics
+    booking = find_booking(params[:id])
+
+    result = Calendars::GenerateIcsService.call(booking: booking)
+
+    if result.success?
+      respond_to do |format|
+        format.ics do
+          send_data result.ics_content,
+                    filename: result.filename,
+                    type: 'text/calendar; charset=utf-8',
+                    disposition: 'attachment'
+        end
+        format.json do
+          render json: {
+            data: {
+              ics_content: result.ics_content,
+              filename: result.filename
+            }
+          }
+        end
+      end
+    else
+      render json: { errors: result.errors }, status: :unprocessable_entity
+    end
+  end
+
   def create
     # Support both nested (booking: { ... }) and flat params (from voice bot)
     bp = params[:booking].present? ? booking_params : {}

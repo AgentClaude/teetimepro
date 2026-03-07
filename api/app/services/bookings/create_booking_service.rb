@@ -67,6 +67,9 @@ module Bookings
         # Broadcast real-time notification
         broadcast_notification(booking, "booking.created")
 
+        # Sync to calendar (async)
+        CalendarSyncJob.perform_later(booking.id, 'create')
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e

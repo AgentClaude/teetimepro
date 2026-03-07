@@ -44,6 +44,9 @@ module Bookings
         # Broadcast real-time notification
         broadcast_notification(booking)
 
+        # Remove from calendar (async)
+        CalendarSyncJob.perform_later(booking.id, 'delete')
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e
