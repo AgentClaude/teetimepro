@@ -8,7 +8,7 @@ class LoyaltyAccount < ApplicationRecord
   validates :lifetime_points, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :user_id, uniqueness: { scope: :organization_id }
 
-  enum tier: { bronze: 0, silver: 1, gold: 2, platinum: 3 }
+  enum :tier, { bronze: 0, silver: 1, gold: 2, platinum: 3 }
 
   scope :for_organization, ->(org) { where(organization: org) }
   scope :by_tier, ->(tier) { where(tier: tier) }

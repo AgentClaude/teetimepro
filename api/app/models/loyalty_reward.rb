@@ -8,7 +8,7 @@ class LoyaltyReward < ApplicationRecord
   validates :discount_value, presence: true, numericality: { greater_than: 0 }, 
             if: -> { discount_percentage? || discount_fixed? || pro_shop_credit? }
 
-  enum reward_type: { 
+  enum :reward_type, { 
     discount_percentage: 0, 
     discount_fixed: 1, 
     free_round: 2, 

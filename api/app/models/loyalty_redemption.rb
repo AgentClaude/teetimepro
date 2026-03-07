@@ -6,7 +6,7 @@ class LoyaltyRedemption < ApplicationRecord
   validates :code, presence: true, uniqueness: true
   validates :status, presence: true
 
-  enum status: { pending: 0, applied: 1, expired: 2, cancelled: 3 }
+  enum :status, { pending: 0, applied: 1, expired: 2, cancelled: 3 }
 
   scope :active, -> { where(status: [:pending, :applied]) }
   scope :for_account, ->(account) { where(loyalty_account: account) }
