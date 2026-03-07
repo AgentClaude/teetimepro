@@ -19,6 +19,8 @@ module Types
     field :register_for_tournament, mutation: Mutations::RegisterForTournament
     field :withdraw_from_tournament, mutation: Mutations::WithdrawFromTournament
     field :record_tournament_score, mutation: Mutations::RecordTournamentScore
+    field :define_tournament_prizes, mutation: Mutations::DefineTournamentPrizes
+    field :finalize_tournament_results, mutation: Mutations::FinalizeTournamentResults
     
     # Accounting integrations
     field :connect_accounting_integration, mutation: Mutations::ConnectAccountingIntegration

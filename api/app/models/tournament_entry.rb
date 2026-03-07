@@ -3,6 +3,8 @@ class TournamentEntry < ApplicationRecord
   belongs_to :user
   belongs_to :payment, optional: true
   has_many :tournament_scores, dependent: :destroy
+  has_many :tournament_prizes, foreign_key: :awarded_to_id
+  has_one :tournament_result, dependent: :destroy
 
   enum :status, { registered: 0, confirmed: 1, withdrawn: 2, disqualified: 3 }
 
