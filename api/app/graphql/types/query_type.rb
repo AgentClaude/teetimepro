@@ -590,6 +590,51 @@ module Types
       require_role!(:manager)
       org.pricing_rules.includes(:course).find(id)
     end
+
+    # Marketplace connections
+    field :marketplace_connections, [Types::MarketplaceConnectionType], null: false do
+      argument :course_id, ID, required: false
+      argument :provider, Types::MarketplaceProviderEnum, required: false
+      argument :status, Types::MarketplaceConnectionStatusEnum, required: false
+    end
+    def marketplace_connections(course_id: nil, provider: nil, status: nil)
+      org = require_auth!
+      require_role!(:manager)
+
+      scope = org.marketplace_connections.includes(:course, :marketplace_listings)
+      scope = scope.where(course_id: course_id) if course_id.present?
+      scope = scope.where(provider: provider) if provider.present?
+      scope = scope.where(status: status) if status.present?
+      scope.order(created_at: :desc)
+    end
+
+    field :marketplace_connection, Types::MarketplaceConnectionType, null: true do
+      argument :id, ID, required: true
+    end
+    def marketplace_connection(id:)
+      org = require_auth!
+      require_role!(:manager)
+      org.marketplace_connections.includes(:course, :marketplace_listings).find(id)
+    end
+
+    # Marketplace listings
+    field :marketplace_listings, [Types::MarketplaceListingType], null: false do
+      argument :connection_id, ID, required: false
+      argument :status, Types::MarketplaceListingStatusEnum, required: false
+      argument :limit, Integer, required: false
+    end
+    def marketplace_listings(connection_id: nil, status: nil, limit: 50)
+      org = require_auth!
+      require_role!(:manager)
+
+      scope = MarketplaceListing.joins(:marketplace_connection)
+                                .where(marketplace_connections: { organization_id: org.id })
+                                .includes(:tee_time, :marketplace_connection)
+
+      scope = scope.where(marketplace_connection_id: connection_id) if connection_id.present?
+      scope = scope.where(status: status) if status.present?
+      scope.order(created_at: :desc).limit([limit, 100].min)
+    end
   end
   end
 end

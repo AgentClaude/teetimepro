@@ -57,6 +57,9 @@ Rails.application.routes.draw do
 
       # Stripe webhooks (no authentication required)
       post "/stripe/webhooks", to: "stripe_webhooks#create"
+
+      # Marketplace webhook callbacks (GolfNow, TeeOff)
+      post "/marketplace_webhooks/:provider", to: "marketplace_webhooks#receive"
     end
   end
 

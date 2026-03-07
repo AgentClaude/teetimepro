@@ -12,6 +12,7 @@ class Organization < ApplicationRecord
   has_many :fnb_tabs, dependent: :destroy
   has_many :member_account_charges, dependent: :destroy
   has_many :pos_products, dependent: :destroy
+  has_many :marketplace_connections, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
