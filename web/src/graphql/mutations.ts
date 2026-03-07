@@ -90,12 +90,16 @@ export const CREATE_BOOKING = gql`
     $playersCount: Int!
     $paymentMethodId: String
     $playerNames: [String!]
+    $playerDetails: [PlayerDetailInput!]
+    $loyaltyRedemptionCode: String
   ) {
     createBooking(
       teeTimeId: $teeTimeId
       playersCount: $playersCount
       paymentMethodId: $paymentMethodId
       playerNames: $playerNames
+      playerDetails: $playerDetails
+      loyaltyRedemptionCode: $loyaltyRedemptionCode
     ) {
       booking {
         id
@@ -112,6 +116,8 @@ export const CREATE_BOOKING = gql`
         bookingPlayers {
           id
           name
+          email
+          phone
         }
       }
       errors
