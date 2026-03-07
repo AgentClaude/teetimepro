@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,29 +60,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.text "cancellation_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "calendar_event_id"
-    t.index ["calendar_event_id"], name: "index_bookings_on_calendar_event_id"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
     t.index ["status"], name: "index_bookings_on_status"
     t.index ["tee_time_id"], name: "index_bookings_on_tee_time_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
-  end
-
-  create_table "calendar_connections", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "provider", null: false
-    t.text "access_token"
-    t.text "refresh_token"
-    t.datetime "token_expires_at"
-    t.boolean "enabled", default: true, null: false
-    t.string "calendar_id"
-    t.string "calendar_name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["enabled"], name: "index_calendar_connections_on_enabled"
-    t.index ["provider"], name: "index_calendar_connections_on_provider"
-    t.index ["user_id", "provider"], name: "index_calendar_connections_on_user_id_and_provider", unique: true
-    t.index ["user_id"], name: "index_calendar_connections_on_user_id"
   end
 
   create_table "courses", force: :cascade do |t|
@@ -151,6 +132,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.datetime "closed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "booking_id"
+    t.boolean "turn_order", default: false, null: false
+    t.integer "delivery_hole"
+    t.text "delivery_notes"
+    t.index ["booking_id", "turn_order"], name: "index_fnb_tabs_on_booking_and_turn_order"
+    t.index ["booking_id"], name: "index_fnb_tabs_on_booking_id"
     t.index ["course_id", "status"], name: "index_fnb_tabs_on_course_and_status"
     t.index ["course_id"], name: "index_fnb_tabs_on_course_id"
     t.index ["opened_at"], name: "index_fnb_tabs_on_opened_at"
@@ -199,10 +186,131 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.index ["organization_id"], name: "index_golfer_segments_on_organization_id"
   end
 
+  create_table "inventory_levels", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "pos_product_id", null: false
+    t.bigint "course_id", null: false
+    t.integer "current_stock", default: 0, null: false
+    t.integer "reserved_stock", default: 0, null: false
+    t.integer "reorder_point", default: 0, null: false
+    t.integer "reorder_quantity", default: 0, null: false
+    t.decimal "average_cost_cents", precision: 10, scale: 2
+    t.decimal "last_cost_cents", precision: 10, scale: 2
+    t.datetime "last_counted_at"
+    t.bigint "last_counted_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_inventory_levels_on_course_id"
+    t.index ["last_counted_by_id"], name: "index_inventory_levels_on_last_counted_by_id"
+    t.index ["organization_id", "course_id"], name: "index_inventory_levels_on_org_and_course"
+    t.index ["organization_id", "pos_product_id", "course_id"], name: "index_inventory_levels_unique", unique: true
+    t.index ["organization_id"], name: "index_inventory_levels_low_stock", where: "(current_stock <= reorder_point)"
+    t.index ["organization_id"], name: "index_inventory_levels_on_organization_id"
+    t.index ["pos_product_id"], name: "index_inventory_levels_on_pos_product_id"
+    t.check_constraint "current_stock >= 0", name: "inventory_levels_current_stock_non_negative"
+    t.check_constraint "reorder_point >= 0", name: "inventory_levels_reorder_point_non_negative"
+    t.check_constraint "reorder_quantity >= 0", name: "inventory_levels_reorder_quantity_non_negative"
+    t.check_constraint "reserved_stock >= 0", name: "inventory_levels_reserved_stock_non_negative"
+  end
+
+  create_table "inventory_movements", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "pos_product_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "performed_by_id", null: false
+    t.string "movement_type", null: false
+    t.integer "quantity", null: false
+    t.text "notes"
+    t.string "reference_type"
+    t.string "reference_id"
+    t.decimal "unit_cost_cents", precision: 10, scale: 2
+    t.decimal "total_cost_cents", precision: 10, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_inventory_movements_on_course_id"
+    t.index ["organization_id", "course_id"], name: "index_inventory_movements_on_org_and_course"
+    t.index ["organization_id", "movement_type"], name: "index_inventory_movements_on_org_and_type"
+    t.index ["organization_id", "pos_product_id"], name: "index_inventory_movements_on_org_and_product"
+    t.index ["organization_id"], name: "index_inventory_movements_on_organization_id"
+    t.index ["performed_by_id"], name: "index_inventory_movements_on_performed_by_id"
+    t.index ["pos_product_id"], name: "index_inventory_movements_on_pos_product_id"
+    t.index ["reference_type", "reference_id"], name: "index_inventory_movements_on_reference"
+    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying, 'sale'::character varying, 'adjustment'::character varying, 'transfer_in'::character varying, 'transfer_out'::character varying]::text[])", name: "inventory_movements_type_check"
+  end
+
   create_table "jwt_denylists", force: :cascade do |t|
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
+  create_table "marketplace_connections", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id", null: false
+    t.string "provider", null: false
+    t.integer "status", default: 0, null: false
+    t.string "external_course_id"
+    t.jsonb "credentials", default: {}, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.datetime "last_synced_at"
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_marketplace_connections_on_course_id"
+    t.index ["organization_id", "course_id", "provider"], name: "idx_marketplace_connections_org_course_provider", unique: true
+    t.index ["organization_id"], name: "index_marketplace_connections_on_organization_id"
+    t.index ["provider", "status"], name: "index_marketplace_connections_on_provider_and_status"
+  end
+
+  create_table "marketplace_listings", force: :cascade do |t|
+    t.bigint "marketplace_connection_id", null: false
+    t.bigint "tee_time_id", null: false
+    t.string "external_listing_id"
+    t.integer "status", default: 0, null: false
+    t.integer "listed_price_cents"
+    t.string "listed_price_currency", default: "USD"
+    t.integer "commission_rate_bps"
+    t.datetime "listed_at"
+    t.datetime "expires_at"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_listing_id"], name: "idx_marketplace_listings_external_id"
+    t.index ["marketplace_connection_id", "tee_time_id"], name: "idx_marketplace_listings_connection_tee_time", unique: true
+    t.index ["marketplace_connection_id"], name: "index_marketplace_listings_on_marketplace_connection_id"
+    t.index ["status"], name: "index_marketplace_listings_on_status"
+    t.index ["tee_time_id"], name: "index_marketplace_listings_on_tee_time_id"
+  end
+
+  create_table "member_account_charges", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "membership_id", null: false
+    t.bigint "charged_by_id", null: false
+    t.bigint "fnb_tab_id"
+    t.bigint "booking_id"
+    t.string "charge_type", default: "fnb", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "amount_cents", null: false
+    t.string "amount_currency", default: "USD", null: false
+    t.text "description"
+    t.text "notes"
+    t.datetime "posted_at"
+    t.datetime "voided_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_member_account_charges_on_booking_id"
+    t.index ["charge_type"], name: "index_member_account_charges_on_charge_type"
+    t.index ["charged_by_id"], name: "index_member_account_charges_on_charged_by_id"
+    t.index ["fnb_tab_id"], name: "index_member_account_charges_on_fnb_tab_id"
+    t.index ["membership_id", "status"], name: "idx_member_charges_membership_status"
+    t.index ["membership_id"], name: "index_member_account_charges_on_membership_id"
+    t.index ["organization_id", "created_at"], name: "idx_member_charges_org_created"
+    t.index ["organization_id", "membership_id"], name: "idx_member_charges_org_membership"
+    t.index ["organization_id"], name: "index_member_account_charges_on_organization_id"
+    t.index ["status"], name: "index_member_account_charges_on_status"
+    t.check_constraint "amount_cents > 0", name: "member_account_charges_amount_positive"
+    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying, 'booking'::character varying, 'pro_shop'::character varying, 'dues'::character varying, 'other'::character varying]::text[])", name: "member_account_charges_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'posted'::character varying, 'voided'::character varying, 'paid'::character varying]::text[])", name: "member_account_charges_status_check"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -217,6 +325,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.boolean "auto_renew", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "account_balance_cents", default: 0, null: false
+    t.integer "credit_limit_cents", default: 500000, null: false
     t.index ["organization_id", "user_id"], name: "index_memberships_on_organization_id_and_user_id", unique: true
     t.index ["organization_id"], name: "index_memberships_on_organization_id"
     t.index ["status"], name: "index_memberships_on_status"
@@ -253,6 +363,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.index ["booking_id"], name: "index_payments_on_booking_id"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["stripe_payment_intent_id"], name: "index_payments_on_stripe_payment_intent_id", unique: true
+  end
+
+  create_table "pos_products", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id", null: false
+    t.string "name", null: false
+    t.string "sku", null: false
+    t.string "barcode"
+    t.integer "price_cents", null: false
+    t.string "category", default: "other", null: false
+    t.text "description"
+    t.boolean "active", default: true, null: false
+    t.integer "stock_quantity"
+    t.boolean "track_inventory", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_pos_products_on_course_id"
+    t.index ["organization_id", "active"], name: "index_pos_products_on_org_and_active"
+    t.index ["organization_id", "barcode"], name: "index_pos_products_on_org_and_barcode", unique: true, where: "(barcode IS NOT NULL)"
+    t.index ["organization_id", "category"], name: "index_pos_products_on_org_and_category"
+    t.index ["organization_id", "sku"], name: "index_pos_products_on_org_and_sku", unique: true
+    t.index ["organization_id"], name: "index_pos_products_on_organization_id"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'apparel'::character varying, 'equipment'::character varying, 'rental'::character varying, 'other'::character varying]::text[])", name: "pos_products_category_check"
+    t.check_constraint "price_cents >= 0", name: "pos_products_price_non_negative"
   end
 
   create_table "pricing_rules", force: :cascade do |t|
@@ -430,7 +564,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
     t.string "phone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "marketplace_source"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["marketplace_source"], name: "index_users_on_marketplace_source", where: "(marketplace_source IS NOT NULL)"
     t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
@@ -511,10 +647,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
-  add_foreign_key "calendar_connections", "users"
   add_foreign_key "courses", "organizations", on_delete: :cascade
   add_foreign_key "fnb_tab_items", "fnb_tabs"
   add_foreign_key "fnb_tab_items", "users", column: "added_by_id"
+  add_foreign_key "fnb_tabs", "bookings"
   add_foreign_key "fnb_tabs", "courses"
   add_foreign_key "fnb_tabs", "organizations"
   add_foreign_key "fnb_tabs", "users"
@@ -523,9 +659,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
   add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
   add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
   add_foreign_key "golfer_segments", "users", column: "created_by_id"
+  add_foreign_key "inventory_levels", "courses"
+  add_foreign_key "inventory_levels", "organizations"
+  add_foreign_key "inventory_levels", "pos_products"
+  add_foreign_key "inventory_levels", "users", column: "last_counted_by_id"
+  add_foreign_key "inventory_movements", "courses"
+  add_foreign_key "inventory_movements", "organizations"
+  add_foreign_key "inventory_movements", "pos_products"
+  add_foreign_key "inventory_movements", "users", column: "performed_by_id"
+  add_foreign_key "marketplace_connections", "courses"
+  add_foreign_key "marketplace_connections", "organizations"
+  add_foreign_key "marketplace_listings", "marketplace_connections"
+  add_foreign_key "marketplace_listings", "tee_times"
+  add_foreign_key "member_account_charges", "bookings"
+  add_foreign_key "member_account_charges", "fnb_tabs"
+  add_foreign_key "member_account_charges", "memberships"
+  add_foreign_key "member_account_charges", "organizations"
+  add_foreign_key "member_account_charges", "users", column: "charged_by_id"
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
   add_foreign_key "payments", "bookings", on_delete: :cascade
+  add_foreign_key "pos_products", "courses"
+  add_foreign_key "pos_products", "organizations"
   add_foreign_key "pricing_rules", "courses"
   add_foreign_key "pricing_rules", "organizations"
   add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
