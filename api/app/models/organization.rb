@@ -9,6 +9,8 @@ class Organization < ApplicationRecord
   has_many :accounting_integrations, dependent: :destroy
   has_many :golfer_segments, dependent: :destroy
   has_many :pricing_rules, dependent: :destroy
+  has_many :fnb_tabs, dependent: :destroy
+  has_many :member_account_charges, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

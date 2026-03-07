@@ -43,6 +43,11 @@ module Types
     field :merge_fnb_tabs, mutation: Mutations::MergeFnbTabs
     field :split_fnb_tab, mutation: Mutations::SplitFnbTab
 
+    # Member account charging
+    field :charge_member_account, mutation: Mutations::ChargeMemberAccount
+    field :void_member_charge, mutation: Mutations::VoidMemberCharge
+    field :charge_fnb_tab_to_member, mutation: Mutations::ChargeFnbTabToMember
+
     # Pricing rules
     field :create_pricing_rule, mutation: Mutations::CreatePricingRule
     field :update_pricing_rule, mutation: Mutations::UpdatePricingRule
