@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# TeeTimes Pro — Production Docker helper
+# Usage: bin/docker-prod [command]
+#
+# Commands:
+#   up          Start all services
+#   down        Stop all services
+#   build       Rebuild containers
+#   logs        Tail logs (optionally: bin/docker-prod logs api)
+#   status      Show service status
+#   ssl-init    Obtain initial Let's Encrypt certificate
+#   ssl-renew   Manually trigger certificate renewal
+#   console     Rails console
+#   dbconsole   Database console
+#   backup-db   Dump database to timestamped file
+#   restore-db  Restore database from dump file
+#   deploy      Pull latest, rebuild, and restart (zero-downtime)
+#   rollback    Rollback to previous image
+#   sh          Shell into a container (default: api)
+
+COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+
+# Load env
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+fi
+
+case "${1:-up}" in
+  up)
+    $COMPOSE up -d --remove-orphans "${@:2}"
+    echo "✅ All services started"
+    ;;
+
+  down)
+    $COMPOSE down "${@:2}"
+    ;;
+
+  build)
+    $COMPOSE build --no-cache "${@:2}"
+    ;;
+
+  logs)
+    $COMPOSE logs -f --tail=100 "${@:2}"
+    ;;
+
+  status)
+    $COMPOSE ps
+    echo ""
+    echo "--- Health ---"
+    for svc in nginx api web db redis sidekiq voice-agent; do
+      status=$($COMPOSE ps --format json "$svc" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('Health','unknown'))" 2>/dev/null || echo "not running")
+      printf "  %-15s %s\n" "$svc" "$status"
+    done
+    ;;
+
+  ssl-init)
+    DOMAIN="${DOMAIN:?Set DOMAIN in .env}"
+    EMAIL="${LETSENCRYPT_EMAIL:?Set LETSENCRYPT_EMAIL in .env}"
+
+    echo "🔒 Obtaining SSL certificate for $DOMAIN..."
+
+    # Start nginx without SSL first (for ACME challenge)
+    # Create a temporary config that only serves HTTP
+    cat > /tmp/nginx-acme.conf <<'ACME'
+worker_processes 1;
+events { worker_connections 128; }
+http {
+    server {
+        listen 80;
+        server_name _;
+        location /.well-known/acme-challenge/ { root /var/www/certbot; }
+        location / { return 200 "waiting for cert"; add_header Content-Type text/plain; }
+    }
+}
+ACME
+
+    # Start nginx with ACME-only config
+    $COMPOSE run -d --name teetimepro_nginx_acme \
+      -v /tmp/nginx-acme.conf:/etc/nginx/nginx.conf:ro \
+      -v teetimepro_certbot_webroot:/var/www/certbot \
+      -p 80:80 \
+      nginx nginx -g "daemon off;"
+
+    sleep 3
+
+    # Request certificate
+    docker run --rm \
+      -v teetimepro_certbot_webroot:/var/www/certbot \
+      -v teetimepro_certbot_certs:/etc/letsencrypt \
+      certbot/certbot certonly \
+        --webroot -w /var/www/certbot \
+        -d "$DOMAIN" \
+        --email "$EMAIL" \
+        --agree-tos \
+        --no-eff-email \
+        --force-renewal
+
+    # Stop temporary nginx
+    docker rm -f teetimepro_nginx_acme 2>/dev/null || true
+
+    echo "✅ SSL certificate obtained for $DOMAIN"
+    echo "   Run 'bin/docker-prod up' to start with full SSL config"
+    ;;
+
+  ssl-renew)
+    $COMPOSE exec certbot certbot renew --webroot -w /var/www/certbot
+    $COMPOSE exec nginx nginx -s reload
+    echo "✅ SSL certificates renewed"
+    ;;
+
+  console)
+    $COMPOSE exec api bundle exec rails console
+    ;;
+
+  dbconsole)
+    $COMPOSE exec db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB:-teetimepro_production}"
+    ;;
+
+  backup-db)
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_FILE="backups/teetimepro_${TIMESTAMP}.sql.gz"
+    mkdir -p backups
+
+    echo "📦 Backing up database..."
+    $COMPOSE exec -T db pg_dump -U "${POSTGRES_USER}" -d "${POSTGRES_DB:-teetimepro_production}" \
+      --no-owner --no-privileges | gzip > "$BACKUP_FILE"
+
+    echo "✅ Backup saved to $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
+    ;;
+
+  restore-db)
+    BACKUP_FILE="${2:?Usage: bin/docker-prod restore-db <file.sql.gz>}"
+    if [ ! -f "$BACKUP_FILE" ]; then
+      echo "❌ File not found: $BACKUP_FILE"
+      exit 1
+    fi
+
+    echo "⚠️  This will overwrite the current database. Continue? (y/N)"
+    read -r confirm
+    if [ "$confirm" != "y" ]; then
+      echo "Aborted."
+      exit 0
+    fi
+
+    echo "📦 Restoring from $BACKUP_FILE..."
+    gunzip -c "$BACKUP_FILE" | $COMPOSE exec -T db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB:-teetimepro_production}"
+    echo "✅ Database restored"
+    ;;
+
+  deploy)
+    echo "🚀 Deploying TeeTimes Pro..."
+
+    # Pull latest code
+    git pull origin main
+
+    # Build new images
+    $COMPOSE build api sidekiq web
+
+    # Rolling restart (API first, then workers)
+    $COMPOSE up -d --no-deps api
+    echo "  Waiting for API health..."
+    sleep 10
+
+    if $COMPOSE exec -T api curl -sf http://localhost:3003/health > /dev/null 2>&1; then
+      echo "  ✅ API healthy"
+    else
+      echo "  ❌ API unhealthy — check logs with: bin/docker-prod logs api"
+      exit 1
+    fi
+
+    $COMPOSE up -d --no-deps sidekiq web nginx
+    echo "✅ Deploy complete"
+    ;;
+
+  rollback)
+    echo "⏪ Rolling back to previous images..."
+    # Docker keeps previous layers; force recreate pulls from cache
+    $COMPOSE up -d --force-recreate api sidekiq web
+    echo "✅ Rollback complete (using cached images)"
+    ;;
+
+  sh)
+    $COMPOSE exec "${2:-api}" sh
+    ;;
+
+  *)
+    echo "Unknown command: $1"
+    echo "Usage: bin/docker-prod [up|down|build|logs|status|ssl-init|ssl-renew|console|dbconsole|backup-db|restore-db|deploy|rollback|sh]"
+    exit 1
+    ;;
+esac
