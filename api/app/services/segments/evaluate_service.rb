@@ -6,7 +6,8 @@ module Segments
   class EvaluateService < ApplicationService
     attr_accessor :organization, :filter_criteria
 
-    validates :organization, :filter_criteria, presence: true
+    validates :organization, presence: true
+    validate :filter_criteria_must_be_hash
 
     def call
       return validation_failure(self) unless valid?
@@ -24,6 +25,10 @@ module Segments
     end
 
     private
+
+    def filter_criteria_must_be_hash
+      errors.add(:filter_criteria, "must be a Hash") unless filter_criteria.is_a?(Hash)
+    end
 
     def apply_filters(scope)
       criteria = filter_criteria.with_indifferent_access

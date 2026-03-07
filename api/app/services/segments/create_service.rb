@@ -4,7 +4,8 @@ module Segments
   class CreateService < ApplicationService
     attr_accessor :organization, :user, :name, :description, :filter_criteria, :is_dynamic
 
-    validates :organization, :user, :name, :filter_criteria, presence: true
+    validates :organization, :user, :name, presence: true
+    validate :filter_criteria_must_be_hash
 
     def call
       return validation_failure(self) unless valid?
@@ -41,6 +42,12 @@ module Segments
       success(segment: segment)
     rescue AuthorizationError => e
       failure([e.message])
+    end
+
+    private
+
+    def filter_criteria_must_be_hash
+      errors.add(:filter_criteria, "must be a Hash") unless filter_criteria.is_a?(Hash)
     end
   end
 end
