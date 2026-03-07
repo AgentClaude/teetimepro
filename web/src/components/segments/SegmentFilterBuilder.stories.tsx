@@ -27,7 +27,7 @@ const meta: Meta<typeof SegmentFilterBuilder> = {
   component: SegmentFilterBuilder,
   tags: ['autodocs'],
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <MockedProvider mocks={[previewMock]} addTypename={false}>
         <div className="max-w-2xl p-6">
           <Story />

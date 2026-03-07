@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { SegmentFilterBuilder } from './SegmentFilterBuilder';
+import { SegmentFilterBuilder, type FilterCriteria } from './SegmentFilterBuilder';
 import { CREATE_GOLFER_SEGMENT, UPDATE_GOLFER_SEGMENT } from '../../graphql/mutations';
 import { GET_GOLFER_SEGMENTS } from '../../graphql/queries';
 
@@ -24,8 +24,8 @@ export function SegmentFormModal({ isOpen, onClose, segment }: SegmentFormModalP
   const isEditing = !!segment;
   const [name, setName] = useState(segment?.name ?? '');
   const [description, setDescription] = useState(segment?.description ?? '');
-  const [filterCriteria, setFilterCriteria] = useState<Record<string, unknown>>(
-    segment?.filterCriteria ?? {}
+  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>(
+    (segment?.filterCriteria ?? {}) as FilterCriteria
   );
   const [errors, setErrors] = useState<string[]>([]);
 

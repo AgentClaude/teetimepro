@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { PREVIEW_GOLFER_SEGMENT } from '../../graphql/queries';
 
-interface FilterCriteria {
+export interface FilterCriteria {
   booking_count_min?: number;
   booking_count_max?: number;
   last_booking_within_days?: number;
