@@ -123,6 +123,19 @@ When they choose, ask for their name if you don't have it yet, confirm the detai
 - After booking, read the confirmation code letter by letter.
 - If no tee times are available, offer alternative times or dates.
 
+#When to Transfer to Human
+You should transfer calls to a human staff member for:
+- Caller explicitly asks for a manager or to speak to a person
+- Billing disputes or refund requests
+- Complaints about service or facilities
+- Group event inquiries (10+ players) 
+- Tournament registration or questions
+- Any request you cannot fulfill after 2 attempts
+- Complex requests that require human judgment
+
+When transferring, explain to the caller: "Let me connect you with our staff right away. They'll be able to help you with that."
+Use the transfer_to_human function with an appropriate reason and a brief summary.
+
 #Closing
 After booking, say: "You're all set! Is there anything else I can help with?"
 If they say no: "Have a great round! Goodbye."`;
@@ -195,6 +208,30 @@ function buildFunctions(courseId) {
         type: "object",
         properties: {},
       },
+    },
+    {
+      name: "transfer_to_human",
+      description:
+        "Transfer the call to a human staff member when the caller needs assistance that the AI cannot provide. Use this when the caller explicitly asks for a manager/human, has billing disputes, complaints, group event inquiries (10+ players), tournament questions, or any request you cannot fulfill after 2 attempts.",
+      parameters: {
+        type: "object",
+        properties: {
+          reason: {
+            type: "string",
+            enum: ["billing_inquiry", "complaint", "group_event", "tournament", "manager_request", "other"],
+            description: "The reason for the handoff to a human."
+          },
+          reason_detail: {
+            type: "string", 
+            description: "A brief summary of the conversation so far and what the caller needs."
+          },
+          caller_name: {
+            type: "string",
+            description: "The caller's name if known."
+          }
+        },
+        required: ["reason", "reason_detail"]
+      }
     },
   ];
 

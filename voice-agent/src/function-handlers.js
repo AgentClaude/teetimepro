@@ -18,6 +18,8 @@ export async function executeFunction(name, args, callMeta) {
       return await createBooking(args, callMeta);
     case "get_course_info":
       return await getCourseInfo();
+    case "transfer_to_human":
+      return await transferToHuman(args, callMeta);
     default:
       return JSON.stringify({ error: `Unknown function: ${name}` });
   }
@@ -183,6 +185,55 @@ async function getCourseInfo() {
     });
   } catch (err) {
     return JSON.stringify({ error: `Could not fetch course info: ${err.message}` });
+  }
+}
+
+/**
+ * Transfer call to human staff member
+ * @param {object} args
+ * @param {string} args.reason - Reason for handoff
+ * @param {string} args.reason_detail - Summary of conversation and caller needs
+ * @param {string} [args.caller_name] - Caller's name if known
+ * @param {object} callMeta - Call metadata (from, to, streamSid)
+ */
+async function transferToHuman({ reason, reason_detail, caller_name }, callMeta) {
+  try {
+    const body = {
+      call_sid: callMeta?.streamSid || callMeta?.callSid,
+      caller_phone: callMeta?.from,
+      caller_name,
+      reason,
+      reason_detail,
+    };
+
+    const res = await apiFetch("/api/v1/voice_handoffs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return JSON.stringify({
+        transfer: false,
+        error: data.error || "Transfer failed. Please hold while I try to reach someone.",
+      });
+    }
+
+    const handoffData = data.data || data;
+    
+    return JSON.stringify({
+      transfer: true,
+      handoff_id: handoffData.handoff?.id || handoffData.handoff_id,
+      transfer_number: handoffData.transfer_number,
+      message: "Transferring you to our staff right away. Please hold.",
+    });
+  } catch (err) {
+    return JSON.stringify({
+      transfer: false,
+      error: `Transfer failed: ${err.message}`,
+    });
   }
 }
 

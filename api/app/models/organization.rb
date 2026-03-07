@@ -5,6 +5,7 @@ class Organization < ApplicationRecord
   has_many :webhook_endpoints, dependent: :destroy
   has_many :sms_campaigns, dependent: :destroy
   has_many :voice_call_logs, dependent: :destroy
+  has_many :voice_handoffs, dependent: :destroy
   has_many :tournaments, dependent: :destroy
   has_many :accounting_integrations, dependent: :destroy
   has_many :golfer_segments, dependent: :destroy
