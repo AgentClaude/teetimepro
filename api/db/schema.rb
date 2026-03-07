@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -107,8 +107,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.text "cancellation_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "calendar_event_id"
-    t.index ["calendar_event_id"], name: "index_bookings_on_calendar_event_id"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
     t.index ["status"], name: "index_bookings_on_status"
     t.index ["tee_time_id"], name: "index_bookings_on_tee_time_id"
@@ -321,7 +319,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["added_by_id"], name: "index_fnb_tab_items_on_added_by_id"
     t.index ["fnb_tab_id", "created_at"], name: "index_fnb_tab_items_on_tab_and_created_at"
     t.index ["fnb_tab_id"], name: "index_fnb_tab_items_on_fnb_tab_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'other'::character varying]::text[])", name: "fnb_tab_items_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'other'::character varying::text])", name: "fnb_tab_items_category_check"
     t.check_constraint "quantity > 0", name: "fnb_tab_items_quantity_positive"
     t.check_constraint "total_cents >= 0", name: "fnb_tab_items_total_cents_non_negative"
     t.check_constraint "unit_price_cents >= 0", name: "fnb_tab_items_unit_price_non_negative"
@@ -351,7 +349,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["organization_id"], name: "index_fnb_tabs_on_organization_id"
     t.index ["user_id", "opened_at"], name: "index_fnb_tabs_on_user_and_opened_at"
     t.index ["user_id"], name: "index_fnb_tabs_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['open'::character varying, 'closed'::character varying, 'merged'::character varying]::text[])", name: "fnb_tabs_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['open'::character varying::text, 'closed'::character varying::text, 'merged'::character varying::text])", name: "fnb_tabs_status_check"
     t.check_constraint "total_cents >= 0", name: "fnb_tabs_total_cents_non_negative"
   end
 
@@ -362,6 +360,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.string "preferred_tee"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "total_rounds", default: 0, null: false
+    t.integer "best_score"
+    t.decimal "average_score", precision: 5, scale: 1
+    t.date "last_played_on"
+    t.datetime "handicap_updated_at"
     t.index ["user_id"], name: "index_golfer_profiles_on_user_id", unique: true
   end
 
@@ -390,6 +393,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["filter_criteria"], name: "index_golfer_segments_on_filter_criteria", using: :gin
     t.index ["organization_id", "name"], name: "index_golfer_segments_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_golfer_segments_on_organization_id"
+  end
+
+  create_table "handicap_revisions", force: :cascade do |t|
+    t.bigint "golfer_profile_id", null: false
+    t.decimal "handicap_index", precision: 4, scale: 1, null: false
+    t.decimal "previous_index", precision: 4, scale: 1
+    t.integer "rounds_used", default: 0, null: false
+    t.date "effective_date", null: false
+    t.string "source", default: "calculated", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["golfer_profile_id", "effective_date"], name: "idx_on_golfer_profile_id_effective_date_e541a980ad"
+    t.index ["golfer_profile_id"], name: "index_handicap_revisions_on_golfer_profile_id"
   end
 
   create_table "inventory_levels", force: :cascade do |t|
@@ -441,7 +458,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["performed_by_id"], name: "index_inventory_movements_on_performed_by_id"
     t.index ["pos_product_id"], name: "index_inventory_movements_on_pos_product_id"
     t.index ["reference_type", "reference_id"], name: "index_inventory_movements_on_reference"
-    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying, 'sale'::character varying, 'adjustment'::character varying, 'transfer_in'::character varying, 'transfer_out'::character varying]::text[])", name: "inventory_movements_type_check"
+    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying::text, 'sale'::character varying::text, 'adjustment'::character varying::text, 'transfer_in'::character varying::text, 'transfer_out'::character varying::text])", name: "inventory_movements_type_check"
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -589,8 +606,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["organization_id"], name: "index_member_account_charges_on_organization_id"
     t.index ["status"], name: "index_member_account_charges_on_status"
     t.check_constraint "amount_cents > 0", name: "member_account_charges_amount_positive"
-    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying, 'booking'::character varying, 'pro_shop'::character varying, 'dues'::character varying, 'other'::character varying]::text[])", name: "member_account_charges_type_check"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'posted'::character varying, 'voided'::character varying, 'paid'::character varying]::text[])", name: "member_account_charges_status_check"
+    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying::text, 'booking'::character varying::text, 'pro_shop'::character varying::text, 'dues'::character varying::text, 'other'::character varying::text])", name: "member_account_charges_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'posted'::character varying::text, 'voided'::character varying::text, 'paid'::character varying::text])", name: "member_account_charges_status_check"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -665,7 +682,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["organization_id", "category"], name: "index_pos_products_on_org_and_category"
     t.index ["organization_id", "sku"], name: "index_pos_products_on_org_and_sku", unique: true
     t.index ["organization_id"], name: "index_pos_products_on_organization_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'apparel'::character varying, 'equipment'::character varying, 'rental'::character varying, 'other'::character varying]::text[])", name: "pos_products_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'apparel'::character varying::text, 'equipment'::character varying::text, 'rental'::character varying::text, 'other'::character varying::text])", name: "pos_products_category_check"
     t.check_constraint "price_cents >= 0", name: "pos_products_price_non_negative"
   end
 
@@ -689,6 +706,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["organization_id", "rule_type"], name: "index_pricing_rules_on_organization_id_and_rule_type"
     t.index ["organization_id"], name: "index_pricing_rules_on_organization_id"
     t.index ["priority"], name: "index_pricing_rules_on_priority"
+  end
+
+  create_table "rounds", force: :cascade do |t|
+    t.bigint "golfer_profile_id", null: false
+    t.bigint "course_id"
+    t.string "course_name", null: false
+    t.date "played_on", null: false
+    t.integer "score", null: false
+    t.integer "holes_played", default: 18, null: false
+    t.decimal "course_rating", precision: 4, scale: 1
+    t.integer "slope_rating"
+    t.decimal "differential", precision: 5, scale: 1
+    t.string "tee_color"
+    t.text "notes"
+    t.integer "putts"
+    t.integer "fairways_hit"
+    t.integer "greens_in_regulation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_rounds_on_course_id"
+    t.index ["golfer_profile_id", "played_on"], name: "index_rounds_on_golfer_profile_id_and_played_on"
+    t.index ["golfer_profile_id"], name: "index_rounds_on_golfer_profile_id"
+    t.index ["played_on"], name: "index_rounds_on_played_on"
   end
 
   create_table "sms_campaigns", force: :cascade do |t|
@@ -946,6 +986,31 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
     t.index ["status"], name: "index_voice_call_logs_on_status"
   end
 
+  create_table "voice_handoffs", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "voice_call_log_id"
+    t.string "call_sid", null: false
+    t.string "caller_phone", null: false
+    t.string "caller_name"
+    t.string "reason", null: false
+    t.text "reason_detail"
+    t.string "status", default: "pending", null: false
+    t.string "transfer_to", null: false
+    t.string "staff_name"
+    t.integer "wait_seconds"
+    t.text "resolution_notes"
+    t.datetime "started_at", null: false
+    t.datetime "connected_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_sid"], name: "index_voice_handoffs_on_call_sid", unique: true
+    t.index ["organization_id", "started_at"], name: "index_voice_handoffs_on_organization_id_and_started_at"
+    t.index ["organization_id", "status"], name: "index_voice_handoffs_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_voice_handoffs_on_organization_id"
+    t.index ["voice_call_log_id"], name: "index_voice_handoffs_on_voice_call_log_id"
+  end
+
   create_table "waitlist_entries", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "tee_time_id", null: false
@@ -1033,6 +1098,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
   add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
   add_foreign_key "golfer_segments", "users", column: "created_by_id"
+  add_foreign_key "handicap_revisions", "golfer_profiles", on_delete: :cascade
   add_foreign_key "inventory_levels", "courses"
   add_foreign_key "inventory_levels", "organizations"
   add_foreign_key "inventory_levels", "pos_products"
@@ -1065,6 +1131,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   add_foreign_key "pos_products", "organizations"
   add_foreign_key "pricing_rules", "courses"
   add_foreign_key "pricing_rules", "organizations"
+  add_foreign_key "rounds", "courses", on_delete: :nullify
+  add_foreign_key "rounds", "golfer_profiles", on_delete: :cascade
   add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
   add_foreign_key "sms_campaigns", "users", column: "created_by_id", on_delete: :cascade
   add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade
@@ -1087,6 +1155,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   add_foreign_key "users", "organizations", on_delete: :cascade
   add_foreign_key "voice_call_logs", "courses", on_delete: :nullify
   add_foreign_key "voice_call_logs", "organizations", on_delete: :cascade
+  add_foreign_key "voice_handoffs", "organizations"
+  add_foreign_key "voice_handoffs", "voice_call_logs"
   add_foreign_key "waitlist_entries", "organizations"
   add_foreign_key "waitlist_entries", "tee_times"
   add_foreign_key "waitlist_entries", "users"
