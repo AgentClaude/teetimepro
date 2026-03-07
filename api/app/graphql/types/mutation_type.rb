@@ -77,5 +77,8 @@ module Types
     field :disconnect_marketplace, mutation: Mutations::DisconnectMarketplace
     field :update_marketplace_settings, mutation: Mutations::UpdateMarketplaceSettings
     field :sync_marketplace, mutation: Mutations::SyncMarketplace
+
+    # Call recordings and transcriptions
+    field :request_transcription, mutation: Mutations::RequestTranscription
   end
 end
