@@ -34,7 +34,7 @@ const generateMockCalls = (count: number) => {
     const startDate = new Date();
     startDate.setHours(startDate.getHours() - (i * 2));
     
-    const duration = status === 'completed' ? Math.floor(Math.random() * 300) + 60 : null;
+    const duration = status === 'completed' ? Math.floor(Math.random() * 300) + 60 : undefined;
     
     return {
       id: `call-${i + 1}`,
@@ -42,7 +42,7 @@ const generateMockCalls = (count: number) => {
       courseName: course,
       channel,
       callerPhone: caller.phone,
-      callerName: caller.name,
+      callerName: caller.name ?? undefined,
       status,
       durationSeconds: duration,
       startedAt: startDate.toISOString(),
@@ -122,7 +122,7 @@ export const UnknownCallers: Story = {
   args: {
     calls: mockCalls.map(call => ({
       ...call,
-      callerName: null,
+      callerName: undefined,
     })),
     loading: false,
   },
@@ -132,7 +132,7 @@ export const LongCalls: Story = {
   args: {
     calls: mockCalls.map(call => ({
       ...call,
-      durationSeconds: call.status === 'completed' ? Math.floor(Math.random() * 600) + 300 : null,
+      durationSeconds: call.status === 'completed' ? Math.floor(Math.random() * 600) + 300 : undefined,
     })),
     loading: false,
   },
@@ -142,7 +142,7 @@ export const ShortCalls: Story = {
   args: {
     calls: mockCalls.map(call => ({
       ...call,
-      durationSeconds: call.status === 'completed' ? Math.floor(Math.random() * 60) + 10 : null,
+      durationSeconds: call.status === 'completed' ? Math.floor(Math.random() * 60) + 10 : undefined,
     })),
     loading: false,
   },
