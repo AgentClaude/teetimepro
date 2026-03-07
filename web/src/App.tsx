@@ -13,6 +13,7 @@ import { CallLogPage } from "./pages/CallLogPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import CampaignsPage from "./pages/CampaignsPage";
+import { SegmentsPage } from "./pages/SegmentsPage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
+        <Route path="/segments" element={<SegmentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/call-logs/:id" element={<CallLogPage />} />
       </Route>

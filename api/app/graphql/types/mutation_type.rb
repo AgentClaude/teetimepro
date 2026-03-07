@@ -22,6 +22,11 @@ module Types
     field :sync_accounting_data, mutation: Mutations::SyncAccountingData
     field :configure_accounting_mapping, mutation: Mutations::ConfigureAccountingMapping
     
+    # Golfer segments
+    field :create_golfer_segment, mutation: Mutations::CreateGolferSegment
+    field :update_golfer_segment, mutation: Mutations::UpdateGolferSegment
+    field :delete_golfer_segment, mutation: Mutations::DeleteGolferSegment
+
     # Calendar integrations
     field :connect_google_calendar, mutation: Mutations::ConnectGoogleCalendar
     field :disconnect_calendar, mutation: Mutations::DisconnectCalendar

@@ -525,3 +525,56 @@ export const GET_REPORTS_SUMMARY = gql`
     reportsSummary(courseId: $courseId, days: $days)
   }
 `;
+
+// Golfer Segments
+export const GET_GOLFER_SEGMENTS = gql`
+  query GetGolferSegments {
+    golferSegments {
+      id
+      name
+      description
+      filterCriteria
+      isDynamic
+      cachedCount
+      lastEvaluatedAt
+      createdAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+export const GET_GOLFER_SEGMENT = gql`
+  query GetGolferSegment($id: ID!) {
+    golferSegment(id: $id) {
+      id
+      name
+      description
+      filterCriteria
+      isDynamic
+      cachedCount
+      lastEvaluatedAt
+      createdAt
+      createdBy {
+        id
+        fullName
+      }
+      members {
+        id
+        fullName
+        email
+        phone
+        role
+        createdAt
+      }
+    }
+  }
+`;
+
+export const PREVIEW_GOLFER_SEGMENT = gql`
+  query PreviewGolferSegment($filterCriteria: JSON!) {
+    golferSegmentPreview(filterCriteria: $filterCriteria)
+  }
+`;
