@@ -1016,3 +1016,14 @@ export const UPDATE_EMAIL_TEMPLATE = gql`
     }
   }
 `;
+
+// Seed Booking Templates
+export const SEED_BOOKING_TEMPLATES = gql`
+  mutation SeedBookingTemplates {
+    seedBookingTemplates {
+      created
+      skipped
+      errors
+    }
+  }
+`;

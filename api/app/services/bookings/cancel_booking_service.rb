@@ -78,7 +78,12 @@ module Bookings
     end
 
     def notify_cancellation(booking)
-      # Fire-and-forget notification
+      # Send cancellation email
+      Notifications::SendBookingEmailService.call(
+        booking: booking,
+        email_type: "cancellation"
+      )
+
       Rails.logger.info("Booking #{booking.confirmation_code} cancelled for #{booking.user.email}")
     end
   end

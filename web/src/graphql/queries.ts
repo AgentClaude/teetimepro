@@ -978,3 +978,26 @@ export const GET_EMAIL_TEMPLATE = gql`
     }
   }
 `;
+
+// Booking Email Templates (transactional)
+export const GET_BOOKING_EMAIL_TEMPLATES = gql`
+  query GetBookingEmailTemplates {
+    bookingEmailTemplates {
+      id
+      name
+      subject
+      bodyHtml
+      bodyText
+      category
+      isActive
+      mergeFields
+      usageCount
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;

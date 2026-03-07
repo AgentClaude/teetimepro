@@ -1,0 +1,47 @@
+<div class="header">
+  <h1>Booking Cancelled</h1>
+</div>
+
+<div class="card">
+  <p>Hi <%= @user.first_name %>,</p>
+  <p>Your booking at <strong><%= @course.name %></strong> has been cancelled. Here are the details:</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Date</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right;"><%= @tee_time.date.strftime('%A, %B %d, %Y') %></td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Tee Time</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right;"><%= @tee_time.formatted_time %></td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Confirmation Code</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right; font-family: monospace; letter-spacing: 2px;"><%= @booking.confirmation_code %></td>
+    </tr>
+    <% if @booking.cancellation_reason.present? %>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Reason</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; text-align: right;"><%= @booking.cancellation_reason %></td>
+    </tr>
+    <% end %>
+  </table>
+
+  <% if @refunded %>
+  <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <p style="margin: 0; color: #166534; font-weight: 600;">💰 Refund Processed</p>
+    <p style="margin: 8px 0 0; font-size: 14px; color: #166534;">
+      Your payment of <%= @booking.total.format %> has been refunded. Please allow 5–10 business days for the refund to appear on your statement.
+    </p>
+  </div>
+  <% end %>
+
+  <p style="margin-top: 24px; font-size: 14px; color: #71717a;">
+    Would you like to rebook? Visit our website or call us to schedule a new tee time.
+  </p>
+</div>
+
+<div class="footer">
+  <p><%= @organization.name %></p>
+  <p>This email was sent to <%= @user.email %> regarding your booking cancellation.</p>
+</div>

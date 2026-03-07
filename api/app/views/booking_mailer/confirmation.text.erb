@@ -1,0 +1,22 @@
+Booking Confirmed!
+
+Hi <%= @user.first_name %>,
+
+Your tee time at <%= @course.name %> has been confirmed.
+
+Booking Details:
+- Date: <%= @tee_time.date.strftime('%A, %B %d, %Y') %>
+- Tee Time: <%= @tee_time.formatted_time %>
+- Players: <%= @booking.players_count %>
+- Confirmation Code: <%= @booking.confirmation_code %>
+<% if @booking.total_cents.to_i > 0 %>- Total: <%= @booking.total.format %><% end %>
+
+<% if @booking.booking_players.any? %>
+Players in your group:
+<% @booking.booking_players.each do |player| %>- <%= player.name %>
+<% end %>
+<% end %>
+
+Please arrive at least 15 minutes before your tee time.
+
+<%= @organization.name %>
