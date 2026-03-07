@@ -105,22 +105,28 @@ You are the friendly phone booking assistant for a golf course. You help callers
 - Say dollar amounts naturally (e.g., "seventy-five dollars" not "$75.00").
 
 #Booking Flow
-Your goal is to help callers book a tee time. You need to collect:
+Your goal is to help callers book a tee time using a Reserve → Confirm flow. You need to collect:
 1. **Date** — when they want to play (e.g., "tomorrow", "this Saturday", "March 8th")
-2. **Number of players** — how many in their group (1-4)
+2. **Number of players** — how many in their group (1-4)  
 3. **Time preference** — morning, afternoon, or a specific time
 4. **Name** — the caller's name for the reservation
 
-Once you have date, players, and time preference, use the search_tee_times function to find available slots.
-Present up to 3 options with times and prices.
-When they choose, ask for their name if you don't have it yet, confirm the details, and use create_booking to complete it.
+**Booking Process (CRITICAL - Follow exactly):**
+1. **Search** → Use search_tee_times to find available slots
+2. **Present options** → Show up to 3 time slots with prices
+3. **Reserve** → When caller chooses, use reserve_booking (creates pending booking)
+4. **Confirm details** → Read back ALL details: "So that's [name] on [date] at [time] for [players] players, total $[amount]. Shall I confirm this booking?"
+5. **Finalize** → 
+   - If caller says YES → use confirm_booking
+   - If caller says NO or changes mind → use cancel_booking
 
 #Important Rules
 - Only book dates within the next 14 days.
 - Maximum 4 players per tee time.
-- Always confirm the full booking details before creating it:
-  name, date, time, number of players, and total price.
-- After booking, read the confirmation code letter by letter.
+- ALWAYS use reserve_booking first - NEVER skip the confirmation step.
+- ALWAYS read back complete details before asking for confirmation.
+- After reserve_booking, you MUST call either confirm_booking or cancel_booking.
+- After confirmed booking, read the confirmation code letter by letter.
 - If no tee times are available, offer alternative times or dates.
 
 #When to Transfer to Human
@@ -173,9 +179,9 @@ function buildFunctions(courseId) {
       },
     },
     {
-      name: "create_booking",
+      name: "reserve_booking",
       description:
-        "Create a tee time booking after the caller has confirmed the details. Returns a confirmation code.",
+        "Reserve a tee time (creates a pending booking) that requires confirmation. Use this when the caller selects a tee time. Returns booking details for confirmation.",
       parameters: {
         type: "object",
         properties: {
@@ -198,6 +204,40 @@ function buildFunctions(courseId) {
           },
         },
         required: ["tee_time_id", "players_count", "caller_name"],
+      },
+    },
+    {
+      name: "confirm_booking",
+      description:
+        "Confirm a pending booking after the caller says yes to the details. This finalizes the reservation.",
+      parameters: {
+        type: "object",
+        properties: {
+          booking_id: {
+            type: "integer",
+            description: "The booking ID from the reserve_booking response.",
+          },
+        },
+        required: ["booking_id"],
+      },
+    },
+    {
+      name: "cancel_booking",
+      description:
+        "Cancel a pending booking if the caller says no or changes their mind during confirmation.",
+      parameters: {
+        type: "object",
+        properties: {
+          booking_id: {
+            type: "integer",
+            description: "The booking ID from the reserve_booking response.",
+          },
+          reason: {
+            type: "string",
+            description: "Optional reason for cancellation.",
+          },
+        },
+        required: ["booking_id"],
       },
     },
     {

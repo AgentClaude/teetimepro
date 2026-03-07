@@ -125,7 +125,7 @@ export interface TeeTime {
 export interface Booking {
   id: string;
   confirmationCode: string;
-  status: "confirmed" | "checked_in" | "completed" | "cancelled" | "no_show";
+  status: "confirmed" | "checked_in" | "completed" | "cancelled" | "no_show" | "pending_voice_confirmation";
   playersCount: number;
   totalCents: number;
   cancellable: boolean;
