@@ -7,7 +7,7 @@ class GolferSegment < ApplicationRecord
   has_many :members, through: :golfer_segment_memberships, source: :user
 
   validates :name, presence: true, uniqueness: { scope: :organization_id }
-  validates :filter_criteria, presence: true
+  validate :filter_criteria_is_hash
 
   scope :by_organization, ->(org) { where(organization: org) }
   scope :dynamic, -> { where(is_dynamic: true) }
@@ -35,6 +35,10 @@ class GolferSegment < ApplicationRecord
   validate :validate_filter_criteria
 
   private
+
+  def filter_criteria_is_hash
+    errors.add(:filter_criteria, "must be a Hash") unless filter_criteria.is_a?(Hash)
+  end
 
   def validate_filter_criteria
     return if filter_criteria.blank?
