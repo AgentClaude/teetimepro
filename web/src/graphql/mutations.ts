@@ -71,8 +71,13 @@ export const CONFIGURE_ACCOUNTING_MAPPING = gql`
 `;
 
 export const CREATE_PAYMENT_INTENT = gql`
-  mutation CreatePaymentIntent($teeTimeId: ID!, $playersCount: Int!) {
-    createPaymentIntent(teeTimeId: $teeTimeId, playersCount: $playersCount) {
+  mutation CreatePaymentIntent($teeTimeId: ID, $playersCount: Int, $tournamentId: ID, $entryFeeCents: Int) {
+    createPaymentIntent(
+      teeTimeId: $teeTimeId
+      playersCount: $playersCount
+      tournamentId: $tournamentId
+      entryFeeCents: $entryFeeCents
+    ) {
       clientSecret
       errors
     }
