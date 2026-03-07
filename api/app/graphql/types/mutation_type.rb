@@ -31,5 +31,13 @@ module Types
     field :connect_google_calendar, mutation: Mutations::ConnectGoogleCalendar
     field :disconnect_calendar, mutation: Mutations::DisconnectCalendar
     field :toggle_calendar_sync, mutation: Mutations::ToggleCalendarSync
+    
+    # F&B Tab management
+    field :open_fnb_tab, mutation: Mutations::OpenFnbTab
+    field :add_fnb_tab_item, mutation: Mutations::AddFnbTabItem
+    field :remove_fnb_tab_item, mutation: Mutations::RemoveFnbTabItem
+    field :close_fnb_tab, mutation: Mutations::CloseFnbTab
+    field :merge_fnb_tabs, mutation: Mutations::MergeFnbTabs
+    field :split_fnb_tab, mutation: Mutations::SplitFnbTab
   end
 end
