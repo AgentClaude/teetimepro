@@ -424,4 +424,5 @@ module Types
       org.pricing_rules.includes(:course).find(id)
     end
   end
+  end
 end
