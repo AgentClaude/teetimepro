@@ -29,6 +29,10 @@ gem "twilio-ruby", "~> 6.0"
 gem "request_store", "~> 1.6"
 gem "paper_trail", "~> 15.1"
 
+# Calendar sync functionality
+gem "google-apis-calendar_v3", "~> 0.39"
+gem "icalendar", "~> 2.8"
+
 group :development, :test do
   gem "debug", "~> 1.8"
   gem "rspec-rails", "~> 6.1"

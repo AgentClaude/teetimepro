@@ -40,6 +40,7 @@ Rails.application.routes.draw do
       resources :bookings, only: [:index, :show, :create] do
         member do
           patch :cancel
+          get :ics, defaults: { format: 'ics' }
         end
       end
 

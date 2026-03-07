@@ -15,6 +15,7 @@ module Types
     field :bookings, [Types::BookingType], null: false
     field :upcoming_bookings, [Types::BookingType], null: false
     field :golfer_profile, Types::GolferProfileType, null: true
+    field :calendar_connections, [Types::CalendarConnectionType], null: false
     field :audit_log, [Types::AuditLogType], null: false
 
     def audit_log
