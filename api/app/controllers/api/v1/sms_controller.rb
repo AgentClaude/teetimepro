@@ -3,7 +3,7 @@
 module Api
   module V1
     class SmsController < BaseController
-      skip_before_action :authenticate_user!, only: [:status_callback]
+      skip_before_action :authenticate_api_key!, only: [:status_callback]
 
       # POST /api/v1/sms/status_callback
       # Twilio webhook for SMS delivery status updates
