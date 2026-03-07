@@ -2,6 +2,7 @@ module Types
   class CourseType < Types::BaseObject
     field :id, ID, null: false
     field :name, String, null: false
+    field :slug, String, null: false
     field :holes, Integer, null: false
     field :interval_minutes, Integer, null: false
     field :max_players_per_slot, Integer, null: false
