@@ -12,7 +12,7 @@ class FnbTabItem < ApplicationRecord
   validate :tab_can_be_modified
   validate :organization_consistency
 
-  enum category: { food: 'food', beverage: 'beverage', other: 'other' }
+  enum :category, { food: 'food', beverage: 'beverage', other: 'other' }
 
   scope :for_tab, ->(tab) { where(fnb_tab: tab) }
   scope :by_category, ->(cat) { where(category: cat) }
