@@ -66,5 +66,11 @@ module Types
     field :update_pricing_rule, mutation: Mutations::UpdatePricingRule
     field :delete_pricing_rule, mutation: Mutations::DeletePricingRule
     field :calculate_tee_time_price, mutation: Mutations::CalculateTeeTimePrice
+
+    # Marketplace syndication
+    field :connect_marketplace, mutation: Mutations::ConnectMarketplace
+    field :disconnect_marketplace, mutation: Mutations::DisconnectMarketplace
+    field :update_marketplace_settings, mutation: Mutations::UpdateMarketplaceSettings
+    field :sync_marketplace, mutation: Mutations::SyncMarketplace
   end
 end

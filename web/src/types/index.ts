@@ -277,3 +277,51 @@ export interface PricingRuleFormData {
   startDate: string | null;
   endDate: string | null;
 }
+
+// Marketplace types
+export type MarketplaceProvider = "golfnow" | "teeoff";
+export type MarketplaceConnectionStatus = "pending" | "active" | "paused" | "error";
+export type MarketplaceListingStatus = "pending" | "listed" | "booked" | "expired" | "error" | "cancelled";
+
+export interface MarketplaceSettings {
+  auto_syndicate: boolean;
+  min_advance_hours: number;
+  max_advance_days: number;
+  discount_percent: number;
+  blocked_time_ranges: string[];
+  min_available_spots: number;
+}
+
+export interface MarketplaceConnection {
+  id: string;
+  provider: MarketplaceProvider;
+  providerLabel: string;
+  status: MarketplaceConnectionStatus;
+  externalCourseId: string | null;
+  settings: MarketplaceSettings;
+  effectiveSettings: MarketplaceSettings;
+  lastSyncedAt: string | null;
+  lastError: string | null;
+  course: Course;
+  activeListingsCount: number;
+  totalListingsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketplaceListing {
+  id: string;
+  status: MarketplaceListingStatus;
+  externalListingId: string | null;
+  listedPriceCents: number | null;
+  listedPriceCurrency: string;
+  commissionRateBps: number | null;
+  commissionRatePercent: number;
+  estimatedCommissionCents: number;
+  netRevenueCents: number;
+  listedAt: string | null;
+  expiresAt: string | null;
+  teeTime: TeeTime;
+  providerLabel: string;
+  createdAt: string;
+}

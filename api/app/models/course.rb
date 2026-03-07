@@ -6,6 +6,8 @@ class Course < ApplicationRecord
   has_many :voice_call_logs, dependent: :nullify
   has_many :tournaments, dependent: :destroy
   has_many :pricing_rules, dependent: :destroy
+  has_many :marketplace_connections, dependent: :destroy
+  has_many :marketplace_listings, through: :marketplace_connections
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
