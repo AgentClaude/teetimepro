@@ -266,7 +266,7 @@ module Types
       syncs = AccountingSync.joins(:accounting_integration)
                            .where(accounting_integrations: { organization_id: org.id })
 
-      syncs = syncs.joins(:accounting_integration).where(accounting_integrations: { provider: provider }) if provider
+      syncs = syncs.where(accounting_integrations: { provider: provider }) if provider
       syncs = syncs.where(sync_type: sync_type) if sync_type
       syncs = syncs.where(status: status) if status
 
