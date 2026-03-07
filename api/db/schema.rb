@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_032702) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -233,20 +233,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_032702) do
     t.index ["sms_campaign_id"], name: "index_sms_messages_on_sms_campaign_id"
     t.index ["twilio_sid"], name: "index_sms_messages_on_twilio_sid", unique: true, where: "(twilio_sid IS NOT NULL)"
     t.index ["user_id"], name: "index_sms_messages_on_user_id"
-  end
-
-  create_table "stripe_events", force: :cascade do |t|
-    t.string "stripe_event_id", null: false
-    t.string "event_type", null: false
-    t.integer "status", default: 0, null: false
-    t.jsonb "payload", null: false
-    t.datetime "processed_at"
-    t.text "error_message"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["event_type"], name: "index_stripe_events_on_event_type"
-    t.index ["status"], name: "index_stripe_events_on_status"
-    t.index ["stripe_event_id"], name: "index_stripe_events_on_stripe_event_id", unique: true
   end
 
   create_table "tee_sheets", force: :cascade do |t|

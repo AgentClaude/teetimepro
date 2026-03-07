@@ -340,5 +340,30 @@ module Types
 
       syncs.recent.limit([limit, 100].min)
     end
+
+    # F&B Tabs - List all tabs
+    field :fnb_tabs, [Types::FnbTabType], null: false do
+      argument :status, Types::FnbTabStatusEnum, required: false
+      argument :course_id, ID, required: false
+      argument :limit, Integer, required: false
+    end
+    def fnb_tabs(status: nil, course_id: nil, limit: 50)
+      org = require_auth!
+      
+      tabs = org.fnb_tabs.includes(:course, :user, :fnb_tab_items)
+      tabs = tabs.where(status: status.downcase) if status
+      tabs = tabs.where(course_id: course_id) if course_id
+      
+      tabs.recent.limit([limit, 100].min)
+    end
+
+    # F&B Tabs - Single tab
+    field :fnb_tab, Types::FnbTabType, null: true do
+      argument :id, ID, required: true
+    end
+    def fnb_tab(id:)
+      org = require_auth!
+      org.fnb_tabs.includes(:course, :user, :fnb_tab_items).find_by(id: id)
+    end
   end
 end
