@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import twilio from "twilio";
 import { buildSettings } from "./deepgram-settings.js";
 import { executeFunction } from "./function-handlers.js";
 import { CallLogger } from "./call-logger.js";
@@ -194,6 +195,18 @@ async function handleFunctionCalls(msg, deepgramWs, callMeta, log, callLogger) {
 
       callLogger.addFunctionResult(fn.name, result);
 
+      // Check if this is a transfer request
+      const resultObj = JSON.parse(result);
+      if (resultObj.transfer === true) {
+        log.info({ handoff_id: resultObj.handoff_id }, "Initiating call transfer to human");
+        
+        // Initiate Twilio call transfer
+        await initiateCallTransfer(callMeta.callSid, resultObj.transfer_number, log);
+        
+        // Don't send response back to Deepgram - the call is being transferred
+        return;
+      }
+
       // Send FunctionCallResponse back to Deepgram
       if (deepgramWs.readyState === WebSocket.OPEN) {
         deepgramWs.send(
@@ -219,5 +232,43 @@ async function handleFunctionCalls(msg, deepgramWs, callMeta, log, callLogger) {
         );
       }
     }
+  }
+}
+
+/**
+ * Initiate a call transfer to a human staff member using Twilio's REST API
+ * @param {string} callSid - Twilio call SID
+ * @param {string} transferNumber - Phone number to transfer to
+ * @param {object} log - Logger instance
+ */
+async function initiateCallTransfer(callSid, transferNumber, log) {
+  try {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    
+    if (!accountSid || !authToken) {
+      log.error("Twilio credentials not configured");
+      return;
+    }
+
+    const client = twilio(accountSid, authToken);
+    
+    // Create TwiML to dial the transfer number
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Dial timeout="30" action="/api/voice/transfer_complete">
+    <Number>${transferNumber}</Number>
+  </Dial>
+  <Say>I'm sorry, no one is available to take your call right now. Please call back later.</Say>
+</Response>`;
+
+    // Update the call to use the transfer TwiML
+    await client.calls(callSid).update({
+      twiml: twiml
+    });
+
+    log.info({ callSid, transferNumber }, "Call transfer initiated successfully");
+  } catch (error) {
+    log.error({ error: error.message, callSid, transferNumber }, "Call transfer failed");
   }
 }

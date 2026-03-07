@@ -195,6 +195,31 @@ module Types
       VoiceCallLog.for_organization(org).find(id)
     end
 
+    # Voice handoffs
+    field :voice_handoffs, [Types::VoiceHandoffType], null: false do
+      argument :status, Types::VoiceHandoffStatusEnum, required: false
+      argument :reason, Types::VoiceHandoffReasonEnum, required: false
+      argument :active_only, Boolean, required: false, default_value: false
+      argument :limit, Integer, required: false
+      argument :offset, Integer, required: false
+    end
+    def voice_handoffs(status: nil, reason: nil, active_only: false, limit: 50, offset: 0)
+      org = require_auth!
+      scope = VoiceHandoff.for_organization(org).order(started_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      scope = scope.where(reason: reason) if reason.present?
+      scope = scope.active if active_only
+      scope.includes(:voice_call_log).limit([limit, 100].min).offset(offset)
+    end
+
+    field :voice_handoff, Types::VoiceHandoffType, null: true do
+      argument :id, ID, required: true
+    end
+    def voice_handoff(id:)
+      org = require_auth!
+      VoiceHandoff.for_organization(org).includes(:voice_call_log).find(id)
+    end
+
     # Customers (users in the org)
     field :customers, [Types::UserType], null: false do
       argument :search, String, required: false
