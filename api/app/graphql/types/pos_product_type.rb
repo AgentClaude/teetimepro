@@ -12,7 +12,19 @@ module Types
     field :stock_quantity, Integer
     field :in_stock, Boolean, null: false
     field :formatted_price, String, null: false
+    field :inventory_levels, [Types::InventoryLevelType], null: false
+    field :inventory_movements, [Types::InventoryMovementType], null: false
+    field :needs_reorder, Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
+
+    def needs_reorder
+      object.needs_reorder?
+    end
+
+    def inventory_movements
+      # Limit to recent movements to avoid loading too much data
+      object.inventory_movements.recent.limit(50)
+    end
   end
 end

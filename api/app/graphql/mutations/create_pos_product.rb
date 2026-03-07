@@ -7,23 +7,30 @@ module Mutations
     argument :category, String, required: false
     argument :description, String, required: false
     argument :track_inventory, Boolean, required: false
-    argument :stock_quantity, Integer, required: false
+    argument :reorder_point, Integer, required: false
+    argument :reorder_quantity, Integer, required: false
+    argument :initial_stock, Integer, required: false
 
     field :product, Types::PosProductType
+    field :inventory_level, Types::InventoryLevelType
     field :errors, [String], null: false
 
     def resolve(**args)
-      result = Pos::CreateProductService.call(
+      result = Products::CreateProductService.call(
         organization: current_organization,
-        user: current_user,
         course: current_course,
+        performed_by: current_user,
         **args
       )
 
       if result.success?
-        { product: result.data[:product], errors: [] }
+        { 
+          product: result.product, 
+          inventory_level: result.inventory_level,
+          errors: [] 
+        }
       else
-        { product: nil, errors: result.errors }
+        { product: nil, inventory_level: nil, errors: result.errors }
       end
     end
   end

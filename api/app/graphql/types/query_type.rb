@@ -490,6 +490,64 @@ module Types
       org.pos_products.find_by(id: id)
     end
 
+    # Low Stock Products
+    field :low_stock_products, [Types::InventoryLevelType], null: false do
+      argument :course_id, ID, required: false
+      argument :category, String, required: false
+    end
+    def low_stock_products(course_id: nil, category: nil)
+      org = require_auth!
+      course = course_id ? org.courses.find(course_id) : nil
+      
+      result = Inventory::CheckLowStockService.call(
+        organization: org,
+        course: course,
+        category: category
+      )
+
+      if result.success?
+        result.low_stock_items
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
+    # Inventory Movements
+    field :inventory_movements, [Types::InventoryMovementType], null: false do
+      argument :product_id, ID, required: false
+      argument :course_id, ID, required: false
+      argument :movement_type, String, required: false
+      argument :limit, Integer, required: false, default_value: 50
+      argument :offset, Integer, required: false, default_value: 0
+    end
+    def inventory_movements(product_id: nil, course_id: nil, movement_type: nil, limit: 50, offset: 0)
+      org = require_auth!
+      
+      scope = InventoryMovement.for_organization(org).includes(:pos_product, :course, :performed_by).recent
+      scope = scope.for_product(org.pos_products.find(product_id)) if product_id.present?
+      scope = scope.for_course(org.courses.find(course_id)) if course_id.present?
+      scope = scope.where(movement_type: movement_type) if movement_type.present?
+      
+      scope.limit([limit, 100].min).offset(offset)
+    end
+
+    # Inventory Levels
+    field :inventory_levels, [Types::InventoryLevelType], null: false do
+      argument :course_id, ID, required: false
+      argument :product_id, ID, required: false
+      argument :low_stock_only, Boolean, required: false, default_value: false
+    end
+    def inventory_levels(course_id: nil, product_id: nil, low_stock_only: false)
+      org = require_auth!
+      
+      scope = InventoryLevel.for_organization(org).includes(:pos_product, :course)
+      scope = scope.for_course(org.courses.find(course_id)) if course_id.present?
+      scope = scope.where(pos_product_id: product_id) if product_id.present?
+      scope = scope.low_stock if low_stock_only
+      
+      scope.joins(:pos_product).order('pos_products.name')
+    end
+
     # Turn orders
     field :turn_orders, [Types::FnbTabType], null: false do
       argument :date, GraphQL::Types::ISO8601Date, required: false,
