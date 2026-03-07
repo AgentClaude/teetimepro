@@ -125,7 +125,7 @@ interface CalendarProviderCardProps {
 }
 
 function CalendarProviderCard({
-  provider,
+  provider: _provider,
   displayName,
   connection,
   onConnect,
