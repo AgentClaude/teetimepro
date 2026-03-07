@@ -12,6 +12,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { CallLogPage } from "./pages/CallLogPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { ReportsPage } from "./pages/ReportsPage";
+import { VoiceAnalyticsPage } from "./pages/VoiceAnalyticsPage";
 import CampaignsPage from "./pages/CampaignsPage";
 import { SegmentsPage } from "./pages/SegmentsPage";
 
@@ -35,6 +36,7 @@ function App() {
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/voice-analytics" element={<VoiceAnalyticsPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/segments" element={<SegmentsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

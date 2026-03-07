@@ -109,18 +109,50 @@ module Types
       org.sms_campaigns.find(id)
     end
 
+    # Voice analytics
+    field :voice_analytics, Types::VoiceAnalyticsType, null: false do
+      argument :course_id, ID, required: false
+      argument :start_date, GraphQL::Types::ISO8601Date, required: true
+      argument :end_date, GraphQL::Types::ISO8601Date, required: true
+    end
+    def voice_analytics(course_id: nil, start_date:, end_date:)
+      org = require_auth!
+      result = Voice::AnalyticsService.call(
+        organization: org,
+        course_id: course_id,
+        start_date: start_date,
+        end_date: end_date
+      )
+      
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
     # Voice call logs
     field :voice_call_logs, [Types::VoiceCallLogType], null: false do
       argument :course_id, ID, required: false
       argument :channel, String, required: false
+      argument :status, String, required: false
+      argument :start_date, GraphQL::Types::ISO8601Date, required: false
+      argument :end_date, GraphQL::Types::ISO8601Date, required: false
       argument :limit, Integer, required: false
+      argument :offset, Integer, required: false
     end
-    def voice_call_logs(course_id: nil, channel: nil, limit: 50)
+    def voice_call_logs(course_id: nil, channel: nil, status: nil, start_date: nil, end_date: nil, limit: 50, offset: 0)
       org = require_auth!
       scope = VoiceCallLog.for_organization(org).recent
       scope = scope.where(course_id: course_id) if course_id.present?
       scope = scope.where(channel: channel) if channel.present?
-      scope.includes(:course).limit([limit, 100].min)
+      scope = scope.where(status: status) if status.present?
+      
+      if start_date.present? && end_date.present?
+        scope = scope.where(started_at: start_date.beginning_of_day..end_date.end_of_day)
+      end
+      
+      scope.includes(:course).limit([limit, 100].min).offset(offset)
     end
 
     field :voice_call_log, Types::VoiceCallLogType, null: true do
