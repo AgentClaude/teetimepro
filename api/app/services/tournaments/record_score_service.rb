@@ -53,13 +53,28 @@ module Tournaments
       leaderboard = Leaderboard::CalculateService.call(tournament: tournament)
       return unless leaderboard.success?
 
+      now = Time.current.iso8601
+
+      # Broadcast via ActionCable (direct channel)
       ActionCable.server.broadcast(
         "leaderboard_#{tournament.id}",
         {
           type: "leaderboard_update",
           tournament_id: tournament.id,
           leaderboard: leaderboard.data[:entries],
-          updated_at: Time.current.iso8601
+          updated_at: now
+        }
+      )
+
+      # Trigger GraphQL subscription
+      TeeTimeProSchema.subscriptions.trigger(
+        :score_updated,
+        { tournament_id: tournament.id },
+        {
+          tournament_id: tournament.id,
+          score: find_or_initialize_score,
+          leaderboard: leaderboard.data,
+          updated_at: now
         }
       )
     end
