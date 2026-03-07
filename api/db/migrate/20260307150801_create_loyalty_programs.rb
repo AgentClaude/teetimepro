@@ -15,6 +15,6 @@ class CreateLoyaltyPrograms < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :loyalty_programs, :organization_id
+    # organization_id index already created by t.references
   end
 end

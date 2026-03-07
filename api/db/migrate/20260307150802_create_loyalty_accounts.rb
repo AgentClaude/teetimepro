@@ -11,6 +11,6 @@ class CreateLoyaltyAccounts < ActiveRecord::Migration[8.0]
     end
 
     add_index :loyalty_accounts, [:organization_id, :user_id], unique: true
-    add_index :loyalty_accounts, :user_id
+    # user_id index already created by t.references
   end
 end

@@ -2,8 +2,8 @@
 
 class CreateEmailProviders < ActiveRecord::Migration[8.0]
   def change
-    create_table :email_providers, id: :uuid do |t|
-      t.references :organization, null: false, foreign_key: true, type: :uuid
+    create_table :email_providers do |t|
+      t.references :organization, null: false, foreign_key: true
       t.string :provider_type, null: false # sendgrid, mailchimp
       t.string :api_key, null: false
       t.string :from_email, null: false

@@ -13,7 +13,7 @@ class CreateLoyaltyRewards < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :loyalty_rewards, :organization_id
+    # organization_id index already created by t.references
     add_index :loyalty_rewards, :is_active
     add_index :loyalty_rewards, :reward_type
   end

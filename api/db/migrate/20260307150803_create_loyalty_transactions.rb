@@ -11,8 +11,8 @@ class CreateLoyaltyTransactions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :loyalty_transactions, :loyalty_account_id
-    add_index :loyalty_transactions, [:source_type, :source_id]
+    # loyalty_account_id index already created by t.references
+    # source_type+source_id index already created by polymorphic t.references
     add_index :loyalty_transactions, :transaction_type
     add_index :loyalty_transactions, :created_at
   end

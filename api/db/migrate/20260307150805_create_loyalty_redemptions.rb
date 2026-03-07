@@ -11,9 +11,7 @@ class CreateLoyaltyRedemptions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :loyalty_redemptions, :loyalty_account_id
-    add_index :loyalty_redemptions, :loyalty_reward_id
-    add_index :loyalty_redemptions, :booking_id
+    # loyalty_account_id, loyalty_reward_id, booking_id indexes already created by t.references
     add_index :loyalty_redemptions, :status
     add_index :loyalty_redemptions, :code, unique: true
     add_index :loyalty_redemptions, :expires_at

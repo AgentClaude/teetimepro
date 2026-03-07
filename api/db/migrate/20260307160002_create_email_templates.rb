@@ -2,9 +2,9 @@
 
 class CreateEmailTemplates < ActiveRecord::Migration[8.0]
   def change
-    create_table :email_templates, id: :uuid do |t|
-      t.references :organization, null: false, foreign_key: true, type: :uuid
-      t.references :created_by, null: false, foreign_key: { to_table: :users }, type: :uuid
+    create_table :email_templates do |t|
+      t.references :organization, null: false, foreign_key: true
+      t.references :created_by, null: false, foreign_key: { to_table: :users }
       t.string :name, null: false
       t.string :subject, null: false
       t.text :body_html, null: false
@@ -21,12 +21,12 @@ class CreateEmailTemplates < ActiveRecord::Migration[8.0]
     add_index :email_templates, [:organization_id, :category]
     add_index :email_templates, [:organization_id, :is_active]
 
-    # Add template reference to email campaigns
-    add_reference :email_campaigns, :email_template, type: :uuid, foreign_key: true, null: true
-    # Add provider reference to email campaigns
-    add_reference :email_campaigns, :email_provider, type: :uuid, foreign_key: true, null: true
-    # Add provider message ID to email messages for webhook tracking
-    add_column :email_messages, :provider_message_id, :string
-    add_index :email_messages, :provider_message_id
+    # Add template/provider references to email campaigns and provider_message_id to email_messages
+    safety_assured do
+      add_reference :email_campaigns, :email_template, foreign_key: true, null: true
+      add_reference :email_campaigns, :email_provider, foreign_key: true, null: true
+      add_column :email_messages, :provider_message_id, :string
+      add_index :email_messages, :provider_message_id
+    end
   end
 end
