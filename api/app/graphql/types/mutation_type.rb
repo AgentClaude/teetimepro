@@ -15,6 +15,9 @@ module Types
     field :create_sms_campaign, mutation: Mutations::CreateSmsCampaign
     field :send_sms_campaign, mutation: Mutations::SendSmsCampaign
     field :cancel_sms_campaign, mutation: Mutations::CancelSmsCampaign
+    field :create_email_campaign, mutation: Mutations::CreateEmailCampaign
+    field :send_email_campaign, mutation: Mutations::SendEmailCampaign
+    field :cancel_email_campaign, mutation: Mutations::CancelEmailCampaign
     field :update_customer, mutation: Mutations::UpdateCustomer
     field :create_tournament, mutation: Mutations::CreateTournament
     field :update_tournament, mutation: Mutations::UpdateTournament

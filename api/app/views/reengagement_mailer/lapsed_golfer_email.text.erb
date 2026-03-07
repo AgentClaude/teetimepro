@@ -1,0 +1,38 @@
+<%= @organization.name %>
+=======================================
+
+Hi <%= @user.first_name || 'Fellow Golfer' %>,
+
+<%= personalize_content(@campaign.body_text || strip_tags(@campaign.body_html), @user) %>
+
+Ready to get back on the course? Book your tee time today!
+
+Book Online: <%= @booking_url %>
+
+Why return to <%= @organization.name %>?
+- Pristine course conditions maintained daily
+- Flexible tee time options to fit your schedule  
+- Member pricing and exclusive benefits
+- Professional staff ready to assist you
+
+CONTACT US
+----------
+<%= @organization.name %>
+<% if @organization.address %>
+<%= @organization.address %>
+<% end %>
+<% if @organization.phone %>
+Phone: <%= @organization.phone %>
+<% end %>
+Email: <%= @organization.email %>
+
+Book Online: <%= @booking_url %>
+
+You received this email because you're a valued member of <%= @organization.name %>. 
+If you'd prefer not to receive these emails, please contact us.
+
+<% content_for :personalize_content do |content, user| %>
+  <% content.to_s.gsub('{{first_name}}', user.first_name || 'Golfer')
+              .gsub('{{name}}', user.full_name || 'Golfer') 
+              .gsub('{{golf_course}}', @organization.name) %>
+<% end %>
