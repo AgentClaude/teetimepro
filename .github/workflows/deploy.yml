@@ -17,20 +17,24 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: deploy
+          username: root
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
           script: |
             set -e
             cd /opt/teetimepro
             git fetch origin main
             git reset --hard origin/main
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-            sleep 10
-            if curl -sf http://localhost:3001/health > /dev/null; then
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq web
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d db redis
+            sleep 5
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d api sidekiq web voice-agent
+            sleep 15
+            # Health check via the mapped port
+            if curl -sf http://localhost:3007/health > /dev/null; then
               echo "✅ Deploy successful - API healthy"
             else
               echo "❌ Deploy failed - API unhealthy"
-              docker compose logs api --tail 20
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml logs api --tail 20
               exit 1
             fi
