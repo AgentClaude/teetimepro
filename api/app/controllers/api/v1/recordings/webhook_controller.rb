@@ -1,8 +1,8 @@
 module Api
   module V1
     module Recordings
-      class WebhookController < ApplicationController
-        skip_before_action :authenticate_user!
+      class WebhookController < Api::BaseController
+        skip_before_action :authenticate_api_key!
 
         def create
           Rails.logger.info "Received Twilio recording webhook: #{webhook_params.inspect}"
