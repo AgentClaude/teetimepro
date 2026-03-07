@@ -1,0 +1,16 @@
+Tee Time Reminder
+
+Hi <%= @user.first_name %>,
+
+Your tee time at <%= @course.name %> is coming up in <%= @hours_until %> hours!
+
+Date: <%= @tee_time.date.strftime('%A, %B %d, %Y') %>
+Tee Time: <%= @tee_time.formatted_time %>
+Players: <%= @booking.players_count %>
+Confirmation Code: <%= @booking.confirmation_code %>
+
+Please arrive at least 15 minutes before your tee time.
+
+See you on the course! ⛳
+
+<%= @organization.name %>

@@ -1,0 +1,10 @@
+Good Morning, <%= @user.first_name %>!
+
+Your tee time at <%= @course.name %> is TODAY at <%= @tee_time.formatted_time %>.
+
+Players: <%= @booking.players_count %>
+Confirmation Code: <%= @booking.confirmation_code %>
+
+Remember to arrive at least 15 minutes early. Have a great round! ⛳
+
+<%= @organization.name %>
