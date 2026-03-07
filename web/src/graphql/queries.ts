@@ -913,3 +913,68 @@ export const GET_EMAIL_CAMPAIGN = gql`
     }
   }
 `;
+
+// Email Providers
+export const GET_EMAIL_PROVIDERS = gql`
+  query GetEmailProviders {
+    emailProviders {
+      id
+      providerType
+      fromEmail
+      fromName
+      isActive
+      isDefault
+      verificationStatus
+      lastVerifiedAt
+      maskedApiKey
+      settings
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Email Templates
+export const GET_EMAIL_TEMPLATES = gql`
+  query GetEmailTemplates($category: String) {
+    emailTemplates(category: $category) {
+      id
+      name
+      subject
+      bodyHtml
+      bodyText
+      category
+      isActive
+      mergeFields
+      usageCount
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+export const GET_EMAIL_TEMPLATE = gql`
+  query GetEmailTemplate($id: ID!) {
+    emailTemplate(id: $id) {
+      id
+      name
+      subject
+      bodyHtml
+      bodyText
+      category
+      isActive
+      mergeFields
+      usageCount
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;

@@ -73,6 +73,10 @@ Rails.application.routes.draw do
 
       # Marketplace webhook callbacks (GolfNow, TeeOff)
       post "/marketplace_webhooks/:provider", to: "marketplace_webhooks#receive"
+
+      # Email provider webhooks (SendGrid, Mailchimp)
+      post "/email_webhooks/sendgrid/:organization_id", to: "email_webhooks#sendgrid"
+      post "/email_webhooks/mailchimp/:organization_id", to: "email_webhooks#mailchimp"
     end
   end
 

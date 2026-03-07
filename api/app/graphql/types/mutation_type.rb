@@ -91,5 +91,10 @@ module Types
     field :adjust_points, mutation: Mutations::AdjustPoints
     field :create_reward, mutation: Mutations::CreateReward
     field :update_reward, mutation: Mutations::UpdateReward
+
+    # Email provider & templates
+    field :configure_email_provider, mutation: Mutations::ConfigureEmailProvider
+    field :create_email_template, mutation: Mutations::CreateEmailTemplate
+    field :update_email_template, mutation: Mutations::UpdateEmailTemplate
   end
 end
