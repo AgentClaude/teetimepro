@@ -1,5 +1,6 @@
 class Payment < ApplicationRecord
   belongs_to :booking
+  has_many :accounting_syncs, as: :syncable, dependent: :destroy
 
   enum :status, { pending: 0, completed: 1, failed: 2, refunded: 3, partially_refunded: 4 }
 

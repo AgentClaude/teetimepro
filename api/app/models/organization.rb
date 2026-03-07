@@ -6,6 +6,7 @@ class Organization < ApplicationRecord
   has_many :sms_campaigns, dependent: :destroy
   has_many :voice_call_logs, dependent: :destroy
   has_many :tournaments, dependent: :destroy
+  has_many :accounting_integrations, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

@@ -1,5 +1,75 @@
 import { gql } from "@apollo/client";
 
+// Accounting mutations
+export const CONNECT_ACCOUNTING_INTEGRATION = gql`
+  mutation ConnectAccountingIntegration(
+    $provider: AccountingProviderEnum!
+    $oauthCode: String!
+    $oauthState: String!
+    $realmId: String
+    $tenantId: String
+  ) {
+    connectAccountingIntegration(
+      provider: $provider
+      oauthCode: $oauthCode
+      oauthState: $oauthState
+      realmId: $realmId
+      tenantId: $tenantId
+    ) {
+      integration {
+        id
+        provider
+        status
+        companyName
+        connected
+      }
+      errors
+    }
+  }
+`;
+
+export const DISCONNECT_ACCOUNTING_INTEGRATION = gql`
+  mutation DisconnectAccountingIntegration($provider: AccountingProviderEnum!) {
+    disconnectAccountingIntegration(provider: $provider) {
+      success
+      message
+      errors
+    }
+  }
+`;
+
+export const SYNC_ACCOUNTING_DATA = gql`
+  mutation SyncAccountingData($syncType: AccountingSyncTypeEnum, $force: Boolean) {
+    syncAccountingData(syncType: $syncType, force: $force) {
+      success
+      message
+      errors
+    }
+  }
+`;
+
+export const CONFIGURE_ACCOUNTING_MAPPING = gql`
+  mutation ConfigureAccountingMapping(
+    $provider: AccountingProviderEnum!
+    $category: String!
+    $accountId: String!
+    $accountName: String!
+  ) {
+    configureAccountingMapping(
+      provider: $provider
+      category: $category
+      accountId: $accountId
+      accountName: $accountName
+    ) {
+      integration {
+        id
+        accountMapping
+      }
+      errors
+    }
+  }
+`;
+
 export const CREATE_BOOKING = gql`
   mutation CreateBooking(
     $teeTimeId: ID!

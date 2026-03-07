@@ -1,5 +1,78 @@
 import { gql } from "@apollo/client";
 
+// Accounting queries
+export const GET_ACCOUNTING_INTEGRATION = gql`
+  query GetAccountingIntegration($provider: AccountingProviderEnum!) {
+    accountingIntegration(provider: $provider) {
+      id
+      provider
+      status
+      companyName
+      countryCode
+      connectedAt
+      lastSyncAt
+      accountMapping
+      settings
+      lastErrorMessage
+      lastErrorAt
+      connected
+      companyId
+    }
+  }
+`;
+
+export const GET_ACCOUNTING_SYNC_HISTORY = gql`
+  query GetAccountingSyncHistory(
+    $provider: AccountingProviderEnum
+    $syncType: AccountingSyncTypeEnum
+    $status: AccountingSyncStatusEnum
+    $limit: Int
+  ) {
+    accountingSyncHistory(
+      provider: $provider
+      syncType: $syncType
+      status: $status
+      limit: $limit
+    ) {
+      id
+      syncType
+      status
+      externalId
+      retryCount
+      errorMessage
+      errorAt
+      startedAt
+      completedAt
+      createdAt
+      syncTypeHumanized
+      provider
+      duration
+      retryable
+      syncable {
+        ... on Booking {
+          id
+          confirmationCode
+          totalCents
+          status
+          user {
+            fullName
+            email
+          }
+        }
+        ... on Payment {
+          id
+          amountCents
+          stripePaymentIntentId
+          status
+          booking {
+            confirmationCode
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_ME = gql`
   query GetMe {
     me {
