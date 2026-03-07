@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { RecordingsList } from './RecordingsList';
-import type { CallRecording } from '../../types';
+import type { CallRecording, CallTranscription } from '../../types';
 
 const meta: Meta<typeof RecordingsList> = {
   title: 'Recordings/RecordingsList',
@@ -11,9 +11,10 @@ const meta: Meta<typeof RecordingsList> = {
 export default meta;
 type Story = StoryObj<typeof RecordingsList>;
 
-const mockTranscription = {
+const mockTranscription: CallTranscription = {
   id: 'trans-1',
   organizationId: 'org-1',
+  callRecording: {} as CallRecording,
   transcriptionText: 'Hello, thank you for calling TeeTimes Pro. How can I help you today?',
   confidenceScore: 0.85,
   language: 'en',
