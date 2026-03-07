@@ -160,7 +160,7 @@ export function DashboardPage() {
             <p className="text-sm text-gray-500">No revenue data available.</p>
           ) : (
             <div className="space-y-2">
-              {stats.weeklyRevenue.map((day, index) => (
+              {stats.weeklyRevenue.map((day, _index) => (
                 <div key={day.date} className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">
                     {formatShortDate(day.date)}
