@@ -744,6 +744,123 @@ export const GET_EMAIL_CAMPAIGNS = gql`
   }
 `;
 
+// Loyalty queries
+export const GET_LOYALTY_PROGRAM = gql`
+  query GetLoyaltyProgram {
+    loyaltyProgram {
+      id
+      name
+      description
+      pointsPerDollar
+      isActive
+      tierThresholds
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_LOYALTY_ACCOUNT = gql`
+  query GetLoyaltyAccount {
+    loyaltyAccount {
+      id
+      pointsBalance
+      lifetimePoints
+      tier
+      tierName
+      pointsNeededForNextTier
+      createdAt
+      updatedAt
+      loyaltyProgram {
+        id
+        name
+        description
+        pointsPerDollar
+      }
+      recentTransactions {
+        id
+        transactionType
+        points
+        pointsDisplay
+        description
+        balanceAfter
+        transactionIcon
+        positive
+        createdAt
+      }
+    }
+  }
+`;
+
+export const GET_LOYALTY_REWARDS = gql`
+  query GetLoyaltyRewards($rewardType: LoyaltyRewardTypeEnum, $affordableOnly: Boolean, $activeOnly: Boolean) {
+    loyaltyRewards(rewardType: $rewardType, affordableOnly: $affordableOnly, activeOnly: $activeOnly) {
+      id
+      name
+      description
+      pointsCost
+      rewardType
+      discountValue
+      discountDisplay
+      isActive
+      maxRedemptionsPerUser
+      canBeRedeemed
+      remainingRedemptions
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_LOYALTY_TRANSACTIONS = gql`
+  query GetLoyaltyTransactions($userId: ID, $transactionType: String, $limit: Int) {
+    loyaltyTransactions(userId: $userId, transactionType: $transactionType, limit: $limit) {
+      id
+      transactionType
+      points
+      pointsDisplay
+      description
+      balanceAfter
+      transactionIcon
+      positive
+      negative
+      sourceType
+      sourceId
+      createdAt
+    }
+  }
+`;
+
+export const GET_LOYALTY_REDEMPTIONS = gql`
+  query GetLoyaltyRedemptions($status: String, $rewardId: ID, $userId: ID, $limit: Int) {
+    loyaltyRedemptions(status: $status, rewardId: $rewardId, userId: $userId, limit: $limit) {
+      id
+      status
+      code
+      expiresAt
+      expired
+      canBeApplied
+      canBeCancelled
+      createdAt
+      updatedAt
+      loyaltyAccount {
+        id
+        user {
+          id
+          fullName
+          email
+        }
+      }
+      loyaltyReward {
+        id
+        name
+        pointsCost
+        discountDisplay
+      }
+    }
+  }
+`;
+
 export const GET_EMAIL_CAMPAIGN = gql`
   query GetEmailCampaign($id: ID!) {
     emailCampaign(id: $id) {

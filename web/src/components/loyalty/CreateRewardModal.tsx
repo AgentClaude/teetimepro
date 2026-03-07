@@ -3,7 +3,6 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Switch } from "../ui/Switch";
-import type { LoyaltyReward } from "../../types/loyalty";
 
 interface CreateRewardModalProps {
   isOpen: boolean;
@@ -65,7 +64,7 @@ export function CreateRewardModal({
         newErrors.discountValue = `${selectedRewardType.valueLabel} must be greater than 0`;
       }
       
-      if (formData.rewardType === "discount_percentage" && formData.discountValue > 100) {
+      if (formData.rewardType === "discount_percentage" && (formData.discountValue ?? 0) > 100) {
         newErrors.discountValue = "Discount percentage cannot exceed 100%";
       }
     }
@@ -88,7 +87,7 @@ export function CreateRewardModal({
       
       // Convert discount value to cents for fixed amounts and pro shop credit
       if (formData.rewardType === "discount_fixed" || formData.rewardType === "pro_shop_credit") {
-        submitData.discountValue = (formData.discountValue || 0) * 100;
+        submitData.discountValue = ((formData.discountValue ?? 0) * 100);
       }
       
       // Remove discountValue for free_round type
@@ -256,7 +255,7 @@ export function CreateRewardModal({
           </div>
           <Switch
             checked={formData.isActive}
-            onChange={(checked) => handleInputChange("isActive", checked)}
+            onCheckedChange={(checked) => handleInputChange("isActive", checked)}
           />
         </div>
 

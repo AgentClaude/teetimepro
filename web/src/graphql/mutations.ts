@@ -712,6 +712,199 @@ export const SEND_EMAIL_CAMPAIGN = gql`
   }
 `;
 
+// Loyalty mutations
+export const CREATE_LOYALTY_PROGRAM = gql`
+  mutation CreateLoyaltyProgram(
+    $name: String!
+    $description: String
+    $pointsPerDollar: Int
+    $tierThresholds: JSON
+    $isActive: Boolean
+  ) {
+    createLoyaltyProgram(
+      name: $name
+      description: $description
+      pointsPerDollar: $pointsPerDollar
+      tierThresholds: $tierThresholds
+      isActive: $isActive
+    ) {
+      program {
+        id
+        name
+        description
+        pointsPerDollar
+        isActive
+        tierThresholds
+      }
+      errors
+    }
+  }
+`;
+
+export const EARN_POINTS = gql`
+  mutation EarnPoints(
+    $userId: ID
+    $points: Int!
+    $description: String!
+    $sourceType: String
+    $sourceId: ID
+  ) {
+    earnPoints(
+      userId: $userId
+      points: $points
+      description: $description
+      sourceType: $sourceType
+      sourceId: $sourceId
+    ) {
+      account {
+        id
+        pointsBalance
+        lifetimePoints
+        tier
+        tierName
+      }
+      transaction {
+        id
+        transactionType
+        points
+        pointsDisplay
+        description
+        balanceAfter
+      }
+      errors
+    }
+  }
+`;
+
+export const REDEEM_REWARD = gql`
+  mutation RedeemReward($rewardId: ID!) {
+    redeemReward(rewardId: $rewardId) {
+      redemption {
+        id
+        status
+        code
+        expiresAt
+        loyaltyReward {
+          id
+          name
+          discountDisplay
+        }
+      }
+      account {
+        id
+        pointsBalance
+        lifetimePoints
+        tier
+        tierName
+      }
+      errors
+    }
+  }
+`;
+
+export const ADJUST_POINTS = gql`
+  mutation AdjustPoints(
+    $userId: ID!
+    $pointsAdjustment: Int!
+    $reason: String!
+  ) {
+    adjustPoints(
+      userId: $userId
+      pointsAdjustment: $pointsAdjustment
+      reason: $reason
+    ) {
+      account {
+        id
+        pointsBalance
+        lifetimePoints
+        tier
+        tierName
+      }
+      transaction {
+        id
+        transactionType
+        points
+        pointsDisplay
+        description
+        balanceAfter
+      }
+      errors
+    }
+  }
+`;
+
+export const CREATE_REWARD = gql`
+  mutation CreateReward(
+    $name: String!
+    $description: String
+    $pointsCost: Int!
+    $rewardType: LoyaltyRewardTypeEnum!
+    $discountValue: Int
+    $isActive: Boolean
+    $maxRedemptionsPerUser: Int
+  ) {
+    createReward(
+      name: $name
+      description: $description
+      pointsCost: $pointsCost
+      rewardType: $rewardType
+      discountValue: $discountValue
+      isActive: $isActive
+      maxRedemptionsPerUser: $maxRedemptionsPerUser
+    ) {
+      reward {
+        id
+        name
+        description
+        pointsCost
+        rewardType
+        discountValue
+        discountDisplay
+        isActive
+        maxRedemptionsPerUser
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_REWARD = gql`
+  mutation UpdateReward(
+    $rewardId: ID!
+    $name: String
+    $description: String
+    $pointsCost: Int
+    $rewardType: LoyaltyRewardTypeEnum
+    $discountValue: Int
+    $isActive: Boolean
+    $maxRedemptionsPerUser: Int
+  ) {
+    updateReward(
+      rewardId: $rewardId
+      name: $name
+      description: $description
+      pointsCost: $pointsCost
+      rewardType: $rewardType
+      discountValue: $discountValue
+      isActive: $isActive
+      maxRedemptionsPerUser: $maxRedemptionsPerUser
+    ) {
+      reward {
+        id
+        name
+        description
+        pointsCost
+        rewardType
+        discountValue
+        discountDisplay
+        isActive
+        maxRedemptionsPerUser
+      }
+      errors
+    }
+  }
+`;
+
 export const CANCEL_EMAIL_CAMPAIGN = gql`
   mutation CancelEmailCampaign($id: ID!) {
     cancelEmailCampaign(id: $id) {
