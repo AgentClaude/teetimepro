@@ -1061,3 +1061,31 @@ export const GET_BOOKING_EMAIL_TEMPLATES = gql`
     }
   }
 `;
+
+
+// Waitlist
+export const GET_WAITLIST_ENTRIES = gql`
+  query GetWaitlistEntries($status: String) {
+    waitlistEntries(status: $status) {
+      id
+      playersRequested
+      status
+      notifiedAt
+      createdAt
+      teeTime {
+        id
+        startsAt
+        maxPlayers
+        bookedPlayers
+        status
+        teeSheet {
+          date
+          course {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;

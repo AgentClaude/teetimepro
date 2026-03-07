@@ -1,0 +1,15 @@
+Hi <%= @user.first_name %>,
+
+Great news! A tee time you were waiting for at <%= @course.name %> is now available.
+
+Course: <%= @course.name %>
+Date: <%= @tee_time.date.strftime('%A, %B %d, %Y') %>
+Time: <%= @tee_time.formatted_time %>
+Available Spots: <%= @available_spots %>
+Players Requested: <%= @entry.players_requested %>
+
+Tee times are first-come, first-served — book now before someone else grabs it!
+
+Book now: <%= ENV.fetch('FRONTEND_URL', 'https://app.teetimespro.com') %>/book
+
+You received this because you joined the waitlist for this tee time.

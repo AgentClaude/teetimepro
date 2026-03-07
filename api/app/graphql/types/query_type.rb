@@ -860,6 +860,20 @@ module Types
       CallRecording.for_organization(org).includes(:call_transcriptions, :voice_call_log).find(id)
     end
 
+    # Waitlist entries (for current user)
+    field :waitlist_entries, [Types::WaitlistEntryType], null: false do
+      argument :status, String, required: false
+    end
+    def waitlist_entries(status: nil)
+      require_auth!
+      scope = current_user.waitlist_entries
+                          .where(organization: current_organization)
+                          .includes(tee_time: { tee_sheet: :course })
+                          .order(created_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      scope
+    end
+
     # Loyalty Program
     field :loyalty_program, Types::LoyaltyProgramType, null: true
     def loyalty_program

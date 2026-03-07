@@ -22,6 +22,7 @@ class Organization < ApplicationRecord
   has_many :loyalty_programs, dependent: :destroy
   has_many :loyalty_accounts, dependent: :destroy
   has_many :loyalty_rewards, dependent: :destroy
+  has_many :waitlist_entries, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

@@ -1027,3 +1027,37 @@ export const SEED_BOOKING_TEMPLATES = gql`
     }
   }
 `;
+
+// Waitlist
+export const JOIN_WAITLIST = gql`
+  mutation JoinWaitlist($teeTimeId: ID!, $playersRequested: Int) {
+    joinWaitlist(teeTimeId: $teeTimeId, playersRequested: $playersRequested) {
+      waitlistEntry {
+        id
+        playersRequested
+        status
+        createdAt
+        teeTime {
+          id
+          startsAt
+          maxPlayers
+          bookedPlayers
+          status
+        }
+      }
+      errors
+    }
+  }
+`;
+
+export const LEAVE_WAITLIST = gql`
+  mutation LeaveWaitlist($teeTimeId: ID!) {
+    leaveWaitlist(teeTimeId: $teeTimeId) {
+      waitlistEntry {
+        id
+        status
+      }
+      errors
+    }
+  }
+`;
