@@ -41,21 +41,23 @@ export function PricingRulesList({ rules, onEdit, onDelete, loading }: PricingRu
     const { ruleType, conditions } = rule;
 
     switch (ruleType) {
-      case 'DAY_OF_WEEK':
+      case 'DAY_OF_WEEK': {
         const days = conditions.days as string[];
         if (days?.length) {
           return `${days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}`;
         }
         return 'All days';
+      }
 
-      case 'TIME_OF_DAY':
+      case 'TIME_OF_DAY': {
         const hours = conditions.hours as { start: number; end: number };
         if (hours?.start !== undefined && hours?.end !== undefined) {
           return `${hours.start}:00 - ${hours.end}:00`;
         }
         return 'All hours';
+      }
 
-      case 'OCCUPANCY':
+      case 'OCCUPANCY': {
         const threshold = conditions.threshold as number;
         const operator = conditions.operator as string;
         if (threshold !== undefined) {
@@ -64,8 +66,9 @@ export function PricingRulesList({ rules, onEdit, onDelete, loading }: PricingRu
           return `${operatorText} ${threshold}% occupancy`;
         }
         return 'Any occupancy';
+      }
 
-      case 'ADVANCE_BOOKING':
+      case 'ADVANCE_BOOKING': {
         const advanceHours = conditions.hours as number;
         const advanceOp = conditions.operator as string;
         if (advanceHours !== undefined) {
@@ -73,10 +76,12 @@ export function PricingRulesList({ rules, onEdit, onDelete, loading }: PricingRu
           return `${opText} ${advanceHours} hours in advance`;
         }
         return 'Any advance time';
+      }
 
-      case 'LAST_MINUTE':
+      case 'LAST_MINUTE': {
         const lastMinuteHours = conditions.hours as number;
         return `Within ${lastMinuteHours || 2} hours`;
+      }
 
       default:
         return 'All conditions';

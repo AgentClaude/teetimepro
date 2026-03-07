@@ -69,11 +69,12 @@ export function PricingRuleForm({ rule, onSuccess, onCancel }: PricingRuleFormPr
   const [selectedDays, setSelectedDays] = useState<string[]>(
     rule?.conditions?.days as string[] || []
   );
+  const hoursCondition = rule?.conditions?.hours as { start?: number; end?: number } | undefined;
   const [timeStart, setTimeStart] = useState(
-    rule?.conditions?.hours?.start?.toString() || ''
+    hoursCondition?.start?.toString() || ''
   );
   const [timeEnd, setTimeEnd] = useState(
-    rule?.conditions?.hours?.end?.toString() || ''
+    hoursCondition?.end?.toString() || ''
   );
   const [occupancyThreshold, setOccupancyThreshold] = useState(
     rule?.conditions?.threshold?.toString() || ''
@@ -373,7 +374,7 @@ export function PricingRuleForm({ rule, onSuccess, onCancel }: PricingRuleFormPr
           className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
         >
           <option value="">All courses</option>
-          {courses.map((course: any) => (
+          {courses.map((course: { id: string; name: string }) => (
             <option key={course.id} value={course.id}>
               {course.name}
             </option>

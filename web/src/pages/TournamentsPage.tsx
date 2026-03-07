@@ -54,7 +54,7 @@ const getStatusBadgeVariant = (status: string) => {
     case 'COMPLETED':
       return 'default';
     case 'CANCELLED':
-      return 'error';
+      return 'danger';
     default:
       return 'default';
   }
@@ -125,7 +125,7 @@ export function TournamentsPage() {
   const tournaments: Tournament[] = tournamentsData?.tournaments || [];
   const courses: Course[] = coursesData?.courses || [];
 
-  const handleCreateTournament = async (formData: any) => {
+  const handleCreateTournament = async (formData: CreateTournamentFormData) => {
     try {
       await createTournament({
         variables: {
@@ -282,11 +282,24 @@ export function TournamentsPage() {
 }
 
 // Create Tournament Modal Component
+interface CreateTournamentFormData {
+  courseId: string;
+  name: string;
+  description: string;
+  format: string;
+  startDate: string;
+  endDate: string;
+  maxParticipants: string;
+  minParticipants: string;
+  entryFee: string;
+  handicapEnabled: string;
+}
+
 interface CreateTournamentModalProps {
   isOpen: boolean;
   onClose: () => void;
   courses: Course[];
-  onSubmit: (data: any) => void;
+  onSubmit: (data: CreateTournamentFormData) => void;
   loading: boolean;
 }
 
