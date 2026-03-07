@@ -10,9 +10,56 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_170001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "accounting_integrations", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "provider", null: false
+    t.integer "status", default: 0, null: false
+    t.text "encrypted_access_token"
+    t.text "encrypted_refresh_token"
+    t.text "encrypted_realm_id"
+    t.text "encrypted_tenant_id"
+    t.string "company_name"
+    t.string "country_code"
+    t.datetime "connected_at"
+    t.datetime "last_sync_at"
+    t.json "account_mapping", default: {}
+    t.json "settings", default: {}
+    t.text "last_error_message"
+    t.datetime "last_error_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "provider"], name: "index_accounting_integrations_on_organization_id_and_provider", unique: true
+    t.index ["organization_id"], name: "index_accounting_integrations_on_organization_id"
+    t.index ["status"], name: "index_accounting_integrations_on_status"
+  end
+
+  create_table "accounting_syncs", force: :cascade do |t|
+    t.bigint "accounting_integration_id", null: false
+    t.string "syncable_type", null: false
+    t.bigint "syncable_id", null: false
+    t.string "sync_type", null: false
+    t.integer "status", default: 0, null: false
+    t.string "external_id"
+    t.text "external_data"
+    t.integer "retry_count", default: 0
+    t.datetime "next_retry_at"
+    t.text "error_message"
+    t.datetime "error_at"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accounting_integration_id", "sync_type"], name: "idx_on_accounting_integration_id_sync_type_520afe0939"
+    t.index ["accounting_integration_id"], name: "index_accounting_syncs_on_accounting_integration_id"
+    t.index ["next_retry_at"], name: "index_accounting_syncs_on_next_retry_at"
+    t.index ["status"], name: "index_accounting_syncs_on_status"
+    t.index ["syncable_type", "syncable_id"], name: "index_accounting_syncs_on_syncable"
+    t.index ["syncable_type", "syncable_id"], name: "index_accounting_syncs_on_syncable_type_and_syncable_id"
+  end
 
   create_table "api_keys", force: :cascade do |t|
     t.bigint "organization_id", null: false
@@ -60,10 +107,70 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.text "cancellation_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "calendar_event_id"
+    t.index ["calendar_event_id"], name: "index_bookings_on_calendar_event_id"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
     t.index ["status"], name: "index_bookings_on_status"
     t.index ["tee_time_id"], name: "index_bookings_on_tee_time_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "calendar_connections", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "provider", null: false
+    t.text "access_token"
+    t.text "refresh_token"
+    t.datetime "token_expires_at"
+    t.boolean "enabled", default: true, null: false
+    t.string "calendar_id"
+    t.string "calendar_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enabled"], name: "index_calendar_connections_on_enabled"
+    t.index ["provider"], name: "index_calendar_connections_on_provider"
+    t.index ["user_id", "provider"], name: "index_calendar_connections_on_user_id_and_provider", unique: true
+    t.index ["user_id"], name: "index_calendar_connections_on_user_id"
+  end
+
+  create_table "call_recordings", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "voice_call_log_id"
+    t.string "call_sid", null: false
+    t.string "recording_sid", null: false
+    t.string "recording_url", null: false
+    t.integer "duration_seconds", null: false
+    t.string "status", default: "pending", null: false
+    t.bigint "file_size_bytes"
+    t.string "format", default: "wav", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_sid"], name: "index_call_recordings_on_call_sid"
+    t.index ["organization_id", "created_at"], name: "index_call_recordings_on_organization_id_and_created_at"
+    t.index ["organization_id", "status"], name: "index_call_recordings_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_call_recordings_on_organization_id"
+    t.index ["recording_sid"], name: "index_call_recordings_on_recording_sid", unique: true
+    t.index ["voice_call_log_id"], name: "index_call_recordings_on_voice_call_log_id"
+  end
+
+  create_table "call_transcriptions", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "call_recording_id", null: false
+    t.bigint "voice_call_log_id"
+    t.text "transcription_text", null: false
+    t.decimal "confidence_score", precision: 3, scale: 2, null: false
+    t.string "language", default: "en", null: false
+    t.string "provider", default: "deepgram", null: false
+    t.jsonb "raw_response", default: {}
+    t.string "status", default: "pending", null: false
+    t.integer "word_count", default: 0, null: false
+    t.integer "duration_seconds", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_recording_id"], name: "index_call_transcriptions_on_call_recording_id"
+    t.index ["organization_id", "created_at"], name: "index_call_transcriptions_on_organization_id_and_created_at"
+    t.index ["organization_id", "status"], name: "index_call_transcriptions_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_call_transcriptions_on_organization_id"
+    t.index ["voice_call_log_id"], name: "index_call_transcriptions_on_voice_call_log_id"
   end
 
   create_table "courses", force: :cascade do |t|
@@ -214,7 +321,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["added_by_id"], name: "index_fnb_tab_items_on_added_by_id"
     t.index ["fnb_tab_id", "created_at"], name: "index_fnb_tab_items_on_tab_and_created_at"
     t.index ["fnb_tab_id"], name: "index_fnb_tab_items_on_fnb_tab_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'other'::character varying::text])", name: "fnb_tab_items_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'other'::character varying]::text[])", name: "fnb_tab_items_category_check"
     t.check_constraint "quantity > 0", name: "fnb_tab_items_quantity_positive"
     t.check_constraint "total_cents >= 0", name: "fnb_tab_items_total_cents_non_negative"
     t.check_constraint "unit_price_cents >= 0", name: "fnb_tab_items_unit_price_non_negative"
@@ -244,7 +351,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["organization_id"], name: "index_fnb_tabs_on_organization_id"
     t.index ["user_id", "opened_at"], name: "index_fnb_tabs_on_user_and_opened_at"
     t.index ["user_id"], name: "index_fnb_tabs_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['open'::character varying::text, 'closed'::character varying::text, 'merged'::character varying::text])", name: "fnb_tabs_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['open'::character varying, 'closed'::character varying, 'merged'::character varying]::text[])", name: "fnb_tabs_status_check"
     t.check_constraint "total_cents >= 0", name: "fnb_tabs_total_cents_non_negative"
   end
 
@@ -334,7 +441,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["performed_by_id"], name: "index_inventory_movements_on_performed_by_id"
     t.index ["pos_product_id"], name: "index_inventory_movements_on_pos_product_id"
     t.index ["reference_type", "reference_id"], name: "index_inventory_movements_on_reference"
-    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying::text, 'sale'::character varying::text, 'adjustment'::character varying::text, 'transfer_in'::character varying::text, 'transfer_out'::character varying::text])", name: "inventory_movements_type_check"
+    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying, 'sale'::character varying, 'adjustment'::character varying, 'transfer_in'::character varying, 'transfer_out'::character varying]::text[])", name: "inventory_movements_type_check"
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -482,8 +589,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["organization_id"], name: "index_member_account_charges_on_organization_id"
     t.index ["status"], name: "index_member_account_charges_on_status"
     t.check_constraint "amount_cents > 0", name: "member_account_charges_amount_positive"
-    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying::text, 'booking'::character varying::text, 'pro_shop'::character varying::text, 'dues'::character varying::text, 'other'::character varying::text])", name: "member_account_charges_type_check"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'posted'::character varying::text, 'voided'::character varying::text, 'paid'::character varying::text])", name: "member_account_charges_status_check"
+    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying, 'booking'::character varying, 'pro_shop'::character varying, 'dues'::character varying, 'other'::character varying]::text[])", name: "member_account_charges_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'posted'::character varying, 'voided'::character varying, 'paid'::character varying]::text[])", name: "member_account_charges_status_check"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -558,7 +665,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["organization_id", "category"], name: "index_pos_products_on_org_and_category"
     t.index ["organization_id", "sku"], name: "index_pos_products_on_org_and_sku", unique: true
     t.index ["organization_id"], name: "index_pos_products_on_organization_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'apparel'::character varying::text, 'equipment'::character varying::text, 'rental'::character varying::text, 'other'::character varying::text])", name: "pos_products_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'apparel'::character varying, 'equipment'::character varying, 'rental'::character varying, 'other'::character varying]::text[])", name: "pos_products_category_check"
     t.check_constraint "price_cents >= 0", name: "pos_products_price_non_negative"
   end
 
@@ -839,6 +946,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.index ["status"], name: "index_voice_call_logs_on_status"
   end
 
+  create_table "waitlist_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "tee_time_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "players_requested", default: 1, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "notified_at"
+    t.datetime "expired_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_waitlist_entries_on_organization_id"
+    t.index ["tee_time_id", "status"], name: "index_waitlist_entries_on_tee_time_and_status"
+    t.index ["tee_time_id"], name: "index_waitlist_entries_on_tee_time_id"
+    t.index ["user_id", "tee_time_id"], name: "index_waitlist_entries_on_user_and_tee_time", unique: true
+    t.index ["user_id"], name: "index_waitlist_entries_on_user_id"
+  end
+
   create_table "webhook_endpoints", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.string "url", null: false
@@ -875,11 +999,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
     t.check_constraint "response_code >= 100 AND response_code <= 599", name: "webhook_events_response_code_valid_check"
   end
 
+  add_foreign_key "accounting_integrations", "organizations", on_delete: :cascade
+  add_foreign_key "accounting_syncs", "accounting_integrations", on_delete: :cascade
   add_foreign_key "api_keys", "organizations"
   add_foreign_key "booking_players", "bookings", on_delete: :cascade
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
+  add_foreign_key "calendar_connections", "users"
+  add_foreign_key "call_recordings", "organizations"
+  add_foreign_key "call_recordings", "voice_call_logs"
+  add_foreign_key "call_transcriptions", "call_recordings"
+  add_foreign_key "call_transcriptions", "organizations"
+  add_foreign_key "call_transcriptions", "voice_call_logs"
   add_foreign_key "courses", "organizations", on_delete: :cascade
   add_foreign_key "email_campaigns", "email_providers"
   add_foreign_key "email_campaigns", "email_templates"
@@ -955,6 +1087,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
   add_foreign_key "users", "organizations", on_delete: :cascade
   add_foreign_key "voice_call_logs", "courses", on_delete: :nullify
   add_foreign_key "voice_call_logs", "organizations", on_delete: :cascade
+  add_foreign_key "waitlist_entries", "organizations"
+  add_foreign_key "waitlist_entries", "tee_times"
+  add_foreign_key "waitlist_entries", "users"
   add_foreign_key "webhook_endpoints", "organizations"
   add_foreign_key "webhook_events", "webhook_endpoints"
 end
