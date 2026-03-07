@@ -36,3 +36,7 @@ test-results/
 # Generated
 web/src/generated/graphql.ts
 .mcp.json
+
+# Production
+backups/
+nginx/ssl/

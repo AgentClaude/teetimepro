@@ -1,0 +1,138 @@
+# Production overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Adds:
+#   - Nginx reverse proxy with SSL termination
+#   - Production environment defaults
+#   - Resource limits
+#   - No exposed ports except 80/443 (via nginx)
+#   - Certbot sidecar for auto-renewing Let's Encrypt certs
+
+services:
+  # Nginx Reverse Proxy — single entry point
+  nginx:
+    image: nginx:alpine
+    container_name: teetimepro_nginx
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./nginx/nginx.prod.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      - nginx_conf:/etc/nginx
+      - certbot_webroot:/var/www/certbot:ro
+      - certbot_certs:/etc/letsencrypt:ro
+    command: >
+      /bin/sh -c "
+        envsubst '$$DOMAIN' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf &&
+        nginx -g 'daemon off;'
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/nginx-health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Certbot — auto-renew Let's Encrypt certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: teetimepro_certbot
+    volumes:
+      - certbot_webroot:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    # Renew certs every 12 hours; initial cert is obtained via bin/docker-prod ssl-init
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 43200; done"
+
+  # --- Production overrides for existing services ---
+
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-teetimepro_production}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    ports: []  # No exposed port in production
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  redis:
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD}
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  api:
+    environment:
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - RAILS_SERVE_STATIC_FILES=false
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-teetimepro_production}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SIDEKIQ_REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - FORCE_SSL=true
+    ports: []  # Only accessible via nginx
+    command: >
+      sh -c "
+        rm -f /app/tmp/pids/server.pid &&
+        bundle exec rails db:prepare &&
+        bundle exec puma -C config/puma.rb
+      "
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  sidekiq:
+    environment:
+      - RAILS_ENV=production
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-teetimepro_production}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SIDEKIQ_REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    command: bundle exec sidekiq -c 10 -q default -q mailers
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  voice-agent:
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  web:
+    ports: []  # Served via nginx
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  certbot_webroot:
+    driver: local
+  certbot_certs:
+    driver: local
+  nginx_conf:
+    driver: local
