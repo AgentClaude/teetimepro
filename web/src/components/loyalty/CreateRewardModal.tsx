@@ -114,7 +114,7 @@ export function CreateRewardModal({
     }
   };
 
-  const handleInputChange = (field: keyof CreateRewardData, value: any) => {
+  const handleInputChange = (field: keyof CreateRewardData, value: CreateRewardData[keyof CreateRewardData]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error for this field when user starts typing
