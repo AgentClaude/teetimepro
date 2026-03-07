@@ -398,6 +398,8 @@ module Types
     def fnb_tab(id:)
       org = require_auth!
       org.fnb_tabs.includes(:course, :user, :fnb_tab_items).find_by(id: id)
+    end
+
     # Member accounts
     field :member_account_charges, [Types::MemberAccountChargeType], null: false do
       argument :membership_id, ID, required: false
