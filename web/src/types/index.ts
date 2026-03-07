@@ -335,6 +335,49 @@ export interface UtilizationHeatMap {
   summary: UtilizationHeatMapSummary;
 }
 
+// Availability Search
+export interface AvailableSlot {
+  teeTimeId: string;
+  courseId: string;
+  courseName: string;
+  date: string;
+  startsAt: string;
+  formattedTime: string;
+  availableSpots: number;
+  maxPlayers: number;
+  bookedPlayers: number;
+  basePriceCents: number | null;
+  dynamicPriceCents: number | null;
+  pricePerPlayerCents: number | null;
+  totalPriceCents: number | null;
+  hasDynamicPricing: boolean;
+  appliedRules: string[];
+  formattedBasePrice: string | null;
+  formattedDynamicPrice: string | null;
+  formattedTotalPrice: string | null;
+}
+
+export interface AvailabilityDateRange {
+  startDate: string;
+  endDate: string;
+  days: number;
+}
+
+export interface AvailabilityFilters {
+  players: number;
+  timePreference: string | null;
+  courseId: string | null;
+}
+
+export interface AvailabilitySearchResult {
+  slots: AvailableSlot[];
+  totalAvailable: number;
+  dateRange: AvailabilityDateRange;
+  filters: AvailabilityFilters;
+}
+
+export type TimePreference = "morning" | "afternoon" | "twilight";
+
 export interface MarketplaceListing {
   id: string;
   status: MarketplaceListingStatus;
