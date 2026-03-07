@@ -2,20 +2,25 @@ import { cn } from "../../lib/utils";
 
 type BadgeVariant =
   | "default"
+  | "secondary"
   | "success"
   | "warning"
   | "danger"
   | "info"
   | "neutral";
 
+type BadgeSize = "sm" | "md";
+
 interface BadgeProps {
   children: React.ReactNode;
   variant?: BadgeVariant;
+  size?: BadgeSize;
   className?: string;
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
   default: "bg-fairway-100 text-fairway-800",
+  secondary: "bg-rough-200 text-rough-700",
   success: "bg-green-100 text-green-800",
   warning: "bg-yellow-100 text-yellow-800",
   danger: "bg-red-100 text-red-800",
@@ -23,15 +28,22 @@ const variantStyles: Record<BadgeVariant, string> = {
   neutral: "bg-rough-100 text-rough-800",
 };
 
+const sizeStyles: Record<BadgeSize, string> = {
+  sm: "px-2 py-0.5 text-xs",
+  md: "px-2.5 py-0.5 text-xs",
+};
+
 export function Badge({
   children,
   variant = "default",
+  size = "md",
   className,
 }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center rounded-full font-medium",
+        sizeStyles[size],
         variantStyles[variant],
         className
       )}

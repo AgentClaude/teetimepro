@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { VoiceBookingStatus } from './VoiceBookingStatus';
-import type { Booking, User, TeeTime, Course, TeeSheet } from '../../types';
+import type { Booking, User, TeeTime } from '../../types';
 
 const meta: Meta<typeof VoiceBookingStatus> = {
   title: 'Voice/VoiceBookingStatus',
@@ -19,22 +19,6 @@ export default meta;
 type Story = StoryObj<typeof VoiceBookingStatus>;
 
 // Mock data
-const mockCourse: Course = {
-  id: 'course-1',
-  name: 'Pine Valley Golf Course',
-  holes: 18,
-  intervalMinutes: 10,
-  maxPlayersPerSlot: 4,
-  firstTeeTime: '06:00',
-  lastTeeTime: '18:00',
-  weekdayRateCents: 7500,
-  weekendRateCents: 10000,
-  twilightRateCents: 5000,
-  address: '123 Golf Course Dr',
-  phone: '+1555123456',
-  voiceConfig: {},
-};
-
 // const mockTeeSheet: TeeSheet = {
 //   id: 'sheet-1',
 //   date: '2024-03-08',
