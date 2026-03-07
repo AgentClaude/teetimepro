@@ -15,6 +15,8 @@ import { ReportsPage } from "./pages/ReportsPage";
 import { VoiceAnalyticsPage } from "./pages/VoiceAnalyticsPage";
 import CampaignsPage from "./pages/CampaignsPage";
 import { SegmentsPage } from "./pages/SegmentsPage";
+import { TournamentsPage } from "./pages/TournamentsPage";
+import { TournamentDetailPage } from "./pages/TournamentDetailPage";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         <Route path="/bookings/:id" element={<BookingDetailPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
+        <Route path="/tournaments" element={<TournamentsPage />} />
+        <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/voice-analytics" element={<VoiceAnalyticsPage />} />

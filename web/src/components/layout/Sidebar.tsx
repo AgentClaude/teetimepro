@@ -11,6 +11,7 @@ import {
   BellIcon,
   FunnelIcon,
   PhoneIcon,
+  TrophyIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Tee Sheet', href: '/tee-sheet', icon: CalendarDaysIcon },
   { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
   { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+  { name: 'Tournaments', href: '/tournaments', icon: TrophyIcon },
   { name: 'Notifications', href: '/notifications', icon: BellIcon },
   { name: 'Segments', href: '/segments', icon: FunnelIcon },
   { name: 'Campaigns', href: '/campaigns', icon: MegaphoneIcon },
