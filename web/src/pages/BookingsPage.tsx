@@ -12,7 +12,8 @@ export function BookingsPage() {
     skip: !selectedCourseId,
   });
 
-  const bookings = (data?.bookings || []).map((b: any) => ({
+  interface BookingResult { totalCents: number | null; teeTime?: { formattedTime?: string } }
+  const bookings = (data?.bookings || []).map((b: BookingResult) => ({
     ...b,
     totalFormatted: b.totalCents != null ? `$${(b.totalCents / 100).toFixed(2)}` : '--',
     teeTime: {

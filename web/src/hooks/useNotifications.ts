@@ -24,7 +24,7 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<BookingNotification[]>([]);
   const [connected, setConnected] = useState(false);
   const consumerRef = useRef<ReturnType<typeof createConsumer> | null>(null);
-  const subscriptionRef = useRef<any>(null);
+  const subscriptionRef = useRef<ReturnType<ReturnType<typeof createConsumer>['subscriptions']['create']> | null>(null);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem('token');
