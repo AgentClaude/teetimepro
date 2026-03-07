@@ -55,14 +55,4 @@ FactoryBot.define do
     handicap_index { rand(0.0..36.0).round(1) }
   end
 
-  factory :membership do
-    organization
-    user
-    tier { :basic }
-    status { :active }
-    price_cents { 50000 }
-    price_currency { "USD" }
-    starts_at { Time.current }
-    ends_at { 1.year.from_now }
-  end
 end
