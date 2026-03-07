@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useCourse } from '../../contexts/CourseContext';
 import {
   CalendarDaysIcon,
@@ -31,7 +31,6 @@ interface SidebarProps {
 
 export function Sidebar({ onClose }: SidebarProps) {
   const { courses, selectedCourseId, setSelectedCourseId } = useCourse();
-  const location = useLocation();
 
   const handleNavClick = () => {
     // Close sidebar on mobile after navigation

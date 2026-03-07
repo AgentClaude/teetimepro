@@ -37,7 +37,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
         <div className="flex items-center gap-2">
           <UserCircleIcon className="h-7 w-7 text-gray-400 sm:h-8 sm:w-8" />
           <div className="hidden text-sm sm:block">
-            <p className="font-medium text-gray-900">{user?.first_name ?? 'User'}</p>
+            <p className="font-medium text-gray-900">{user?.firstName ?? 'User'}</p>
             <button
               onClick={logout}
               className="text-xs text-gray-500 hover:text-red-600"
