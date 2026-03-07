@@ -240,5 +240,37 @@ module Types
 
       tee_sheet.tee_times.available_for(players).order(:starts_at)
     end
+
+    # Accounting integration
+    field :accounting_integration, Types::AccountingIntegrationType, null: true do
+      argument :provider, Types::AccountingProviderEnum, required: true
+    end
+    def accounting_integration(provider:)
+      org = require_auth!
+      require_role!(:manager)
+      
+      org.accounting_integrations.find_by(provider: provider)
+    end
+
+    # Accounting sync history
+    field :accounting_sync_history, [Types::AccountingSyncType], null: false do
+      argument :provider, Types::AccountingProviderEnum, required: false
+      argument :sync_type, Types::AccountingSyncTypeEnum, required: false
+      argument :status, Types::AccountingSyncStatusEnum, required: false
+      argument :limit, Integer, required: false
+    end
+    def accounting_sync_history(provider: nil, sync_type: nil, status: nil, limit: 50)
+      org = require_auth!
+      require_role!(:manager)
+
+      syncs = AccountingSync.joins(:accounting_integration)
+                           .where(accounting_integrations: { organization_id: org.id })
+
+      syncs = syncs.where(accounting_integrations: { provider: provider }) if provider
+      syncs = syncs.where(sync_type: sync_type) if sync_type
+      syncs = syncs.where(status: status) if status
+
+      syncs.recent.limit([limit, 100].min)
+    end
   end
 end

@@ -5,6 +5,7 @@ class Booking < ApplicationRecord
   belongs_to :user
   has_many :booking_players, dependent: :destroy
   has_one :payment, dependent: :destroy
+  has_many :accounting_syncs, as: :syncable, dependent: :destroy
 
   enum :status, { confirmed: 0, checked_in: 1, completed: 2, cancelled: 3, no_show: 4 }
 

@@ -14,5 +14,11 @@ module Types
     field :update_tournament, mutation: Mutations::UpdateTournament
     field :register_for_tournament, mutation: Mutations::RegisterForTournament
     field :withdraw_from_tournament, mutation: Mutations::WithdrawFromTournament
+    
+    # Accounting integrations
+    field :connect_accounting_integration, mutation: Mutations::ConnectAccountingIntegration
+    field :disconnect_accounting_integration, mutation: Mutations::DisconnectAccountingIntegration
+    field :sync_accounting_data, mutation: Mutations::SyncAccountingData
+    field :configure_accounting_mapping, mutation: Mutations::ConfigureAccountingMapping
   end
 end

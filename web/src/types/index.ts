@@ -8,6 +8,54 @@ export interface User {
   organizationId: string;
 }
 
+export interface AccountingIntegration {
+  id: string;
+  provider: "quickbooks" | "xero";
+  status: "disconnected" | "connected" | "error";
+  companyName: string | null;
+  countryCode: string | null;
+  connectedAt: string | null;
+  lastSyncAt: string | null;
+  accountMapping: Record<string, { account_id: string; account_name: string }>;
+  settings: Record<string, any>;
+  lastErrorMessage: string | null;
+  lastErrorAt: string | null;
+  connected: boolean;
+  companyId: string | null;
+}
+
+export interface AccountingSync {
+  id: string;
+  syncType: "invoice" | "payment" | "refund";
+  status: "pending" | "in_progress" | "completed" | "failed";
+  externalId: string | null;
+  retryCount: number;
+  errorMessage: string | null;
+  errorAt: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  syncTypeHumanized: string;
+  provider: string;
+  duration: number | null;
+  retryable: boolean;
+  syncable: {
+    id: string;
+    confirmationCode?: string;
+    totalCents?: number;
+    amountCents?: number;
+    stripePaymentIntentId?: string;
+    status?: string;
+    user?: {
+      fullName: string;
+      email: string;
+    };
+    booking?: {
+      confirmationCode: string;
+    };
+  };
+}
+
 export interface VoiceConfig {
   system_prompt?: string;
   greeting?: string;
