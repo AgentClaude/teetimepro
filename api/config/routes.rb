@@ -6,10 +6,8 @@ Rails.application.routes.draw do
   # GraphQL endpoint
   post "/graphql", to: "graphql#execute"
 
-  # GraphQL playground (development only)
-  if Rails.env.development? || Rails.env.test?
-    get "/graphiql", to: "graphql#playground"
-  end
+  # GraphQL playground
+  get "/graphiql", to: "graphql#playground"
 
   # Custom API authentication routes
   namespace :api do
