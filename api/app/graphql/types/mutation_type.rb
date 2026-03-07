@@ -97,5 +97,9 @@ module Types
     field :create_email_template, mutation: Mutations::CreateEmailTemplate
     field :update_email_template, mutation: Mutations::UpdateEmailTemplate
     field :seed_booking_templates, mutation: Mutations::SeedBookingTemplates
+
+    # Waitlist
+    field :join_waitlist, mutation: Mutations::JoinWaitlist
+    field :leave_waitlist, mutation: Mutations::LeaveWaitlist
   end
 end

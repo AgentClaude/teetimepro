@@ -434,3 +434,27 @@ export interface CallTranscription {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface WaitlistEntry {
+  id: string;
+  playersRequested: number;
+  status: "waiting" | "notified" | "expired" | "cancelled";
+  notifiedAt: string | null;
+  expiredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  teeTime: {
+    id: string;
+    startsAt: string;
+    maxPlayers: number;
+    bookedPlayers: number;
+    status: string;
+    teeSheet: {
+      date: string;
+      course: {
+        id: string;
+        name: string;
+      };
+    };
+  };
+}

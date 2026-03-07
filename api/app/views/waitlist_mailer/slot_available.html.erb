@@ -1,0 +1,42 @@
+<div class="header">
+  <h1>🏌️ A Tee Time Just Opened Up!</h1>
+</div>
+
+<div class="card">
+  <p>Hi <%= @user.first_name %>,</p>
+
+  <p>Great news! A tee time you were waiting for at <strong><%= @course.name %></strong> is now available.</p>
+
+  <div style="margin: 24px 0;">
+    <div class="detail-row">
+      <span class="detail-label">Course</span>
+      <span class="detail-value"><%= @course.name %></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Date</span>
+      <span class="detail-value"><%= @tee_time.date.strftime('%A, %B %d, %Y') %></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Time</span>
+      <span class="detail-value"><%= @tee_time.formatted_time %></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Available Spots</span>
+      <span class="detail-value"><%= @available_spots %></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Players Requested</span>
+      <span class="detail-value"><%= @entry.players_requested %></span>
+    </div>
+  </div>
+
+  <p>Tee times are first-come, first-served — book now before someone else grabs it!</p>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="<%= ENV.fetch('FRONTEND_URL', 'https://app.teetimespro.com') %>/book" class="btn">Book Now</a>
+  </div>
+
+  <p style="color: #71717a; font-size: 13px;">
+    You received this because you joined the waitlist for this tee time. If you no longer want notifications, you can remove yourself from the waitlist in your account.
+  </p>
+</div>

@@ -47,6 +47,9 @@ module Bookings
         # Remove from calendar (async)
         CalendarSyncJob.perform_later(booking.id, 'delete')
 
+        # Notify waitlisted users that a spot opened up
+        notify_waitlist(booking)
+
         success(booking: booking)
       end
     rescue ActiveRecord::RecordInvalid => e
@@ -75,6 +78,10 @@ module Bookings
           timestamp: Time.current.iso8601
         }
       )
+    end
+
+    def notify_waitlist(booking)
+      Waitlists::NotifyService.call(tee_time: booking.tee_time)
     end
 
     def notify_cancellation(booking)

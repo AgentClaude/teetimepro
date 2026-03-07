@@ -2,6 +2,7 @@ class TeeTime < ApplicationRecord
   belongs_to :tee_sheet
   has_many :bookings, dependent: :destroy
   has_many :booking_players, through: :bookings
+  has_many :waitlist_entries, dependent: :destroy
 
   enum :status, { available: 0, partially_booked: 1, fully_booked: 2, blocked: 3, maintenance: 4 }
 
