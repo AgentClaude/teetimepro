@@ -83,5 +83,13 @@ module Types
 
     # Call recordings and transcriptions
     field :request_transcription, mutation: Mutations::RequestTranscription
+
+    # Loyalty program
+    field :create_loyalty_program, mutation: Mutations::CreateLoyaltyProgram
+    field :earn_points, mutation: Mutations::EarnPoints
+    field :redeem_reward, mutation: Mutations::RedeemReward
+    field :adjust_points, mutation: Mutations::AdjustPoints
+    field :create_reward, mutation: Mutations::CreateReward
+    field :update_reward, mutation: Mutations::UpdateReward
   end
 end
