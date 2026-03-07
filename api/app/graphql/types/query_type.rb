@@ -16,22 +16,20 @@ module Types
     end
     def public_available_tee_times(course_slug:, date:, players: 1, time_preference: nil)
       course = Course.joins(:organization).find_by!(slug: course_slug)
-      tee_sheet = course.tee_sheets.find_by(date: date)
-      return [] unless tee_sheet
 
-      tee_times = tee_sheet.tee_times.available_for(players).order(:starts_at)
+      result = Bookings::SearchAvailabilityService.call(
+        organization: course.organization,
+        course_id: course.id,
+        date: date,
+        players: players,
+        time_preference: time_preference,
+        include_pricing: true
+      )
 
-      # Filter by time preference if provided
-      case time_preference&.downcase
-      when 'morning'
-        tee_times = tee_times.where('EXTRACT(hour FROM starts_at) < 12')
-      when 'afternoon'
-        tee_times = tee_times.where('EXTRACT(hour FROM starts_at) BETWEEN 12 AND 16')
-      when 'twilight'
-        tee_times = tee_times.where('EXTRACT(hour FROM starts_at) > 16')
-      end
+      return [] unless result.success?
 
-      tee_times
+      tee_time_ids = result.data[:slots].map { |s| s[:tee_time_id] }
+      TeeTime.where(id: tee_time_ids).order(:starts_at)
     end
 
     # Current user
@@ -328,7 +326,7 @@ module Types
       }
     end
 
-    # Available tee times
+    # Available tee times (legacy — kept for backward compat, delegates to service)
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true
       argument :date, GraphQL::Types::ISO8601Date, required: true
@@ -336,11 +334,49 @@ module Types
     end
     def available_tee_times(course_id:, date:, players: 1)
       org = require_auth!
-      course = org.courses.find(course_id)
-      tee_sheet = course.tee_sheets.find_by(date: date)
-      return [] unless tee_sheet
+      result = Bookings::SearchAvailabilityService.call(
+        organization: org,
+        course_id: course_id,
+        date: date,
+        players: players,
+        include_pricing: false
+      )
 
-      tee_sheet.tee_times.available_for(players).order(:starts_at)
+      return [] unless result.success?
+
+      # Return raw tee time records for backward compat
+      tee_time_ids = result.data[:slots].map { |s| s[:tee_time_id] }
+      TeeTime.where(id: tee_time_ids).order(:starts_at)
+    end
+
+    # Availability search — full-featured slot search with pricing
+    field :check_availability, Types::AvailabilitySearchResultType, null: false do
+      description "Search available tee time slots across dates with pricing"
+      argument :course_id, ID, required: false, description: "Filter to specific course"
+      argument :date, GraphQL::Types::ISO8601Date, required: true
+      argument :end_date, GraphQL::Types::ISO8601Date, required: false, description: "End of date range (default: same as date)"
+      argument :players, Integer, required: false, default_value: 1, description: "Number of players (1-5)"
+      argument :time_preference, String, required: false, description: "morning, afternoon, or twilight"
+      argument :include_pricing, Boolean, required: false, default_value: true
+    end
+    def check_availability(course_id: nil, date:, end_date: nil, players: 1, time_preference: nil, include_pricing: true)
+      org = require_auth!
+
+      result = Bookings::SearchAvailabilityService.call(
+        organization: org,
+        course_id: course_id,
+        date: date,
+        end_date: end_date,
+        players: players,
+        time_preference: time_preference,
+        include_pricing: include_pricing
+      )
+
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
     end
 
     # Accounting integration
