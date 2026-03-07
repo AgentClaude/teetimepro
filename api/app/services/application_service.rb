@@ -6,8 +6,15 @@ class ApplicationService
   include ActiveModel::AttributeAssignment
 
   # Class method to create instance and call it
-  def self.call(**args)
-    new(**args).call
+  # Supports both positional hash and keyword arguments:
+  #   Service.call(param1: value1, param2: value2)
+  #   Service.call({ param1: value1, param2: value2 })
+  def self.call(*args, **kwargs)
+    if args.length == 1 && args.first.is_a?(Hash) && kwargs.empty?
+      new(**args.first).call
+    else
+      new(*args, **kwargs).call
+    end
   end
 
   def initialize(**args)

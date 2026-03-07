@@ -165,7 +165,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
           }
 
           result = described_class.call(params)
-          expect(result.success?).to be true, "Failed to transition from pending to #{new_status}"
+          expect(result.success?).to(be(true), "Failed to transition from pending to #{new_status}")
         end
       end
 
@@ -179,7 +179,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
           }
 
           result = described_class.call(params)
-          expect(result.success?).to be true, "Failed to transition from connected to #{new_status}"
+          expect(result.success?).to(be(true), "Failed to transition from connected to #{new_status}")
         end
       end
 
