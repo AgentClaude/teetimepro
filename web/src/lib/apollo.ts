@@ -28,8 +28,9 @@ const errorLink = new ApolloLink((operation, forward) => {
           e.message.includes("Not authenticated") ||
           e.message.includes("Not authorized")
       );
-      if (authError) {
+      if (authError && !window.location.pathname.startsWith("/login")) {
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
         window.location.href = "/login";
       }
     }

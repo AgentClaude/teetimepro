@@ -20,7 +20,8 @@ const CourseContext = createContext<CourseContextValue>({
 });
 
 export function CourseProvider({ children }: { children: ReactNode }) {
-  const { data, loading } = useQuery(GET_COURSES);
+  const hasToken = !!localStorage.getItem('auth_token');
+  const { data, loading } = useQuery(GET_COURSES, { skip: !hasToken });
   const courses: Course[] = data?.courses || [];
 
   const [selectedCourseId, setSelectedCourseIdState] = useState<string>(() => {
