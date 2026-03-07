@@ -328,7 +328,7 @@ export const GET_CUSTOMER = gql`
       bookingsCount
       createdAt
       updatedAt
-      bookings {
+      upcomingBookings {
         id
         confirmationCode
         status
@@ -339,7 +339,67 @@ export const GET_CUSTOMER = gql`
           id
           startsAt
           formattedTime
+          teeSheet {
+            date
+            course {
+              id
+              name
+            }
+          }
         }
+      }
+      pastBookings {
+        id
+        confirmationCode
+        status
+        playersCount
+        totalCents
+        createdAt
+        teeTime {
+          id
+          startsAt
+          formattedTime
+          teeSheet {
+            date
+            course {
+              id
+              name
+            }
+          }
+        }
+      }
+      membership {
+        id
+        tier
+        status
+        startsAt
+        endsAt
+        daysRemaining
+        accountBalanceCents
+        creditLimitCents
+        availableCreditCents
+      }
+      loyaltyAccount {
+        id
+        pointsBalance
+        lifetimePoints
+        tier
+        tierName
+        pointsNeededForNextTier
+        recentTransactions {
+          id
+          transactionType
+          points
+          description
+          balanceAfter
+          createdAt
+        }
+      }
+      golferProfile {
+        id
+        handicapIndex
+        homeCourse
+        preferredTee
       }
       auditLog {
         id
