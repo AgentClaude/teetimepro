@@ -273,14 +273,23 @@ module Types
     end
 
     # Customers (users in the org)
-    field :customers, [Types::UserType], null: false do
+    field :customers, Types::CustomerConnectionType, null: false, connection: false do
       argument :search, String, required: false
       argument :role, String, required: false
+      argument :membership_tier, String, required: false, description: "Filter by membership tier (basic, silver, gold, platinum, none)"
+      argument :loyalty_tier, String, required: false, description: "Filter by loyalty tier (bronze, silver, gold, platinum, none)"
+      argument :min_bookings, Integer, required: false, description: "Minimum number of bookings"
+      argument :max_bookings, Integer, required: false, description: "Maximum number of bookings"
+      argument :sort_by, String, required: false, description: "Sort field (name, email, bookings_count, created_at)"
+      argument :sort_dir, String, required: false, description: "Sort direction (asc, desc)"
+      argument :page, Integer, required: false, description: "Page number (1-based)"
+      argument :per_page, Integer, required: false, description: "Items per page (max 100)"
     end
-    def customers(search: nil, role: nil)
+    def customers(search: nil, role: nil, membership_tier: nil, loyalty_tier: nil, min_bookings: nil, max_bookings: nil, sort_by: nil, sort_dir: nil, page: nil, per_page: nil)
       org = require_auth!
-      scope = org.users.order(created_at: :desc)
-      scope = scope.where(role: role) if role.present?
+      scope = org.users
+
+      # Text search
       if search.present?
         term = "%#{search}%"
         scope = scope.where(
@@ -288,7 +297,79 @@ module Types
           q: term
         )
       end
-      scope.limit(100)
+
+      # Role filter
+      scope = scope.where(role: role) if role.present?
+
+      # Membership tier filter
+      if membership_tier.present?
+        if membership_tier == "none"
+          scope = scope.where.not(
+            id: org.memberships.active.select(:user_id)
+          )
+        else
+          scope = scope.where(
+            id: org.memberships.active.where(tier: membership_tier).select(:user_id)
+          )
+        end
+      end
+
+      # Loyalty tier filter
+      if loyalty_tier.present?
+        if loyalty_tier == "none"
+          scope = scope.where.not(
+            id: LoyaltyAccount.where(organization: org).select(:user_id)
+          )
+        else
+          scope = scope.where(
+            id: LoyaltyAccount.where(organization: org, tier: loyalty_tier).select(:user_id)
+          )
+        end
+      end
+
+      # Bookings count filter
+      if min_bookings.present? || max_bookings.present?
+        scope = scope.left_joins(:bookings)
+          .group("users.id")
+        scope = scope.having("COUNT(bookings.id) >= ?", min_bookings) if min_bookings.present?
+        scope = scope.having("COUNT(bookings.id) <= ?", max_bookings) if max_bookings.present?
+      end
+
+      # Sorting
+      sort_field = case sort_by
+                   when "name" then "last_name"
+                   when "email" then "email"
+                   when "bookings_count" then nil # handled separately
+                   when "created_at" then "created_at"
+                   else "created_at"
+                   end
+      direction = sort_dir == "asc" ? :asc : :desc
+
+      if sort_by == "bookings_count"
+        scope = scope.left_joins(:bookings).group("users.id") unless min_bookings.present? || max_bookings.present?
+        scope = scope.order(Arel.sql("COUNT(bookings.id) #{direction}"))
+      else
+        scope = scope.order(sort_field => direction)
+      end
+
+      # Pagination
+      page = [page.to_i, 1].max
+      per_page = per_page.present? ? [[per_page.to_i, 1].max, 100].min : 25
+
+      # For grouped queries, .count returns a hash; use .size to get integer count
+      count_result = scope.count
+      total_count = count_result.is_a?(Hash) ? count_result.keys.length : count_result
+      offset = (page - 1) * per_page
+
+      nodes = scope.offset(offset).limit(per_page)
+
+      {
+        nodes: nodes,
+        total_count: total_count,
+        page: page,
+        per_page: per_page,
+        total_pages: (total_count.to_f / per_page).ceil
+      }
     end
 
     field :customer, Types::UserType, null: true do
