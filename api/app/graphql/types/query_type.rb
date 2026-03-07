@@ -181,6 +181,51 @@ module Types
       org.tournaments.includes(:tournament_entries, :course, :created_by).find(id)
     end
 
+    # Reports summary
+    field :reports_summary, GraphQL::Types::JSON, null: false do
+      argument :course_id, ID, required: false
+      argument :days, Integer, required: false
+    end
+    def reports_summary(course_id: nil, days: 30)
+      org = require_auth!
+      days = [days, 90].min
+
+      bookings_scope = Booking.for_organization(org)
+      if course_id.present?
+        bookings_scope = bookings_scope.joins(tee_time: { tee_sheet: :course }).where(courses: { id: course_id })
+      end
+
+      today = Date.current
+      period_start = today - days.days
+
+      recent = bookings_scope.where("bookings.created_at >= ?", period_start.beginning_of_day)
+      today_bookings = bookings_scope.joins(tee_time: :tee_sheet).where(tee_sheets: { date: today })
+
+      # Daily booking counts for chart
+      daily = recent.group("DATE(bookings.created_at)").count.transform_keys(&:to_s)
+      daily_revenue = recent.where(status: :confirmed).group("DATE(bookings.created_at)").sum(:total_cents).transform_keys(&:to_s)
+
+      # Fill in missing days
+      chart_data = (0...days).map do |i|
+        d = (period_start + i.days).to_s
+        { date: d, bookings: daily[d] || 0, revenue: daily_revenue[d] || 0 }
+      end
+
+      # Status breakdown
+      status_counts = recent.group(:status).count
+
+      {
+        today_bookings: today_bookings.where.not(status: :cancelled).count,
+        today_revenue: today_bookings.where(status: :confirmed).sum(:total_cents),
+        total_bookings: recent.count,
+        total_revenue: recent.where(status: :confirmed).sum(:total_cents),
+        total_customers: org.users.where(role: :golfer).count,
+        cancellation_rate: recent.count > 0 ? (recent.where(status: :cancelled).count.to_f / recent.count * 100).round(1) : 0,
+        status_breakdown: status_counts,
+        daily: chart_data
+      }
+    end
+
     # Available tee times
     field :available_tee_times, [Types::TeeTimeType], null: false do
       argument :course_id, ID, required: true

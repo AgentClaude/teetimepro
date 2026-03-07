@@ -78,7 +78,7 @@ export function CallLogPage() {
             <Card className="p-6">
               <h2 className="mb-3 text-lg font-semibold text-gray-900">Booking Created</h2>
               <Link
-                to={`/bookings`}
+                to={log.summary.booking_id ? `/bookings/${log.summary.booking_id}` : '/bookings'}
                 className="block rounded-lg border border-green-200 bg-green-50 p-4 transition hover:bg-green-100"
               >
                 <div className="flex items-center justify-between">

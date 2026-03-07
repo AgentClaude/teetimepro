@@ -446,3 +446,9 @@ export const GET_DASHBOARD_STATS = gql`
     }
   }
 `;
+
+export const GET_REPORTS_SUMMARY = gql`
+  query GetReportsSummary($courseId: ID, $days: Int) {
+    reportsSummary(courseId: $courseId, days: $days)
+  }
+`;
