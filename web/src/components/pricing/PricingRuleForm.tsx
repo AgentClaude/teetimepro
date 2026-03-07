@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { Button } from '../ui/Button';
 import { CREATE_PRICING_RULE, UPDATE_PRICING_RULE } from '../../graphql/mutations';

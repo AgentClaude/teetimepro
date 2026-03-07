@@ -210,7 +210,7 @@ export interface PricingRule {
   } | null;
   name: string;
   ruleType: PricingRuleType;
-  conditions: Record<string, unknown>;
+  conditions: Record<string, any>;
   multiplier: number;
   flatAdjustmentCents: number;
   flatAdjustment: string;
@@ -230,7 +230,7 @@ export interface AppliedPricingRule {
   flatAdjustmentCents: number;
   flatAdjustment: string;
   priority: number;
-  conditions: Record<string, unknown>;
+  conditions: Record<string, any>;
 }
 
 export interface PriceBreakdownStep {
@@ -261,7 +261,7 @@ export interface PricingRuleFormData {
   name: string;
   ruleType: PricingRuleType;
   courseId: string | null;
-  conditions: Record<string, unknown>;
+  conditions: Record<string, any>;
   multiplier: number;
   flatAdjustmentCents: number;
   priority: number;
