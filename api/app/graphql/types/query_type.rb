@@ -767,5 +767,45 @@ module Types
       scope = scope.where(status: status) if status.present?
       scope.order(created_at: :desc).limit([limit, 100].min)
     end
+
+    # Call recordings
+    field :call_recordings, [Types::CallRecordingType], null: false do
+      argument :status, String, required: false
+      argument :date_from, GraphQL::Types::ISO8601Date, required: false
+      argument :date_to, GraphQL::Types::ISO8601Date, required: false
+      argument :query, String, required: false, description: "Search in transcription text"
+      argument :page, Integer, required: false, default_value: 1
+      argument :per_page, Integer, required: false, default_value: 20
+    end
+    def call_recordings(status: nil, date_from: nil, date_to: nil, query: nil, page: 1, per_page: 20)
+      org = require_auth!
+      
+      filters = {}
+      filters[:status] = status if status.present?
+      filters[:date_from] = date_from if date_from.present?
+      filters[:date_to] = date_to if date_to.present?
+
+      result = Recordings::SearchService.call(
+        organization: org,
+        query: query,
+        filters: filters,
+        page: page,
+        per_page: per_page
+      )
+
+      if result.success?
+        result.recordings
+      else
+        raise GraphQL::ExecutionError, result.error_messages
+      end
+    end
+
+    field :call_recording, Types::CallRecordingType, null: true do
+      argument :id, ID, required: true
+    end
+    def call_recording(id:)
+      org = require_auth!
+      CallRecording.for_organization(org).includes(:call_transcriptions, :voice_call_log).find(id)
+    end
   end
 end

@@ -55,6 +55,9 @@ Rails.application.routes.draw do
       # Voice handoffs
       resources :voice_handoffs, only: [:index, :show, :create, :update]
 
+      # Call recordings webhook (Twilio webhook)
+      post "/recordings/webhook", to: "recordings/webhook#create"
+
       # SMS status callback (Twilio webhook)
       post "/sms/status_callback", to: "sms#status_callback"
 

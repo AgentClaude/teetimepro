@@ -394,3 +394,43 @@ export interface MarketplaceListing {
   providerLabel: string;
   createdAt: string;
 }
+
+export interface CallRecording {
+  id: string;
+  organizationId: string;
+  voiceCallLog?: VoiceCallLog;
+  callSid: string;
+  recordingSid: string;
+  recordingUrl: string;
+  durationSeconds: number;
+  status: "pending" | "processing" | "completed" | "failed";
+  fileSizeBytes?: number;
+  format: string;
+  transcribed: boolean;
+  latestTranscription?: CallTranscription;
+  callTranscriptions: CallTranscription[];
+  formattedDuration: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CallTranscription {
+  id: string;
+  organizationId: string;
+  callRecording: CallRecording;
+  voiceCallLog?: VoiceCallLog;
+  transcriptionText: string;
+  confidenceScore: number;
+  language: string;
+  provider: string;
+  rawResponse?: Record<string, unknown>;
+  status: "pending" | "processing" | "completed" | "failed";
+  wordCount: number;
+  durationSeconds: number;
+  highConfidence: boolean;
+  mediumConfidence: boolean;
+  lowConfidence: boolean;
+  formattedDuration: string;
+  createdAt: string;
+  updatedAt: string;
+}

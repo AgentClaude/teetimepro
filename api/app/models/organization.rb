@@ -14,6 +14,8 @@ class Organization < ApplicationRecord
   has_many :member_account_charges, dependent: :destroy
   has_many :pos_products, dependent: :destroy
   has_many :marketplace_connections, dependent: :destroy
+  has_many :call_recordings, dependent: :destroy
+  has_many :call_transcriptions, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
