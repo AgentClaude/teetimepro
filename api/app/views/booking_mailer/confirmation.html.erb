@@ -1,0 +1,52 @@
+<div class="header">
+  <h1>⛳ Booking Confirmed!</h1>
+</div>
+
+<div class="card">
+  <p>Hi <%= @user.first_name %>,</p>
+  <p>Your tee time at <strong><%= @course.name %></strong> has been confirmed. Here are your booking details:</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Date</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right;"><%= @tee_time.date.strftime('%A, %B %d, %Y') %></td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Tee Time</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right;"><%= @tee_time.formatted_time %></td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Players</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right;"><%= @booking.players_count %></td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Confirmation Code</td>
+      <td style="padding: 10px 0; border-bottom: 1px solid #e4e4e7; font-weight: 600; text-align: right; font-family: monospace; letter-spacing: 2px;"><%= @booking.confirmation_code %></td>
+    </tr>
+    <% if @booking.total_cents.to_i > 0 %>
+    <tr>
+      <td style="padding: 10px 0; color: #71717a; font-size: 14px;">Total</td>
+      <td style="padding: 10px 0; font-weight: 600; text-align: right; color: #166534;"><%= @booking.total.format %></td>
+    </tr>
+    <% end %>
+  </table>
+
+  <% if @booking.booking_players.any? %>
+  <p style="font-size: 14px; color: #71717a; margin-top: 16px;">Players in your group:</p>
+  <ul style="margin: 8px 0; padding-left: 20px;">
+    <% @booking.booking_players.each do |player| %>
+      <li style="padding: 4px 0;"><%= player.name %></li>
+    <% end %>
+  </ul>
+  <% end %>
+
+  <p style="margin-top: 24px; font-size: 14px; color: #71717a;">
+    Please arrive at least 15 minutes before your tee time. If you need to cancel or modify your booking,
+    please contact us with your confirmation code.
+  </p>
+</div>
+
+<div class="footer">
+  <p><%= @organization.name %></p>
+  <p>This email was sent to <%= @user.email %> regarding your booking.</p>
+</div>

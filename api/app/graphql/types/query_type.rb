@@ -186,6 +186,13 @@ module Types
       org.email_templates.find(id)
     end
 
+    # Booking email templates (transactional)
+    field :booking_email_templates, [Types::EmailTemplateType], null: false
+    def booking_email_templates
+      org = require_auth!
+      org.email_templates.active.by_category("transactional").order(name: :asc)
+    end
+
     # Voice analytics
     field :voice_analytics, Types::VoiceAnalyticsType, null: false do
       argument :course_id, ID, required: false

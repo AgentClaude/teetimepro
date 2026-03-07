@@ -1,0 +1,19 @@
+Booking Cancelled
+
+Hi <%= @user.first_name %>,
+
+Your booking at <%= @course.name %> has been cancelled.
+
+Details:
+- Date: <%= @tee_time.date.strftime('%A, %B %d, %Y') %>
+- Tee Time: <%= @tee_time.formatted_time %>
+- Confirmation Code: <%= @booking.confirmation_code %>
+<% if @booking.cancellation_reason.present? %>- Reason: <%= @booking.cancellation_reason %><% end %>
+
+<% if @refunded %>
+Refund Processed: Your payment of <%= @booking.total.format %> has been refunded. Please allow 5-10 business days for the refund to appear on your statement.
+<% end %>
+
+Would you like to rebook? Visit our website or call us to schedule a new tee time.
+
+<%= @organization.name %>

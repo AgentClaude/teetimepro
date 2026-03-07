@@ -96,5 +96,6 @@ module Types
     field :configure_email_provider, mutation: Mutations::ConfigureEmailProvider
     field :create_email_template, mutation: Mutations::CreateEmailTemplate
     field :update_email_template, mutation: Mutations::UpdateEmailTemplate
+    field :seed_booking_templates, mutation: Mutations::SeedBookingTemplates
   end
 end
