@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "TeeTimes Pro",
+    "slug": "teetimespro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#16a34a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.teetimespro.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16a34a"
+      },
+      "package": "com.teetimespro.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:3000",
+      "graphqlUrl": "http://localhost:3000/graphql",
+      "environment": "development"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
