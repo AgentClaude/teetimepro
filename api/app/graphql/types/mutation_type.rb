@@ -1,5 +1,8 @@
 module Types
   class MutationType < Types::BaseObject
+    # Public mutations (no auth required)
+    field :create_public_booking, mutation: Mutations::CreatePublicBooking
+    
     field :create_booking, mutation: Mutations::CreateBooking
     field :cancel_booking, mutation: Mutations::CancelBooking
     field :update_booking, mutation: Mutations::UpdateBooking

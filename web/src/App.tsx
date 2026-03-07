@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
+import { PublicBookingPage } from "./pages/PublicBookingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { TeeSheetPage } from "./pages/TeeSheetPage";
 import { BookingsPage } from "./pages/BookingsPage";
@@ -20,6 +21,10 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      
+      {/* Public booking routes (no auth required) */}
+      <Route path="/book/:courseSlug" element={<PublicBookingPage />} />
+      <Route path="/book" element={<PublicBookingPage />} />
       <Route
         element={
           <ProtectedRoute>
