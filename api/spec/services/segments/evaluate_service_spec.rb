@@ -9,7 +9,9 @@ RSpec.describe Segments::EvaluateService, type: :service do
   end
 
   def create_booking_for(user, total_cents: 10000, created_at: Time.current)
-    tee_sheet = create(:tee_sheet, course: course)
+    @tee_sheet_day_offset ||= 0
+    @tee_sheet_day_offset += 1
+    tee_sheet = create(:tee_sheet, course: course, date: Date.current + @tee_sheet_day_offset.days)
     tee_time = create(:tee_time, tee_sheet: tee_sheet)
     create(:booking, user: user, tee_time: tee_time, total_cents: total_cents, created_at: created_at)
   end
