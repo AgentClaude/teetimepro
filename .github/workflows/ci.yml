@@ -70,7 +70,7 @@ jobs:
       - name: Setup database
         run: |
           mkdir -p log tmp
-          bundle exec rails db:create db:schema:load
+          bundle exec rails db:create db:migrate
 
       - name: Run RSpec
         run: |
