@@ -7,6 +7,9 @@ module Types
     field :cancel_booking, mutation: Mutations::CancelBooking
     field :update_booking, mutation: Mutations::UpdateBooking
     field :create_payment_intent, mutation: Mutations::CreatePaymentIntent
+    field :create_payment, mutation: Mutations::CreatePayment
+    field :capture_payment, mutation: Mutations::CapturePayment
+    field :refund_payment, mutation: Mutations::RefundPayment
     field :create_course, mutation: Mutations::CreateCourse
     field :update_tee_time, mutation: Mutations::UpdateTeeTime
     field :update_course_voice_config, mutation: Mutations::UpdateCourseVoiceConfig
