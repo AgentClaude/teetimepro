@@ -36,9 +36,9 @@ class Api::V1::StripeWebhooksController < Api::V1::BaseController
     payload = request.body.read
     signature = request.headers['Stripe-Signature']
 
-    webhook_secret = ENV['STRIPE_WEBHOOK_SECRET']
+    webhook_secret = AppConfig.stripe_webhook_secret
     unless webhook_secret
-      Rails.logger.error("STRIPE_WEBHOOK_SECRET not configured")
+      Rails.logger.error("Stripe webhook secret not configured")
       render json: { error: "Webhook secret not configured" }, status: :internal_server_error
       return
     end
