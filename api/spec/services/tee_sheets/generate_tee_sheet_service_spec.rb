@@ -99,8 +99,10 @@ RSpec.describe TeeSheets::GenerateTeeSheetService do
 
     context "twilight pricing" do
       before do
-        # Stub twilight_time? on the course to treat 15:00+ as twilight
-        allow(course).to receive(:twilight_start_time).and_return(Time.zone.parse("15:00"))
+        # Course doesn't have twilight_start_time column yet, so disable verification
+        without_partial_double_verification do
+          allow(course).to receive(:twilight_start_time).and_return(Time.zone.parse("15:00"))
+        end
         allow(course).to receive(:respond_to?).and_call_original
         allow(course).to receive(:respond_to?).with(:twilight_start_time).and_return(true)
       end

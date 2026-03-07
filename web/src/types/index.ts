@@ -200,6 +200,14 @@ export type PricingRuleType =
   | "ADVANCE_BOOKING" 
   | "LAST_MINUTE";
 
+export interface PricingConditions {
+  days?: string[];
+  hours?: { start?: number; end?: number } | number;
+  threshold?: number;
+  operator?: string;
+  [key: string]: unknown;
+}
+
 export interface PricingRule {
   id: string;
   organizationId: string;
@@ -210,7 +218,7 @@ export interface PricingRule {
   } | null;
   name: string;
   ruleType: PricingRuleType;
-  conditions: Record<string, unknown>;
+  conditions: PricingConditions;
   multiplier: number;
   flatAdjustmentCents: number;
   flatAdjustment: string;
@@ -230,7 +238,7 @@ export interface AppliedPricingRule {
   flatAdjustmentCents: number;
   flatAdjustment: string;
   priority: number;
-  conditions: Record<string, unknown>;
+  conditions: PricingConditions;
 }
 
 export interface PriceBreakdownStep {
@@ -261,7 +269,7 @@ export interface PricingRuleFormData {
   name: string;
   ruleType: PricingRuleType;
   courseId: string | null;
-  conditions: Record<string, unknown>;
+  conditions: PricingConditions;
   multiplier: number;
   flatAdjustmentCents: number;
   priority: number;

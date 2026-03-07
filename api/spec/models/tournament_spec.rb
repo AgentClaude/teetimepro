@@ -65,7 +65,7 @@ RSpec.describe Tournament, type: :model do
   end
 
   describe "enums" do
-    it { is_expected.to define_enum_for(:format).with_values(stroke: 0, match_play: 1, scramble: 2, best_ball: 3) }
+    it { is_expected.to define_enum_for(:format).with_values(stroke: 0, match_play: 1, scramble: 2, best_ball: 3, stableford: 4) }
     it {
       is_expected.to define_enum_for(:status).with_values(
         draft: 0, registration_open: 1, registration_closed: 2,
@@ -106,7 +106,7 @@ RSpec.describe Tournament, type: :model do
   end
 
   describe "#full?" do
-    let(:tournament) { create(:tournament, :registration_open, max_participants: 2) }
+    let(:tournament) { create(:tournament, :registration_open, min_participants: 2, max_participants: 2) }
 
     it "returns false when under capacity" do
       expect(tournament).not_to be_full

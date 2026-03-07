@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_035625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,10 +60,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.text "cancellation_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "calendar_event_id"
+    t.index ["calendar_event_id"], name: "index_bookings_on_calendar_event_id"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
     t.index ["status"], name: "index_bookings_on_status"
     t.index ["tee_time_id"], name: "index_bookings_on_tee_time_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "calendar_connections", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "provider", null: false
+    t.text "access_token"
+    t.text "refresh_token"
+    t.datetime "token_expires_at"
+    t.boolean "enabled", default: true, null: false
+    t.string "calendar_id"
+    t.string "calendar_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enabled"], name: "index_calendar_connections_on_enabled"
+    t.index ["provider"], name: "index_calendar_connections_on_provider"
+    t.index ["user_id", "provider"], name: "index_calendar_connections_on_user_id_and_provider", unique: true
+    t.index ["user_id"], name: "index_calendar_connections_on_user_id"
   end
 
   create_table "courses", force: :cascade do |t|
@@ -94,9 +113,53 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "voice_config", default: {}, null: false
+    t.string "slug", null: false
     t.index ["active"], name: "index_courses_on_active"
     t.index ["organization_id", "name"], name: "index_courses_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_courses_on_organization_id"
+    t.index ["slug"], name: "index_courses_on_slug", unique: true
+  end
+
+  create_table "fnb_tab_items", force: :cascade do |t|
+    t.bigint "fnb_tab_id", null: false
+    t.string "name", null: false
+    t.integer "quantity", default: 1, null: false
+    t.integer "unit_price_cents", null: false
+    t.integer "total_cents", null: false
+    t.string "category", default: "food", null: false
+    t.text "notes"
+    t.bigint "added_by_id", null: false, comment: "Staff member who added the item"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["added_by_id"], name: "index_fnb_tab_items_on_added_by_id"
+    t.index ["fnb_tab_id", "created_at"], name: "index_fnb_tab_items_on_tab_and_created_at"
+    t.index ["fnb_tab_id"], name: "index_fnb_tab_items_on_fnb_tab_id"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'other'::character varying]::text[])", name: "fnb_tab_items_category_check"
+    t.check_constraint "quantity > 0", name: "fnb_tab_items_quantity_positive"
+    t.check_constraint "total_cents >= 0", name: "fnb_tab_items_total_cents_non_negative"
+    t.check_constraint "unit_price_cents >= 0", name: "fnb_tab_items_unit_price_non_negative"
+  end
+
+  create_table "fnb_tabs", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "user_id", null: false, comment: "Server who opened the tab"
+    t.string "golfer_name", null: false
+    t.string "status", default: "open", null: false
+    t.integer "total_cents", default: 0, null: false
+    t.datetime "opened_at", null: false
+    t.datetime "closed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id", "status"], name: "index_fnb_tabs_on_course_and_status"
+    t.index ["course_id"], name: "index_fnb_tabs_on_course_id"
+    t.index ["opened_at"], name: "index_fnb_tabs_on_opened_at"
+    t.index ["organization_id", "status"], name: "index_fnb_tabs_on_org_and_status"
+    t.index ["organization_id"], name: "index_fnb_tabs_on_organization_id"
+    t.index ["user_id", "opened_at"], name: "index_fnb_tabs_on_user_and_opened_at"
+    t.index ["user_id"], name: "index_fnb_tabs_on_user_id"
+    t.check_constraint "status::text = ANY (ARRAY['open'::character varying, 'closed'::character varying, 'merged'::character varying]::text[])", name: "fnb_tabs_status_check"
+    t.check_constraint "total_cents >= 0", name: "fnb_tabs_total_cents_non_negative"
   end
 
   create_table "golfer_profiles", force: :cascade do |t|
@@ -192,6 +255,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.index ["stripe_payment_intent_id"], name: "index_payments_on_stripe_payment_intent_id", unique: true
   end
 
+  create_table "pricing_rules", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id"
+    t.string "name", null: false
+    t.string "rule_type", null: false
+    t.jsonb "conditions", default: {}
+    t.decimal "multiplier", precision: 10, scale: 4, default: "1.0"
+    t.integer "flat_adjustment_cents", default: 0
+    t.integer "priority", default: 0
+    t.boolean "active", default: true
+    t.date "start_date"
+    t.date "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_pricing_rules_on_course_id"
+    t.index ["organization_id", "active"], name: "index_pricing_rules_on_organization_id_and_active"
+    t.index ["organization_id", "course_id"], name: "index_pricing_rules_on_organization_id_and_course_id"
+    t.index ["organization_id", "rule_type"], name: "index_pricing_rules_on_organization_id_and_rule_type"
+    t.index ["organization_id"], name: "index_pricing_rules_on_organization_id"
+    t.index ["priority"], name: "index_pricing_rules_on_priority"
+  end
+
   create_table "sms_campaigns", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "created_by_id", null: false
@@ -233,6 +318,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.index ["sms_campaign_id"], name: "index_sms_messages_on_sms_campaign_id"
     t.index ["twilio_sid"], name: "index_sms_messages_on_twilio_sid", unique: true, where: "(twilio_sid IS NOT NULL)"
     t.index ["user_id"], name: "index_sms_messages_on_user_id"
+  end
+
+  create_table "stripe_events", force: :cascade do |t|
+    t.string "stripe_event_id", null: false
+    t.string "event_type", null: false
+    t.integer "status", default: 0, null: false
+    t.jsonb "payload", null: false
+    t.datetime "processed_at"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_stripe_events_on_event_type"
+    t.index ["status"], name: "index_stripe_events_on_status"
+    t.index ["stripe_event_id"], name: "index_stripe_events_on_stripe_event_id", unique: true
   end
 
   create_table "tee_sheets", force: :cascade do |t|
@@ -412,7 +511,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
+  add_foreign_key "calendar_connections", "users"
   add_foreign_key "courses", "organizations", on_delete: :cascade
+  add_foreign_key "fnb_tab_items", "fnb_tabs"
+  add_foreign_key "fnb_tab_items", "users", column: "added_by_id"
+  add_foreign_key "fnb_tabs", "courses"
+  add_foreign_key "fnb_tabs", "organizations"
+  add_foreign_key "fnb_tabs", "users"
   add_foreign_key "golfer_profiles", "users", on_delete: :cascade
   add_foreign_key "golfer_segment_memberships", "golfer_segments", on_delete: :cascade
   add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
@@ -421,6 +526,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
   add_foreign_key "payments", "bookings", on_delete: :cascade
+  add_foreign_key "pricing_rules", "courses"
+  add_foreign_key "pricing_rules", "organizations"
   add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
   add_foreign_key "sms_campaigns", "users", column: "created_by_id", on_delete: :cascade
   add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade
