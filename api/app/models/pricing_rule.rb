@@ -15,7 +15,6 @@ class PricingRule < ApplicationRecord
   validates :rule_type, presence: true, inclusion: { in: RULE_TYPES }
   validates :multiplier, presence: true, numericality: { greater_than: 0 }
   validates :priority, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :start_date, :end_date, allow_nil: true
   validate :end_date_after_start_date
 
   monetize :flat_adjustment_cents, allow_nil: true
