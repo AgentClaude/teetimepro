@@ -467,6 +467,29 @@ module Types
       org.memberships.includes(:user, :member_account_charges).find(id)
     end
 
+    # POS Products
+    field :pos_products, [Types::PosProductType], null: false do
+      argument :category, String, required: false
+      argument :search, String, required: false
+      argument :active_only, Boolean, required: false, default_value: true
+    end
+    def pos_products(category: nil, search: nil, active_only: true)
+      org = require_auth!
+      scope = org.pos_products.order(:category, :name)
+      scope = scope.active if active_only
+      scope = scope.by_category(category) if category.present?
+      scope = scope.search(search) if search.present?
+      scope
+    end
+
+    field :pos_product, Types::PosProductType, null: true do
+      argument :id, ID, required: true
+    end
+    def pos_product(id:)
+      org = require_auth!
+      org.pos_products.find_by(id: id)
+    end
+
     # Pricing rules
     field :pricing_rules, [Types::PricingRuleType], null: false do
       argument :course_id, ID, required: false

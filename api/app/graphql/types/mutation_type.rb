@@ -48,6 +48,12 @@ module Types
     field :void_member_charge, mutation: Mutations::VoidMemberCharge
     field :charge_fnb_tab_to_member, mutation: Mutations::ChargeFnbTabToMember
 
+    # POS
+    field :create_pos_product, mutation: Mutations::CreatePosProduct
+    field :update_pos_product, mutation: Mutations::UpdatePosProduct
+    field :lookup_pos_product, mutation: Mutations::LookupPosProduct
+    field :pos_quick_sale, mutation: Mutations::PosQuickSale
+
     # Pricing rules
     field :create_pricing_rule, mutation: Mutations::CreatePricingRule
     field :update_pricing_rule, mutation: Mutations::UpdatePricingRule

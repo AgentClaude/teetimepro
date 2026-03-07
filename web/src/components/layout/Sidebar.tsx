@@ -12,6 +12,7 @@ import {
   FunnelIcon,
   PhoneIcon,
   TrophyIcon,
+  ShoppingCartIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Notifications', href: '/notifications', icon: BellIcon },
   { name: 'Segments', href: '/segments', icon: FunnelIcon },
   { name: 'Campaigns', href: '/campaigns', icon: MegaphoneIcon },
+  { name: 'Point of Sale', href: '/pos', icon: ShoppingCartIcon },
   { name: 'Reports', href: '/reports', icon: ChartBarIcon },
   { name: 'Voice Analytics', href: '/voice-analytics', icon: PhoneIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
