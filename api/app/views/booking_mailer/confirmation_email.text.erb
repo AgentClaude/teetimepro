@@ -1,0 +1,28 @@
+TEE TIME CONFIRMED!
+
+Hi <%= @user.first_name %>!
+
+Your tee time booking has been confirmed. We're excited to see you on the course!
+
+BOOKING DETAILS:
+================
+Course:       <%= @course.name %>
+Date:         <%= @formatted_date %>
+Time:         <%= @formatted_time %>
+Players:      <%= @players_count %> player<%= 's' if @players_count > 1 %>
+
+CONFIRMATION CODE: <%= @confirmation_code %>
+
+CANCELLATION POLICY:
+<%= @cancellation_policy %>
+
+IMPORTANT NOTES:
+- Please arrive at least 15 minutes before your tee time
+- Bring your confirmation code for check-in
+- Contact the pro shop if you have any questions
+
+Thank you for choosing <%= @organization_name %>. We look forward to providing you with an excellent golf experience!
+
+---
+This is an automated confirmation email from <%= @organization_name %>.
+If you have any questions, please contact the pro shop.
