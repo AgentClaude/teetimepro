@@ -13,7 +13,11 @@ RSpec.describe GolferSegment, type: :model do
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:organization_id) }
-    it { is_expected.to validate_presence_of(:filter_criteria) }
+    it "validates filter_criteria is a Hash" do
+      segment = build(:golfer_segment, filter_criteria: nil)
+      expect(segment).not_to be_valid
+      expect(segment.errors[:filter_criteria]).to include("must be a Hash")
+    end
 
     it "rejects unknown filter keys" do
       segment = build(:golfer_segment, filter_criteria: { "bogus_key" => 1 })
