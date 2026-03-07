@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_160002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,105 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["organization_id", "name"], name: "index_courses_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_courses_on_organization_id"
     t.index ["slug"], name: "index_courses_on_slug", unique: true
+  end
+
+  create_table "email_campaigns", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "name", null: false
+    t.string "subject", null: false
+    t.text "body_html", null: false
+    t.text "body_text"
+    t.integer "status", default: 0, null: false
+    t.string "recipient_filter", default: "all", null: false
+    t.jsonb "filter_criteria", default: {}, null: false
+    t.integer "lapsed_days", default: 30, null: false
+    t.integer "total_recipients", default: 0, null: false
+    t.integer "sent_count", default: 0, null: false
+    t.integer "delivered_count", default: 0, null: false
+    t.integer "opened_count", default: 0, null: false
+    t.integer "clicked_count", default: 0, null: false
+    t.integer "failed_count", default: 0, null: false
+    t.boolean "is_automated", default: false, null: false
+    t.integer "recurrence_interval_days"
+    t.datetime "scheduled_at"
+    t.datetime "sent_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "email_template_id"
+    t.bigint "email_provider_id"
+    t.index ["created_by_id"], name: "index_email_campaigns_on_created_by_id"
+    t.index ["email_provider_id"], name: "index_email_campaigns_on_email_provider_id"
+    t.index ["email_template_id"], name: "index_email_campaigns_on_email_template_id"
+    t.index ["organization_id", "is_automated"], name: "index_email_campaigns_on_organization_id_and_is_automated", where: "(is_automated = true)"
+    t.index ["organization_id", "status"], name: "index_email_campaigns_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_email_campaigns_on_organization_id"
+    t.index ["scheduled_at"], name: "index_email_campaigns_on_scheduled_at", where: "(status = 1)"
+    t.check_constraint "lapsed_days > 0", name: "email_campaigns_lapsed_days_positive_check"
+    t.check_constraint "recurrence_interval_days IS NULL OR recurrence_interval_days > 0", name: "email_campaigns_recurrence_positive_check"
+  end
+
+  create_table "email_messages", force: :cascade do |t|
+    t.bigint "email_campaign_id", null: false
+    t.bigint "user_id", null: false
+    t.string "to_email", null: false
+    t.string "message_id"
+    t.integer "status", default: 0, null: false
+    t.string "error_message"
+    t.datetime "opened_at"
+    t.datetime "clicked_at"
+    t.datetime "sent_at"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "provider_message_id"
+    t.index ["email_campaign_id", "status"], name: "index_email_messages_on_email_campaign_id_and_status"
+    t.index ["email_campaign_id", "user_id"], name: "index_email_messages_on_email_campaign_id_and_user_id", unique: true
+    t.index ["email_campaign_id"], name: "index_email_messages_on_email_campaign_id"
+    t.index ["message_id"], name: "index_email_messages_on_message_id", unique: true, where: "(message_id IS NOT NULL)"
+    t.index ["provider_message_id"], name: "index_email_messages_on_provider_message_id"
+    t.index ["status", "sent_at"], name: "index_email_messages_on_status_and_sent_at"
+    t.index ["user_id"], name: "index_email_messages_on_user_id"
+  end
+
+  create_table "email_providers", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "provider_type", null: false
+    t.string "api_key", null: false
+    t.string "from_email", null: false
+    t.string "from_name"
+    t.string "webhook_secret"
+    t.boolean "is_active", default: true, null: false
+    t.boolean "is_default", default: false, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.datetime "last_verified_at"
+    t.string "verification_status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "is_default"], name: "index_email_providers_on_organization_id_and_is_default"
+    t.index ["organization_id", "provider_type"], name: "index_email_providers_on_organization_id_and_provider_type", unique: true
+    t.index ["organization_id"], name: "index_email_providers_on_organization_id"
+  end
+
+  create_table "email_templates", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "name", null: false
+    t.string "subject", null: false
+    t.text "body_html", null: false
+    t.text "body_text"
+    t.string "category", default: "general"
+    t.boolean "is_active", default: true, null: false
+    t.jsonb "merge_fields", default: [], null: false
+    t.string "thumbnail_url"
+    t.integer "usage_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_email_templates_on_created_by_id"
+    t.index ["organization_id", "category"], name: "index_email_templates_on_organization_id_and_category"
+    t.index ["organization_id", "is_active"], name: "index_email_templates_on_organization_id_and_is_active"
+    t.index ["organization_id"], name: "index_email_templates_on_organization_id"
   end
 
   create_table "fnb_tab_items", force: :cascade do |t|
@@ -242,6 +341,80 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
+  create_table "loyalty_accounts", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "points_balance", default: 0, null: false
+    t.integer "lifetime_points", default: 0, null: false
+    t.integer "tier", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "user_id"], name: "index_loyalty_accounts_on_organization_id_and_user_id", unique: true
+    t.index ["organization_id"], name: "index_loyalty_accounts_on_organization_id"
+    t.index ["user_id"], name: "index_loyalty_accounts_on_user_id"
+  end
+
+  create_table "loyalty_programs", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.integer "points_per_dollar", default: 10, null: false
+    t.boolean "is_active", default: true, null: false
+    t.jsonb "tier_thresholds", default: {"gold"=>2000, "silver"=>500, "platinum"=>5000}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_loyalty_programs_on_organization_id"
+  end
+
+  create_table "loyalty_redemptions", force: :cascade do |t|
+    t.bigint "loyalty_account_id", null: false
+    t.bigint "loyalty_reward_id", null: false
+    t.bigint "booking_id"
+    t.integer "status", default: 0, null: false
+    t.string "code", null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_loyalty_redemptions_on_booking_id"
+    t.index ["code"], name: "index_loyalty_redemptions_on_code", unique: true
+    t.index ["expires_at"], name: "index_loyalty_redemptions_on_expires_at"
+    t.index ["loyalty_account_id"], name: "index_loyalty_redemptions_on_loyalty_account_id"
+    t.index ["loyalty_reward_id"], name: "index_loyalty_redemptions_on_loyalty_reward_id"
+    t.index ["status"], name: "index_loyalty_redemptions_on_status"
+  end
+
+  create_table "loyalty_rewards", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.integer "points_cost", null: false
+    t.integer "reward_type", null: false
+    t.integer "discount_value"
+    t.boolean "is_active", default: true, null: false
+    t.integer "max_redemptions_per_user"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active"], name: "index_loyalty_rewards_on_is_active"
+    t.index ["organization_id"], name: "index_loyalty_rewards_on_organization_id"
+    t.index ["reward_type"], name: "index_loyalty_rewards_on_reward_type"
+  end
+
+  create_table "loyalty_transactions", force: :cascade do |t|
+    t.bigint "loyalty_account_id", null: false
+    t.string "source_type"
+    t.bigint "source_id"
+    t.integer "transaction_type", null: false
+    t.integer "points", null: false
+    t.string "description", null: false
+    t.integer "balance_after", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_loyalty_transactions_on_created_at"
+    t.index ["loyalty_account_id"], name: "index_loyalty_transactions_on_loyalty_account_id"
+    t.index ["source_type", "source_id"], name: "index_loyalty_transactions_on_source"
+    t.index ["transaction_type"], name: "index_loyalty_transactions_on_transaction_type"
   end
 
   create_table "marketplace_connections", force: :cascade do |t|
@@ -514,6 +687,39 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["user_id"], name: "index_tournament_entries_on_user_id"
   end
 
+  create_table "tournament_prizes", force: :cascade do |t|
+    t.bigint "tournament_id", null: false
+    t.integer "position", null: false
+    t.string "prize_type", null: false
+    t.text "description", null: false
+    t.integer "amount_cents", default: 0, null: false
+    t.bigint "awarded_to_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["awarded_to_id"], name: "index_tournament_prizes_on_awarded_to_id"
+    t.index ["prize_type"], name: "index_tournament_prizes_on_prize_type"
+    t.index ["tournament_id", "position"], name: "index_tournament_prizes_on_tournament_id_and_position", unique: true
+    t.index ["tournament_id"], name: "index_tournament_prizes_on_tournament_id"
+  end
+
+  create_table "tournament_results", force: :cascade do |t|
+    t.bigint "tournament_id", null: false
+    t.bigint "tournament_entry_id", null: false
+    t.integer "position", null: false
+    t.integer "total_strokes", null: false
+    t.integer "total_to_par", null: false
+    t.boolean "tied", default: false, null: false
+    t.boolean "prize_awarded", default: false, null: false
+    t.datetime "finalized_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["position"], name: "index_tournament_results_on_position"
+    t.index ["tournament_entry_id"], name: "index_tournament_results_on_tournament_entry_id"
+    t.index ["tournament_id", "position"], name: "index_tournament_results_on_tournament_id_and_position"
+    t.index ["tournament_id", "tournament_entry_id"], name: "idx_on_tournament_id_tournament_entry_id_b7b8121d49", unique: true
+    t.index ["tournament_id"], name: "index_tournament_results_on_tournament_id"
+  end
+
   create_table "tournament_rounds", force: :cascade do |t|
     t.bigint "tournament_id", null: false
     t.integer "round_number", default: 1, null: false
@@ -675,6 +881,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
+  add_foreign_key "email_campaigns", "email_providers"
+  add_foreign_key "email_campaigns", "email_templates"
+  add_foreign_key "email_campaigns", "organizations", on_delete: :cascade
+  add_foreign_key "email_campaigns", "users", column: "created_by_id", on_delete: :cascade
+  add_foreign_key "email_messages", "email_campaigns", on_delete: :cascade
+  add_foreign_key "email_messages", "users", on_delete: :cascade
+  add_foreign_key "email_providers", "organizations"
+  add_foreign_key "email_templates", "organizations"
+  add_foreign_key "email_templates", "users", column: "created_by_id"
   add_foreign_key "fnb_tab_items", "fnb_tabs"
   add_foreign_key "fnb_tab_items", "users", column: "added_by_id"
   add_foreign_key "fnb_tabs", "bookings"
@@ -694,6 +909,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
   add_foreign_key "inventory_movements", "organizations"
   add_foreign_key "inventory_movements", "pos_products"
   add_foreign_key "inventory_movements", "users", column: "performed_by_id"
+  add_foreign_key "loyalty_accounts", "organizations"
+  add_foreign_key "loyalty_accounts", "users"
+  add_foreign_key "loyalty_programs", "organizations"
+  add_foreign_key "loyalty_redemptions", "bookings"
+  add_foreign_key "loyalty_redemptions", "loyalty_accounts"
+  add_foreign_key "loyalty_redemptions", "loyalty_rewards"
+  add_foreign_key "loyalty_rewards", "organizations"
+  add_foreign_key "loyalty_transactions", "loyalty_accounts"
   add_foreign_key "marketplace_connections", "courses"
   add_foreign_key "marketplace_connections", "organizations"
   add_foreign_key "marketplace_listings", "marketplace_connections"
@@ -719,6 +942,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
   add_foreign_key "tournament_entries", "payments", on_delete: :nullify
   add_foreign_key "tournament_entries", "tournaments", on_delete: :cascade
   add_foreign_key "tournament_entries", "users", on_delete: :cascade
+  add_foreign_key "tournament_prizes", "tournament_entries", column: "awarded_to_id"
+  add_foreign_key "tournament_prizes", "tournaments"
+  add_foreign_key "tournament_results", "tournament_entries"
+  add_foreign_key "tournament_results", "tournaments"
   add_foreign_key "tournament_rounds", "tournaments"
   add_foreign_key "tournament_scores", "tournament_entries"
   add_foreign_key "tournament_scores", "tournament_rounds"
