@@ -647,3 +647,64 @@ export const GET_VOICE_CALL_LOGS_PAGINATED = gql`
     }
   }
 `;
+
+// Pricing rules queries
+export const GET_PRICING_RULES = gql`
+  query GetPricingRules(
+    $courseId: ID
+    $ruleType: PricingRuleTypeEnum
+    $active: Boolean
+  ) {
+    pricingRules(
+      courseId: $courseId
+      ruleType: $ruleType
+      active: $active
+    ) {
+      id
+      organizationId
+      courseId
+      course {
+        id
+        name
+      }
+      name
+      ruleType
+      conditions
+      multiplier
+      flatAdjustmentCents
+      flatAdjustment
+      priority
+      active
+      startDate
+      endDate
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_PRICING_RULE = gql`
+  query GetPricingRule($id: ID!) {
+    pricingRule(id: $id) {
+      id
+      organizationId
+      courseId
+      course {
+        id
+        name
+      }
+      name
+      ruleType
+      conditions
+      multiplier
+      flatAdjustmentCents
+      flatAdjustment
+      priority
+      active
+      startDate
+      endDate
+      createdAt
+      updatedAt
+    }
+  }
+`;

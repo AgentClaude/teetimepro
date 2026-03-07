@@ -506,3 +506,150 @@ export const DELETE_GOLFER_SEGMENT = gql`
     }
   }
 `;
+
+// Pricing rules mutations
+export const CREATE_PRICING_RULE = gql`
+  mutation CreatePricingRule(
+    $name: String!
+    $ruleType: PricingRuleTypeEnum!
+    $courseId: ID
+    $conditions: JSON
+    $multiplier: Float
+    $flatAdjustmentCents: Int
+    $priority: Int
+    $active: Boolean
+    $startDate: ISO8601Date
+    $endDate: ISO8601Date
+  ) {
+    createPricingRule(
+      name: $name
+      ruleType: $ruleType
+      courseId: $courseId
+      conditions: $conditions
+      multiplier: $multiplier
+      flatAdjustmentCents: $flatAdjustmentCents
+      priority: $priority
+      active: $active
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      pricingRule {
+        id
+        name
+        ruleType
+        courseId
+        course {
+          id
+          name
+        }
+        conditions
+        multiplier
+        flatAdjustmentCents
+        flatAdjustment
+        priority
+        active
+        startDate
+        endDate
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_PRICING_RULE = gql`
+  mutation UpdatePricingRule(
+    $id: ID!
+    $name: String
+    $ruleType: PricingRuleTypeEnum
+    $courseId: ID
+    $conditions: JSON
+    $multiplier: Float
+    $flatAdjustmentCents: Int
+    $priority: Int
+    $active: Boolean
+    $startDate: ISO8601Date
+    $endDate: ISO8601Date
+  ) {
+    updatePricingRule(
+      id: $id
+      name: $name
+      ruleType: $ruleType
+      courseId: $courseId
+      conditions: $conditions
+      multiplier: $multiplier
+      flatAdjustmentCents: $flatAdjustmentCents
+      priority: $priority
+      active: $active
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      pricingRule {
+        id
+        name
+        ruleType
+        courseId
+        course {
+          id
+          name
+        }
+        conditions
+        multiplier
+        flatAdjustmentCents
+        flatAdjustment
+        priority
+        active
+        startDate
+        endDate
+      }
+      errors
+    }
+  }
+`;
+
+export const DELETE_PRICING_RULE = gql`
+  mutation DeletePricingRule($id: ID!) {
+    deletePricingRule(id: $id) {
+      success
+      message
+      errors
+    }
+  }
+`;
+
+export const CALCULATE_TEE_TIME_PRICE = gql`
+  mutation CalculateTeeTimePrice($teeTimeId: ID!) {
+    calculateTeeTimePrice(teeTimeId: $teeTimeId) {
+      calculation {
+        originalPriceCents
+        originalPrice
+        dynamicPriceCents
+        dynamicPrice
+        priceAdjustmentCents
+        priceAdjustment
+        appliedRules {
+          id
+          name
+          ruleType
+          multiplier
+          flatAdjustmentCents
+          flatAdjustment
+          priority
+          conditions
+        }
+        priceBreakdown {
+          step
+          description
+          ruleType
+          multiplier
+          flatAdjustmentCents
+          flatAdjustment
+          priceCents
+          price
+          adjustmentCents
+          adjustment
+        }
+      }
+      errors
+    }
+  }
+`;

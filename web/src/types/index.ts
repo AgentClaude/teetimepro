@@ -190,3 +190,82 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
+
+// Pricing types
+export type PricingRuleType = 
+  | "TIME_OF_DAY" 
+  | "DAY_OF_WEEK" 
+  | "OCCUPANCY" 
+  | "WEATHER" 
+  | "ADVANCE_BOOKING" 
+  | "LAST_MINUTE";
+
+export interface PricingRule {
+  id: string;
+  organizationId: string;
+  courseId: string | null;
+  course: {
+    id: string;
+    name: string;
+  } | null;
+  name: string;
+  ruleType: PricingRuleType;
+  conditions: Record<string, unknown>;
+  multiplier: number;
+  flatAdjustmentCents: number;
+  flatAdjustment: string;
+  priority: number;
+  active: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppliedPricingRule {
+  id: string;
+  name: string;
+  ruleType: PricingRuleType;
+  multiplier: number;
+  flatAdjustmentCents: number;
+  flatAdjustment: string;
+  priority: number;
+  conditions: Record<string, unknown>;
+}
+
+export interface PriceBreakdownStep {
+  step: string;
+  description: string;
+  ruleType?: PricingRuleType;
+  multiplier?: number;
+  flatAdjustmentCents?: number;
+  flatAdjustment?: string;
+  priceCents: number;
+  price: string;
+  adjustmentCents: number;
+  adjustment: string;
+}
+
+export interface PricingCalculation {
+  originalPriceCents: number;
+  originalPrice: string;
+  dynamicPriceCents: number;
+  dynamicPrice: string;
+  priceAdjustmentCents: number;
+  priceAdjustment: string;
+  appliedRules: AppliedPricingRule[];
+  priceBreakdown: PriceBreakdownStep[];
+}
+
+export interface PricingRuleFormData {
+  name: string;
+  ruleType: PricingRuleType;
+  courseId: string | null;
+  conditions: Record<string, unknown>;
+  multiplier: number;
+  flatAdjustmentCents: number;
+  priority: number;
+  active: boolean;
+  startDate: string | null;
+  endDate: string | null;
+}
