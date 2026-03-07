@@ -28,7 +28,7 @@ export interface AccountingIntegration {
   connectedAt: string | null;
   lastSyncAt: string | null;
   accountMapping: Record<string, { account_id: string; account_name: string }>;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   lastErrorMessage: string | null;
   lastErrorAt: string | null;
   connected: boolean;

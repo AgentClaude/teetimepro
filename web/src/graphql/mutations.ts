@@ -442,3 +442,67 @@ export const CANCEL_SMS_CAMPAIGN = gql`
     }
   }
 `;
+
+// Golfer Segments
+export const CREATE_GOLFER_SEGMENT = gql`
+  mutation CreateGolferSegment(
+    $name: String!
+    $description: String
+    $filterCriteria: JSON!
+    $isDynamic: Boolean
+  ) {
+    createGolferSegment(
+      name: $name
+      description: $description
+      filterCriteria: $filterCriteria
+      isDynamic: $isDynamic
+    ) {
+      golferSegment {
+        id
+        name
+        description
+        filterCriteria
+        isDynamic
+        cachedCount
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_GOLFER_SEGMENT = gql`
+  mutation UpdateGolferSegment(
+    $id: ID!
+    $name: String
+    $description: String
+    $filterCriteria: JSON
+    $isDynamic: Boolean
+  ) {
+    updateGolferSegment(
+      id: $id
+      name: $name
+      description: $description
+      filterCriteria: $filterCriteria
+      isDynamic: $isDynamic
+    ) {
+      golferSegment {
+        id
+        name
+        description
+        filterCriteria
+        isDynamic
+        cachedCount
+      }
+      errors
+    }
+  }
+`;
+
+export const DELETE_GOLFER_SEGMENT = gql`
+  mutation DeleteGolferSegment($id: ID!) {
+    deleteGolferSegment(id: $id) {
+      success
+      errors
+    }
+  }
+`;

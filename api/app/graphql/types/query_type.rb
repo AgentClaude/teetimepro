@@ -158,6 +158,42 @@ module Types
       org.users.find(id)
     end
 
+    # Golfer Segments
+    field :golfer_segments, [Types::GolferSegmentType], null: false
+    def golfer_segments
+      org = require_auth!
+      require_role!(:manager)
+      org.golfer_segments.order(created_at: :desc)
+    end
+
+    field :golfer_segment, Types::GolferSegmentType, null: true do
+      argument :id, ID, required: true
+    end
+    def golfer_segment(id:)
+      org = require_auth!
+      require_role!(:manager)
+      org.golfer_segments.find(id)
+    end
+
+    field :golfer_segment_preview, GraphQL::Types::JSON, null: false do
+      argument :filter_criteria, GraphQL::Types::JSON, required: true
+    end
+    def golfer_segment_preview(filter_criteria:)
+      org = require_auth!
+      require_role!(:manager)
+
+      result = Segments::EvaluateService.call(
+        organization: org,
+        filter_criteria: filter_criteria
+      )
+
+      if result.success?
+        { count: result.count, sample: result.users.limit(5).map { |u| { id: u.id, name: u.full_name, email: u.email } } }
+      else
+        { count: 0, sample: [], error: result.error_message }
+      end
+    end
+
     # Tournaments
     field :tournaments, [Types::TournamentType], null: false do
       argument :course_id, ID, required: false

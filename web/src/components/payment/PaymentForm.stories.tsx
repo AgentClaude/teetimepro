@@ -7,7 +7,7 @@ const meta: Meta<typeof PaymentForm> = {
   component: PaymentForm,
   tags: ['autodocs'],
   decorators: [
-    (Story: any) => (
+    (Story: React.ComponentType) => (
       <StripeProvider>
         <div className="max-w-md mx-auto p-6">
           <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 mb-6">

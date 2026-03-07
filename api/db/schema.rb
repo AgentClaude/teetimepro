@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_06_235059) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -97,6 +97,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_235059) do
     t.index ["active"], name: "index_courses_on_active"
     t.index ["organization_id", "name"], name: "index_courses_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_courses_on_organization_id"
+  end
+
+  create_table "golfer_segment_memberships", force: :cascade do |t|
+    t.bigint "golfer_segment_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["golfer_segment_id", "user_id"], name: "idx_segment_memberships_unique", unique: true
+    t.index ["golfer_segment_id"], name: "index_golfer_segment_memberships_on_golfer_segment_id"
+    t.index ["user_id"], name: "index_golfer_segment_memberships_on_user_id"
+  end
+
+  create_table "golfer_segments", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.jsonb "filter_criteria", default: {}, null: false
+    t.boolean "is_dynamic", default: true, null: false
+    t.integer "cached_count", default: 0, null: false
+    t.datetime "last_evaluated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_golfer_segments_on_created_by_id"
+    t.index ["filter_criteria"], name: "index_golfer_segments_on_filter_criteria", using: :gin
+    t.index ["organization_id", "name"], name: "index_golfer_segments_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_golfer_segments_on_organization_id"
   end
 
   create_table "golfer_profiles", force: :cascade do |t|
@@ -386,6 +413,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_06_235059) do
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
+  add_foreign_key "golfer_segment_memberships", "golfer_segments", on_delete: :cascade
+  add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
+  add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
+  add_foreign_key "golfer_segments", "users", column: "created_by_id"
   add_foreign_key "golfer_profiles", "users", on_delete: :cascade
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade

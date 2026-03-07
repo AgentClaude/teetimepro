@@ -173,13 +173,13 @@ export function CustomerDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {bookings.map((b: any) => (
+                    {bookings.map((b: { id: string; confirmationCode: string; teeTime?: { startTime: string; formattedTime?: string; startsAt?: string; course?: { name: string } }; playersCount: number; totalCents: number; status: string }) => (
                       <tr key={b.id} className="hover:bg-gray-50">
                         <td className="whitespace-nowrap px-3 py-2 font-mono text-sm font-medium text-gray-900">
                           {b.confirmationCode}
                         </td>
                         <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
-                          {b.teeTime?.formattedTime || new Date(b.teeTime?.startsAt).toLocaleString()}
+                          {b.teeTime?.formattedTime || (b.teeTime?.startsAt ? new Date(b.teeTime.startsAt).toLocaleString() : '—')}
                         </td>
                         <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-700">
                           {b.playersCount}
