@@ -70,6 +70,15 @@ export const CONFIGURE_ACCOUNTING_MAPPING = gql`
   }
 `;
 
+export const CREATE_PAYMENT_INTENT = gql`
+  mutation CreatePaymentIntent($teeTimeId: ID!, $playersCount: Int!) {
+    createPaymentIntent(teeTimeId: $teeTimeId, playersCount: $playersCount) {
+      clientSecret
+      errors
+    }
+  }
+`;
+
 export const CREATE_BOOKING = gql`
   mutation CreateBooking(
     $teeTimeId: ID!
