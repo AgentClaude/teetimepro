@@ -57,6 +57,10 @@ module Types
     field :lookup_pos_product, mutation: Mutations::LookupPosProduct
     field :pos_quick_sale, mutation: Mutations::PosQuickSale
 
+    # Inventory management
+    field :adjust_stock, mutation: Mutations::AdjustStock
+    field :receive_stock, mutation: Mutations::ReceiveStock
+
     # Pricing rules
     field :create_pricing_rule, mutation: Mutations::CreatePricingRule
     field :update_pricing_rule, mutation: Mutations::UpdatePricingRule

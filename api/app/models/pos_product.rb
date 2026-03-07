@@ -1,6 +1,9 @@
 class PosProduct < ApplicationRecord
   belongs_to :organization
   belongs_to :course
+  
+  has_many :inventory_movements, dependent: :destroy
+  has_many :inventory_levels, dependent: :destroy
 
   validates :name, presence: true, length: { maximum: 255 }
   validates :sku, presence: true, length: { maximum: 100 },
@@ -38,10 +41,42 @@ class PosProduct < ApplicationRecord
     "$#{(price_cents / 100.0).round(2)}"
   end
 
-  def in_stock?
+  def in_stock?(course = nil)
     return true unless track_inventory
 
+    if course
+      level = inventory_levels.find_by(course: course)
+      return level&.current_stock.to_i > 0
+    end
+
+    # Fallback to legacy stock_quantity if no course specified
     stock_quantity.present? && stock_quantity > 0
+  end
+
+  def available_stock_for_course(course)
+    return nil unless track_inventory
+    
+    level = inventory_levels.find_by(course: course)
+    level&.available_stock || 0
+  end
+
+  def current_stock_for_course(course)
+    return nil unless track_inventory
+    
+    level = inventory_levels.find_by(course: course)
+    level&.current_stock || 0
+  end
+
+  def needs_reorder?(course = nil)
+    return false unless track_inventory
+
+    if course
+      level = inventory_levels.find_by(course: course)
+      return level&.needs_reorder? || false
+    end
+
+    # Check across all courses
+    inventory_levels.any?(&:needs_reorder?)
   end
 
   def decrement_stock!(quantity = 1)
