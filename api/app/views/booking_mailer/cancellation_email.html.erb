@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tee Time Cancelled</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #2c3e50;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8fafc;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .greeting {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+      .booking-card {
+        background-color: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 20px 0;
+      }
+      .booking-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .booking-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      .detail-label {
+        font-weight: bold;
+        color: #495057;
+      }
+      .detail-value {
+        color: #212529;
+      }
+      .confirmation-code {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        letter-spacing: 1px;
+        text-align: center;
+        margin: 15px 0;
+      }
+      .notice {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 0 5px 5px 0;
+      }
+      .notice h3 {
+        margin-top: 0;
+        color: #856404;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #6c757d;
+        border-top: 1px solid #dee2e6;
+      }
+      .golf-icon {
+        font-size: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>
+          <span class="golf-icon">⛳</span>
+          Tee Time Cancelled
+        </h1>
+      </div>
+      
+      <div class="content">
+        <div class="greeting">
+          Hi <%= @user.first_name %>,
+        </div>
+        
+        <p>This email confirms that your tee time booking has been cancelled.</p>
+        
+        <div class="booking-card">
+          <div class="booking-detail">
+            <span class="detail-label">Course:</span>
+            <span class="detail-value"><%= @course.name %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value"><%= @formatted_date %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Time:</span>
+            <span class="detail-value"><%= @formatted_time %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Players:</span>
+            <span class="detail-value"><%= @players_count %> player<%= 's' if @players_count > 1 %></span>
+          </div>
+        </div>
+        
+        <div class="confirmation-code">
+          Cancelled Booking: <%= @confirmation_code %>
+        </div>
+        
+        <div class="notice">
+          <h3>Refund Information</h3>
+          <% if @booking.refundable? %>
+            <p>Your payment will be refunded within 3-5 business days to your original payment method.</p>
+          <% elsif @booking.late_cancel? %>
+            <p>This was a late cancellation. Please check your booking terms for refund eligibility.</p>
+          <% else %>
+            <p>Please contact the pro shop for information about refunds for this cancellation.</p>
+          <% end %>
+        </div>
+        
+        <p>We're sorry to see this booking cancelled. We hope to see you on the course again soon!</p>
+        
+        <p>Thank you for choosing <%= @organization_name %>.</p>
+      </div>
+      
+      <div class="footer">
+        <p>This is an automated cancellation email from <%= @organization_name %>.</p>
+        <p>If you have any questions, please contact the pro shop.</p>
+      </div>
+    </div>
+  </body>
+</html>

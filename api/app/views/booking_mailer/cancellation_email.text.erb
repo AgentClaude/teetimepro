@@ -1,0 +1,31 @@
+TEE TIME CANCELLED
+
+Hi <%= @user.first_name %>,
+
+This email confirms that your tee time booking has been cancelled.
+
+CANCELLED BOOKING DETAILS:
+==========================
+Course:       <%= @course.name %>
+Date:         <%= @formatted_date %>
+Time:         <%= @formatted_time %>
+Players:      <%= @players_count %> player<%= 's' if @players_count > 1 %>
+
+CANCELLED BOOKING: <%= @confirmation_code %>
+
+REFUND INFORMATION:
+<% if @booking.refundable? %>
+Your payment will be refunded within 3-5 business days to your original payment method.
+<% elsif @booking.late_cancel? %>
+This was a late cancellation. Please check your booking terms for refund eligibility.
+<% else %>
+Please contact the pro shop for information about refunds for this cancellation.
+<% end %>
+
+We're sorry to see this booking cancelled. We hope to see you on the course again soon!
+
+Thank you for choosing <%= @organization_name %>.
+
+---
+This is an automated cancellation email from <%= @organization_name %>.
+If you have any questions, please contact the pro shop.

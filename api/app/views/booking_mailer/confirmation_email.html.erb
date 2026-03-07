@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tee Time Confirmed</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #2c3e50;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8fafc;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .greeting {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+      .booking-card {
+        background-color: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 20px 0;
+      }
+      .booking-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .booking-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      .detail-label {
+        font-weight: bold;
+        color: #495057;
+      }
+      .detail-value {
+        color: #212529;
+      }
+      .confirmation-code {
+        background-color: #27ae60;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        letter-spacing: 1px;
+        text-align: center;
+        margin: 15px 0;
+      }
+      .policy {
+        background-color: #e8f5e8;
+        border-left: 4px solid #27ae60;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 0 5px 5px 0;
+      }
+      .policy h3 {
+        margin-top: 0;
+        color: #27ae60;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #6c757d;
+        border-top: 1px solid #dee2e6;
+      }
+      .golf-icon {
+        font-size: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>
+          <span class="golf-icon">⛳</span>
+          Tee Time Confirmed!
+        </h1>
+      </div>
+      
+      <div class="content">
+        <div class="greeting">
+          Hi <%= @user.first_name %>!
+        </div>
+        
+        <p>Your tee time booking has been confirmed. We're excited to see you on the course!</p>
+        
+        <div class="booking-card">
+          <div class="booking-detail">
+            <span class="detail-label">Course:</span>
+            <span class="detail-value"><%= @course.name %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value"><%= @formatted_date %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Time:</span>
+            <span class="detail-value"><%= @formatted_time %></span>
+          </div>
+          <div class="booking-detail">
+            <span class="detail-label">Players:</span>
+            <span class="detail-value"><%= @players_count %> player<%= 's' if @players_count > 1 %></span>
+          </div>
+        </div>
+        
+        <div class="confirmation-code">
+          Confirmation Code: <%= @confirmation_code %>
+        </div>
+        
+        <div class="policy">
+          <h3>Cancellation Policy</h3>
+          <p><%= @cancellation_policy %></p>
+        </div>
+        
+        <p>Please arrive at least 15 minutes before your tee time. Bring your confirmation code for check-in.</p>
+        
+        <p>Thank you for choosing <%= @organization_name %>. We look forward to providing you with an excellent golf experience!</p>
+      </div>
+      
+      <div class="footer">
+        <p>This is an automated confirmation email from <%= @organization_name %>.</p>
+        <p>If you have any questions, please contact the pro shop.</p>
+      </div>
+    </div>
+  </body>
+</html>
