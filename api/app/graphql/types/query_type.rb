@@ -398,6 +398,30 @@ module Types
     def fnb_tab(id:)
       org = require_auth!
       org.fnb_tabs.includes(:course, :user, :fnb_tab_items).find_by(id: id)
+    # Pricing rules
+    field :pricing_rules, [Types::PricingRuleType], null: false do
+      argument :course_id, ID, required: false
+      argument :rule_type, Types::PricingRuleTypeEnum, required: false
+      argument :active, Boolean, required: false
+    end
+    def pricing_rules(course_id: nil, rule_type: nil, active: nil)
+      org = require_auth!
+      require_role!(:manager)
+
+      scope = org.pricing_rules.includes(:course).by_priority
+      scope = scope.for_course(course_id) if course_id.present?
+      scope = scope.where(rule_type: rule_type) if rule_type.present?
+      scope = scope.where(active: active) unless active.nil?
+      scope
+    end
+
+    field :pricing_rule, Types::PricingRuleType, null: true do
+      argument :id, ID, required: true
+    end
+    def pricing_rule(id:)
+      org = require_auth!
+      require_role!(:manager)
+      org.pricing_rules.includes(:course).find(id)
     end
   end
 end

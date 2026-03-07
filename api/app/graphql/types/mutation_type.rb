@@ -42,5 +42,11 @@ module Types
     field :close_fnb_tab, mutation: Mutations::CloseFnbTab
     field :merge_fnb_tabs, mutation: Mutations::MergeFnbTabs
     field :split_fnb_tab, mutation: Mutations::SplitFnbTab
+
+    # Pricing rules
+    field :create_pricing_rule, mutation: Mutations::CreatePricingRule
+    field :update_pricing_rule, mutation: Mutations::UpdatePricingRule
+    field :delete_pricing_rule, mutation: Mutations::DeletePricingRule
+    field :calculate_tee_time_price, mutation: Mutations::CalculateTeeTimePrice
   end
 end
