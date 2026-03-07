@@ -696,5 +696,4 @@ module Types
       scope.order(created_at: :desc).limit([limit, 100].min)
     end
   end
-  end
 end
