@@ -6,7 +6,7 @@ class LoyaltyTransaction < ApplicationRecord
   validates :description, presence: true
   validates :balance_after, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
-  enum transaction_type: { earn: 0, redeem: 1, adjust: 2, expire: 3 }
+  enum :transaction_type, { earn: 0, redeem: 1, adjust: 2, expire: 3 }
 
   scope :for_account, ->(account) { where(loyalty_account: account) }
   scope :recent, -> { order(created_at: :desc) }
