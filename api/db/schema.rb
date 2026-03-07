@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_200001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_210001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -661,9 +661,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_200001) do
     t.jsonb "metadata", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "organization_id"
+    t.bigint "user_id"
+    t.integer "payment_method", default: 0, null: false
+    t.integer "provider", default: 0, null: false
+    t.string "provider_transaction_id"
+    t.string "refund_reason"
+    t.datetime "paid_at"
+    t.datetime "refunded_at"
+    t.index ["booking_id", "status"], name: "index_payments_on_booking_status"
     t.index ["booking_id"], name: "index_payments_on_booking_id"
+    t.index ["organization_id"], name: "index_payments_on_organization_id"
+    t.index ["payment_method"], name: "index_payments_on_payment_method"
+    t.index ["provider"], name: "index_payments_on_provider"
+    t.index ["provider_transaction_id"], name: "index_payments_on_provider_transaction_id"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["stripe_payment_intent_id"], name: "index_payments_on_stripe_payment_intent_id", unique: true
+    t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
   create_table "pos_products", force: :cascade do |t|
@@ -1131,6 +1145,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_200001) do
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
   add_foreign_key "payments", "bookings", on_delete: :cascade
+  add_foreign_key "payments", "organizations", on_delete: :cascade
+  add_foreign_key "payments", "users", on_delete: :nullify
   add_foreign_key "pos_products", "courses"
   add_foreign_key "pos_products", "organizations"
   add_foreign_key "pricing_rules", "courses"

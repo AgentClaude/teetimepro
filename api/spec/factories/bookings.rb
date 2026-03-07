@@ -31,7 +31,7 @@ FactoryBot.define do
 
     trait :with_payment do
       after(:create) do |booking|
-        create(:payment, booking: booking, amount_cents: booking.total_cents)
+        create(:payment, :captured, booking: booking, amount_cents: booking.total_cents)
       end
     end
   end
@@ -41,13 +41,4 @@ FactoryBot.define do
     name { Faker::Name.name }
     golfer_profile { nil }
   end
-
-  factory :payment do
-    booking
-    amount_cents { 15000 }
-    amount_currency { "USD" }
-    status { :completed }
-    stripe_payment_intent_id { "pi_#{SecureRandom.hex(12)}" }
-  end
-
-  end
+end

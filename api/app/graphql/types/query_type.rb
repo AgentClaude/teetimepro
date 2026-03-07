@@ -86,6 +86,22 @@ module Types
     end
 
     # Single booking
+    # Payments
+    field :payments, [Types::PaymentType], null: false do
+      argument :booking_id, ID, required: false
+      argument :status, Types::PaymentStatusEnum, required: false
+    end
+    def payments(booking_id: nil, status: nil)
+      org = require_auth!
+      scope = Payment.where(organization_id: org.id)
+                     .or(Payment.joins(booking: { tee_time: { tee_sheet: :course } })
+                                .where(courses: { organization_id: org.id }))
+                     .distinct
+      scope = scope.for_booking(booking_id) if booking_id.present?
+      scope = scope.by_status(status) if status.present?
+      scope.order(created_at: :desc)
+    end
+
     field :booking, Types::BookingType, null: true do
       argument :id, ID, required: true
     end

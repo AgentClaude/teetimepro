@@ -4,7 +4,7 @@ class Booking < ApplicationRecord
   belongs_to :tee_time
   belongs_to :user
   has_many :booking_players, dependent: :destroy
-  has_one :payment, dependent: :destroy
+  has_many :payments, dependent: :destroy
   has_many :fnb_tabs, dependent: :nullify
   has_many :accounting_syncs, as: :syncable, dependent: :destroy
 
