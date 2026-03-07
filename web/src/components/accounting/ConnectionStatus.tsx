@@ -35,7 +35,7 @@ export function ConnectionStatus({
       case "connected":
         return <Badge variant="success">Connected</Badge>;
       case "error":
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge variant="danger">Error</Badge>;
       case "disconnected":
       default:
         return <Badge variant="neutral">Disconnected</Badge>;
@@ -92,16 +92,16 @@ export function ConnectionStatus({
             {isConnected ? (
               <>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                 
                   onClick={() => handleSync()}
                   disabled={syncing}
                 >
-                  {syncing ? <LoadingSpinner size="sm" /> : "Sync Now"}
+                  {syncing ? <LoadingSpinner /> : "Sync Now"}
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                 
                   onClick={() => setShowDisconnectModal(true)}
                 >
                   Disconnect
@@ -146,24 +146,24 @@ export function ConnectionStatus({
               <p className="text-sm font-medium text-rough-700 mb-2">Quick Sync:</p>
               <div className="flex space-x-2">
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                 
                   onClick={() => handleSync("invoice")}
                   disabled={syncing}
                 >
                   Sync Invoices
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                 
                   onClick={() => handleSync("payment")}
                   disabled={syncing}
                 >
                   Sync Payments
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                 
                   onClick={() => handleSync("refund")}
                   disabled={syncing}
                 >
@@ -191,7 +191,7 @@ export function ConnectionStatus({
 
       {/* Disconnect Confirmation Modal */}
       <Modal
-        open={showDisconnectModal}
+        isOpen={showDisconnectModal}
         onClose={() => setShowDisconnectModal(false)}
         title={`Disconnect ${provider === "quickbooks" ? "QuickBooks" : "Xero"}`}
       >
@@ -202,12 +202,12 @@ export function ConnectionStatus({
           </p>
           <div className="flex justify-end space-x-3">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setShowDisconnectModal(false)}
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDisconnect}>
+            <Button variant="danger" onClick={handleDisconnect}>
               Disconnect
             </Button>
           </div>

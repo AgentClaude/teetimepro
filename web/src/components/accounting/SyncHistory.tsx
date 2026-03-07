@@ -14,15 +14,15 @@ export function SyncHistory({ syncHistory, onRetrySync }: SyncHistoryProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="success" size="sm">Completed</Badge>;
+        return <Badge variant="success">Completed</Badge>;
       case "failed":
-        return <Badge variant="destructive" size="sm">Failed</Badge>;
+        return <Badge variant="danger">Failed</Badge>;
       case "pending":
-        return <Badge variant="neutral" size="sm">Pending</Badge>;
+        return <Badge variant="neutral">Pending</Badge>;
       case "in_progress":
-        return <Badge variant="warning" size="sm">In Progress</Badge>;
+        return <Badge variant="warning">In Progress</Badge>;
       default:
-        return <Badge variant="neutral" size="sm">{status}</Badge>;
+        return <Badge variant="neutral">{status}</Badge>;
     }
   };
 
@@ -172,8 +172,8 @@ export function SyncHistory({ syncHistory, onRetrySync }: SyncHistoryProps) {
               <div className="flex items-center space-x-2">
                 {sync.status === "failed" && sync.retryable && onRetrySync && (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="secondary"
+                   
                     onClick={() => onRetrySync(sync)}
                   >
                     Retry

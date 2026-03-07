@@ -80,7 +80,7 @@ export const FullyMapped: Story = {
   args: {
     provider: 'quickbooks',
     integration: fullyMappedIntegration,
-    onConfigureMapping: (category, accountId, accountName) =>
+    onConfigureMapping: (category: string, accountId: string, accountName: string) =>
       console.log('Configure mapping:', category, accountId, accountName),
   },
 };
@@ -89,7 +89,7 @@ export const PartiallyMapped: Story = {
   args: {
     provider: 'quickbooks',
     integration: partiallyMappedIntegration,
-    onConfigureMapping: (category, accountId, accountName) =>
+    onConfigureMapping: (category: string, accountId: string, accountName: string) =>
       console.log('Configure mapping:', category, accountId, accountName),
   },
 };
@@ -98,7 +98,7 @@ export const EmptyMapping: Story = {
   args: {
     provider: 'xero',
     integration: emptyMappingIntegration,
-    onConfigureMapping: (category, accountId, accountName) =>
+    onConfigureMapping: (category: string, accountId: string, accountName: string) =>
       console.log('Configure mapping:', category, accountId, accountName),
   },
 };
@@ -113,7 +113,7 @@ export const XeroFullyMapped: Story = {
       companyName: 'Oakmont Country Club',
       companyId: 'XERO_abc123',
     },
-    onConfigureMapping: (category, accountId, accountName) =>
+    onConfigureMapping: (category: string, accountId: string, accountName: string) =>
       console.log('Configure mapping:', category, accountId, accountName),
   },
 };

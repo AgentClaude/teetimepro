@@ -128,14 +128,14 @@ const mockSyncHistory: AccountingSync[] = [
 export const Default: Story = {
   args: {
     syncHistory: mockSyncHistory,
-    onRetrySync: (sync) => console.log('Retry sync:', sync.id),
+    onRetrySync: (sync: AccountingSync) => console.log('Retry sync:', sync.id),
   },
 };
 
 export const Empty: Story = {
   args: {
     syncHistory: [],
-    onRetrySync: (sync) => console.log('Retry sync:', sync.id),
+    onRetrySync: (sync: AccountingSync) => console.log('Retry sync:', sync.id),
   },
 };
 
@@ -153,7 +153,7 @@ export const AllCompleted: Story = {
           createdAt: '2024-01-19T10:00:00Z',
         },
       ]),
-    onRetrySync: (sync) => console.log('Retry sync:', sync.id),
+    onRetrySync: (sync: AccountingSync) => console.log('Retry sync:', sync.id),
   },
 };
 
@@ -178,7 +178,7 @@ export const AllFailed: Story = {
         retryable: true,
       },
     ],
-    onRetrySync: (sync) => console.log('Retry sync:', sync.id),
+    onRetrySync: (sync: AccountingSync) => console.log('Retry sync:', sync.id),
   },
 };
 

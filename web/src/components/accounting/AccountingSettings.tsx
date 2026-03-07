@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Card, CardHeader } from "../ui/Card";
-import { Button } from "../ui/Button";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { Badge } from "../ui/Badge";
 import { ConnectionStatus } from "./ConnectionStatus";
@@ -61,7 +60,7 @@ export function AccountingSettings({
               <div className="flex items-center space-x-2">
                 <span>QuickBooks</span>
                 {quickbooksIntegration?.connected && (
-                  <Badge variant="success" size="sm">
+                  <Badge variant="success">
                     Connected
                   </Badge>
                 )}
@@ -78,7 +77,7 @@ export function AccountingSettings({
               <div className="flex items-center space-x-2">
                 <span>Xero</span>
                 {xeroIntegration?.connected && (
-                  <Badge variant="success" size="sm">
+                  <Badge variant="success">
                     Connected
                   </Badge>
                 )}

@@ -136,7 +136,7 @@ export function AccountMappingConfig({
                   </div>
 
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => handleEditMapping(category.key)}
                   >
@@ -170,7 +170,7 @@ export function AccountMappingConfig({
 
       {/* Edit Mapping Modal */}
       <Modal
-        open={!!editingCategory}
+        isOpen={!!editingCategory}
         onClose={handleCancelEdit}
         title={`Configure ${CATEGORIES.find(c => c.key === editingCategory)?.label} Mapping`}
       >
@@ -212,7 +212,7 @@ export function AccountMappingConfig({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button variant="outline" onClick={handleCancelEdit}>
+              <Button variant="secondary" onClick={handleCancelEdit}>
                 Cancel
               </Button>
               <Button 

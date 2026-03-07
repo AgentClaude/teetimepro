@@ -69,7 +69,7 @@ export const QuickBooksConnected: Story = {
     integration: mockQuickBooksIntegration,
     onConnect: () => console.log('Connect QuickBooks'),
     onDisconnect: () => console.log('Disconnect QuickBooks'),
-    onSync: (syncType, force) => console.log('Sync', syncType, force),
+    onSync: (syncType: string | undefined, force: boolean | undefined) => console.log('Sync', syncType, force),
   },
 };
 
@@ -79,7 +79,7 @@ export const XeroConnected: Story = {
     integration: mockXeroIntegration,
     onConnect: () => console.log('Connect Xero'),
     onDisconnect: () => console.log('Disconnect Xero'),
-    onSync: (syncType, force) => console.log('Sync', syncType, force),
+    onSync: (syncType: string | undefined, force: boolean | undefined) => console.log('Sync', syncType, force),
   },
 };
 
@@ -88,7 +88,7 @@ export const NotConnected: Story = {
     provider: 'quickbooks',
     onConnect: () => console.log('Connect QuickBooks'),
     onDisconnect: () => console.log('Disconnect QuickBooks'),
-    onSync: (syncType, force) => console.log('Sync', syncType, force),
+    onSync: (syncType: string | undefined, force: boolean | undefined) => console.log('Sync', syncType, force),
   },
 };
 
@@ -98,7 +98,7 @@ export const ErrorState: Story = {
     integration: errorIntegration,
     onConnect: () => console.log('Connect QuickBooks'),
     onDisconnect: () => console.log('Disconnect QuickBooks'),
-    onSync: (syncType, force) => console.log('Sync', syncType, force),
+    onSync: (syncType: string | undefined, force: boolean | undefined) => console.log('Sync', syncType, force),
   },
 };
 
@@ -114,6 +114,6 @@ export const Disconnected: Story = {
     },
     onConnect: () => console.log('Connect Xero'),
     onDisconnect: () => console.log('Disconnect Xero'),
-    onSync: (syncType, force) => console.log('Sync', syncType, force),
+    onSync: (syncType: string | undefined, force: boolean | undefined) => console.log('Sync', syncType, force),
   },
 };
