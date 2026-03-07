@@ -300,17 +300,45 @@ export const GET_VOICE_CALL_LOG = gql`
 
 
 export const GET_CUSTOMERS = gql`
-  query GetCustomers($search: String, $role: String) {
-    customers(search: $search, role: $role) {
-      id
-      email
-      firstName
-      lastName
-      fullName
-      phone
-      role
-      bookingsCount
-      createdAt
+  query GetCustomers(
+    $search: String
+    $role: String
+    $membershipTier: String
+    $loyaltyTier: String
+    $minBookings: Int
+    $maxBookings: Int
+    $sortBy: String
+    $sortDir: String
+    $page: Int
+    $perPage: Int
+  ) {
+    customers(
+      search: $search
+      role: $role
+      membershipTier: $membershipTier
+      loyaltyTier: $loyaltyTier
+      minBookings: $minBookings
+      maxBookings: $maxBookings
+      sortBy: $sortBy
+      sortDir: $sortDir
+      page: $page
+      perPage: $perPage
+    ) {
+      nodes {
+        id
+        email
+        firstName
+        lastName
+        fullName
+        phone
+        role
+        bookingsCount
+        createdAt
+      }
+      totalCount
+      page
+      perPage
+      totalPages
     }
   }
 `;
