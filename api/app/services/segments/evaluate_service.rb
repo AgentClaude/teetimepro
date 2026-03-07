@@ -14,7 +14,11 @@ module Segments
       scope = organization.users.where(role: :golfer)
       scope = apply_filters(scope)
 
-      success(users: scope.distinct, count: scope.distinct.count)
+      # Wrap in subquery to get a flat count — .count on grouped scopes returns a Hash
+      matching_ids = scope.distinct.select("users.id")
+      user_scope = organization.users.where(id: matching_ids)
+
+      success(users: user_scope, count: user_scope.count)
     rescue StandardError => e
       failure(["Failed to evaluate segment: #{e.message}"])
     end
