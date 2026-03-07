@@ -13,7 +13,7 @@ module Mutations
     def resolve(booking_id:, items:, delivery_hole:, delivery_notes: nil)
       item_hashes = items.map { |i| { product_id: i.product_id, quantity: i.quantity } }
 
-      result = TeeSheet::CreateTurnOrderService.call(
+      result = TeeSheets::CreateTurnOrderService.call(
         organization: current_organization,
         user: current_user,
         course: current_course,

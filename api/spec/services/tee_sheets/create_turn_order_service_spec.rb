@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe TeeSheet::CreateTurnOrderService do
+RSpec.describe TeeSheets::CreateTurnOrderService do
   let(:org) { create(:organization) }
   let(:course) { create(:course, organization: org) }
   let(:user) { create(:user, organization: org, role: :staff) }

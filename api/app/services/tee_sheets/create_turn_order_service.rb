@@ -1,4 +1,4 @@
-module TeeSheet
+module TeeSheets
   # Creates an F&B tab linked to a booking for food orders at the turn.
   # Golfers can pre-order food/drinks to be ready when they finish hole 9.
   class CreateTurnOrderService < ApplicationService
