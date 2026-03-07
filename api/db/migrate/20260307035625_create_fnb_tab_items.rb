@@ -12,7 +12,6 @@ class CreateFnbTabItems < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index :fnb_tab_id
       t.index [:fnb_tab_id, :created_at], name: 'index_fnb_tab_items_on_tab_and_created_at'
     end
 
