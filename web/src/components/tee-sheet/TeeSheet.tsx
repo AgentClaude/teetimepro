@@ -9,9 +9,10 @@ interface TeeSheetProps {
   courseId: string;
   onBookTeeTime?: (teeTimeId: string) => void;
   onEditTeeTime?: (teeTimeId: string) => void;
+  onOrderFood?: (bookingId: string, golferName: string) => void;
 }
 
-export function TeeSheet({ courseId, onBookTeeTime, onEditTeeTime }: TeeSheetProps) {
+export function TeeSheet({ courseId, onBookTeeTime, onEditTeeTime, onOrderFood }: TeeSheetProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { teeSheet, loading, error } = useTeeSheet({ courseId, date: format(selectedDate, 'yyyy-MM-dd') });
 
@@ -83,6 +84,7 @@ export function TeeSheet({ courseId, onBookTeeTime, onEditTeeTime }: TeeSheetPro
                   teeTime={teeTime as unknown as TeeTimeData}
                   onBook={() => onBookTeeTime?.(teeTime.id)}
                   onEdit={() => onEditTeeTime?.(teeTime.id)}
+                  onOrderFood={onOrderFood}
                 />
               ))
             ) : (

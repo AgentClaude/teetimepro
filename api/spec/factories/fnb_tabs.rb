@@ -20,6 +20,12 @@ FactoryBot.define do
       closed_at { 30.minutes.after(opened_at) }
     end
 
+    trait :turn_order do
+      turn_order { true }
+      delivery_hole { 10 }
+      booking
+    end
+
     trait :with_items do
       after(:create) do |tab|
         create(:fnb_tab_item, fnb_tab: tab, added_by: tab.user)

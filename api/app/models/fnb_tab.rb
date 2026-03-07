@@ -2,6 +2,7 @@ class FnbTab < ApplicationRecord
   belongs_to :organization
   belongs_to :course
   belongs_to :user, class_name: 'User', foreign_key: 'user_id' # Server who opened the tab
+  belongs_to :booking, optional: true
   has_many :fnb_tab_items, dependent: :destroy
   has_many :added_by_users, through: :fnb_tab_items, source: :added_by, class_name: 'User'
 
@@ -19,6 +20,8 @@ class FnbTab < ApplicationRecord
   scope :for_course, ->(course) { where(course: course) }
   scope :recent, -> { order(opened_at: :desc) }
   scope :open_tabs, -> { where(status: 'open') }
+  scope :turn_orders, -> { where(turn_order: true) }
+  scope :for_booking, ->(booking) { where(booking: booking) }
 
   before_validation :set_opened_at_if_blank
   before_validation :calculate_total_cents

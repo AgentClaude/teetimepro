@@ -48,6 +48,9 @@ module Types
     field :void_member_charge, mutation: Mutations::VoidMemberCharge
     field :charge_fnb_tab_to_member, mutation: Mutations::ChargeFnbTabToMember
 
+    # Tee Sheet integrations
+    field :create_turn_order, mutation: Mutations::CreateTurnOrder
+
     # POS
     field :create_pos_product, mutation: Mutations::CreatePosProduct
     field :update_pos_product, mutation: Mutations::UpdatePosProduct

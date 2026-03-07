@@ -160,6 +160,7 @@ export const GET_TEE_SHEET = gql`
           confirmationCode
           status
           playersCount
+          hasTurnOrder
           user {
             id
             fullName
