@@ -100,6 +100,12 @@ RSpec.describe Tournaments::RecordScoreService do
       expect(ActionCable.server).to receive(:broadcast).with(
         "leaderboard_#{tournament.id}",
         hash_including(type: "leaderboard_update", tournament_id: tournament.id)
+      ).once
+
+      # Also allow the GraphQL subscription broadcast
+      allow(ActionCable.server).to receive(:broadcast).with(
+        anything,
+        anything
       )
 
       described_class.call(**valid_params)

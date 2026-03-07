@@ -115,7 +115,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["added_by_id"], name: "index_fnb_tab_items_on_added_by_id"
     t.index ["fnb_tab_id", "created_at"], name: "index_fnb_tab_items_on_tab_and_created_at"
     t.index ["fnb_tab_id"], name: "index_fnb_tab_items_on_fnb_tab_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'other'::character varying]::text[])", name: "fnb_tab_items_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'other'::character varying::text])", name: "fnb_tab_items_category_check"
     t.check_constraint "quantity > 0", name: "fnb_tab_items_quantity_positive"
     t.check_constraint "total_cents >= 0", name: "fnb_tab_items_total_cents_non_negative"
     t.check_constraint "unit_price_cents >= 0", name: "fnb_tab_items_unit_price_non_negative"
@@ -145,7 +145,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["organization_id"], name: "index_fnb_tabs_on_organization_id"
     t.index ["user_id", "opened_at"], name: "index_fnb_tabs_on_user_and_opened_at"
     t.index ["user_id"], name: "index_fnb_tabs_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['open'::character varying, 'closed'::character varying, 'merged'::character varying]::text[])", name: "fnb_tabs_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['open'::character varying::text, 'closed'::character varying::text, 'merged'::character varying::text])", name: "fnb_tabs_status_check"
     t.check_constraint "total_cents >= 0", name: "fnb_tabs_total_cents_non_negative"
   end
 
@@ -235,7 +235,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["performed_by_id"], name: "index_inventory_movements_on_performed_by_id"
     t.index ["pos_product_id"], name: "index_inventory_movements_on_pos_product_id"
     t.index ["reference_type", "reference_id"], name: "index_inventory_movements_on_reference"
-    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying, 'sale'::character varying, 'adjustment'::character varying, 'transfer_in'::character varying, 'transfer_out'::character varying]::text[])", name: "inventory_movements_type_check"
+    t.check_constraint "movement_type::text = ANY (ARRAY['receipt'::character varying::text, 'sale'::character varying::text, 'adjustment'::character varying::text, 'transfer_in'::character varying::text, 'transfer_out'::character varying::text])", name: "inventory_movements_type_check"
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -309,8 +309,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["organization_id"], name: "index_member_account_charges_on_organization_id"
     t.index ["status"], name: "index_member_account_charges_on_status"
     t.check_constraint "amount_cents > 0", name: "member_account_charges_amount_positive"
-    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying, 'booking'::character varying, 'pro_shop'::character varying, 'dues'::character varying, 'other'::character varying]::text[])", name: "member_account_charges_type_check"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'posted'::character varying, 'voided'::character varying, 'paid'::character varying]::text[])", name: "member_account_charges_status_check"
+    t.check_constraint "charge_type::text = ANY (ARRAY['fnb'::character varying::text, 'booking'::character varying::text, 'pro_shop'::character varying::text, 'dues'::character varying::text, 'other'::character varying::text])", name: "member_account_charges_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'posted'::character varying::text, 'voided'::character varying::text, 'paid'::character varying::text])", name: "member_account_charges_status_check"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -385,7 +385,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_140100) do
     t.index ["organization_id", "category"], name: "index_pos_products_on_org_and_category"
     t.index ["organization_id", "sku"], name: "index_pos_products_on_org_and_sku", unique: true
     t.index ["organization_id"], name: "index_pos_products_on_organization_id"
-    t.check_constraint "category::text = ANY (ARRAY['food'::character varying, 'beverage'::character varying, 'apparel'::character varying, 'equipment'::character varying, 'rental'::character varying, 'other'::character varying]::text[])", name: "pos_products_category_check"
+    t.check_constraint "category::text = ANY (ARRAY['food'::character varying::text, 'beverage'::character varying::text, 'apparel'::character varying::text, 'equipment'::character varying::text, 'rental'::character varying::text, 'other'::character varying::text])", name: "pos_products_category_check"
     t.check_constraint "price_cents >= 0", name: "pos_products_price_non_negative"
   end
 

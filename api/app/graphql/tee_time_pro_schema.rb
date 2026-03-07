@@ -1,6 +1,10 @@
 class TeeTimeProSchema < GraphQL::Schema
   mutation(Types::MutationType)
   query(Types::QueryType)
+  subscription(Types::SubscriptionType)
+
+  # Use ActionCable for GraphQL subscriptions
+  use GraphQL::Subscriptions::ActionCableSubscriptions
 
   # Limits
   max_complexity 300
