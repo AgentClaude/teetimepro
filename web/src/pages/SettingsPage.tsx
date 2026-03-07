@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { PricingRulesSection } from '../components/pricing/PricingRulesSection';
 import { useCourse } from '../contexts/CourseContext';
 import { GET_COURSE, GET_VOICE_CALL_LOGS } from '../graphql/queries';
 import { UPDATE_COURSE_VOICE_CONFIG } from '../graphql/mutations';
@@ -350,6 +351,9 @@ export function SettingsPage() {
           </div>
         )}
       </Card>
+
+      {/* Dynamic Pricing Rules */}
+      <PricingRulesSection />
 
       {/* Integrations */}
       <Card className="p-6">

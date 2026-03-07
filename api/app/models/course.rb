@@ -5,6 +5,7 @@ class Course < ApplicationRecord
   has_many :bookings, through: :tee_times
   has_many :voice_call_logs, dependent: :nullify
   has_many :tournaments, dependent: :destroy
+  has_many :pricing_rules, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
