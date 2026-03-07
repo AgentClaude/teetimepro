@@ -32,6 +32,8 @@ module Types
 
     field :tournament_entries, [Types::TournamentEntryType], null: false
     field :tournament_rounds, [Types::TournamentRoundType], null: false
+    field :tournament_prizes, [Types::TournamentPrizeType], null: false
+    field :tournament_results, [Types::TournamentResultType], null: false
     field :days, Integer, null: false
 
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -51,6 +53,14 @@ module Types
 
     def tournament_rounds
       object.tournament_rounds.chronological
+    end
+
+    def tournament_prizes
+      object.tournament_prizes.by_position
+    end
+
+    def tournament_results
+      object.tournament_results.by_position
     end
   end
 end

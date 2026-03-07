@@ -317,6 +317,17 @@ module Types
       scope
     end
 
+    # Tournament Results
+    field :tournament_results, [Types::TournamentResultType], null: false do
+      description "Get finalized results for a tournament"
+      argument :tournament_id, ID, required: true
+    end
+    def tournament_results(tournament_id:)
+      org = require_auth!
+      tournament = org.tournaments.find(tournament_id)
+      tournament.tournament_results.includes(:tournament_entry, :user).by_position
+    end
+
     # Reports summary
     field :reports_summary, GraphQL::Types::JSON, null: false do
       argument :course_id, ID, required: false
