@@ -709,3 +709,90 @@ export const GET_PRICING_RULE = gql`
     }
   }
 `;
+
+export const GET_EMAIL_CAMPAIGNS = gql`
+  query GetEmailCampaigns($status: String) {
+    emailCampaigns(status: $status) {
+      id
+      name
+      subject
+      bodyHtml
+      bodyText
+      status
+      recipientFilter
+      lapsedDays
+      isAutomated
+      recurrenceIntervalDays
+      totalRecipients
+      sentCount
+      deliveredCount
+      openedCount
+      clickedCount
+      failedCount
+      progressPercentage
+      openRatePercentage
+      clickRatePercentage
+      scheduledAt
+      sentAt
+      completedAt
+      createdAt
+      createdBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+export const GET_EMAIL_CAMPAIGN = gql`
+  query GetEmailCampaign($id: ID!) {
+    emailCampaign(id: $id) {
+      id
+      name
+      subject
+      bodyHtml
+      bodyText
+      status
+      recipientFilter
+      filterCriteria
+      lapsedDays
+      isAutomated
+      recurrenceIntervalDays
+      totalRecipients
+      sentCount
+      deliveredCount
+      openedCount
+      clickedCount
+      failedCount
+      progressPercentage
+      openRatePercentage
+      clickRatePercentage
+      scheduledAt
+      sentAt
+      completedAt
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        fullName
+        email
+      }
+      emailMessages {
+        id
+        toEmail
+        status
+        openedAt
+        clickedAt
+        sentAt
+        deliveredAt
+        errorMessage
+        createdAt
+        user {
+          id
+          fullName
+          email
+        }
+      }
+    }
+  }
+`;

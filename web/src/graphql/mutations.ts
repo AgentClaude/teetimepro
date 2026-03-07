@@ -658,3 +658,69 @@ export const CALCULATE_TEE_TIME_PRICE = gql`
     }
   }
 `;
+
+export const CREATE_EMAIL_CAMPAIGN = gql`
+  mutation CreateEmailCampaign(
+    $name: String!
+    $subject: String!
+    $bodyHtml: String!
+    $bodyText: String
+    $recipientFilter: String
+    $filterCriteria: JSON
+    $lapsedDays: Int
+    $isAutomated: Boolean
+    $recurrenceIntervalDays: Int
+    $scheduledAt: ISO8601DateTime
+  ) {
+    createEmailCampaign(
+      name: $name
+      subject: $subject
+      bodyHtml: $bodyHtml
+      bodyText: $bodyText
+      recipientFilter: $recipientFilter
+      filterCriteria: $filterCriteria
+      lapsedDays: $lapsedDays
+      isAutomated: $isAutomated
+      recurrenceIntervalDays: $recurrenceIntervalDays
+      scheduledAt: $scheduledAt
+    ) {
+      emailCampaign {
+        id
+        name
+        subject
+        status
+        createdAt
+      }
+      errors
+    }
+  }
+`;
+
+export const SEND_EMAIL_CAMPAIGN = gql`
+  mutation SendEmailCampaign($id: ID!) {
+    sendEmailCampaign(id: $id) {
+      emailCampaign {
+        id
+        name
+        status
+        sentAt
+        totalRecipients
+        sentCount
+      }
+      errors
+    }
+  }
+`;
+
+export const CANCEL_EMAIL_CAMPAIGN = gql`
+  mutation CancelEmailCampaign($id: ID!) {
+    cancelEmailCampaign(id: $id) {
+      emailCampaign {
+        id
+        name
+        status
+      }
+      errors
+    }
+  }
+`;

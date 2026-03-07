@@ -141,6 +141,25 @@ module Types
       org.sms_campaigns.find(id)
     end
 
+    # Email Campaigns
+    field :email_campaigns, [Types::EmailCampaignType], null: false do
+      argument :status, String, required: false
+    end
+    def email_campaigns(status: nil)
+      org = require_auth!
+      scope = org.email_campaigns.order(created_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      scope.limit(50)
+    end
+
+    field :email_campaign, Types::EmailCampaignType, null: true do
+      argument :id, ID, required: true
+    end
+    def email_campaign(id:)
+      org = require_auth!
+      org.email_campaigns.find(id)
+    end
+
     # Voice analytics
     field :voice_analytics, Types::VoiceAnalyticsType, null: false do
       argument :course_id, ID, required: false
