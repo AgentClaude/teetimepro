@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_032702) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.index ["organization_id"], name: "index_courses_on_organization_id"
   end
 
+  create_table "golfer_profiles", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.decimal "handicap_index", precision: 4, scale: 1
+    t.string "home_course"
+    t.string "preferred_tee"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_golfer_profiles_on_user_id", unique: true
+  end
+
   create_table "golfer_segment_memberships", force: :cascade do |t|
     t.bigint "golfer_segment_id", null: false
     t.bigint "user_id", null: false
@@ -124,16 +134,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.index ["filter_criteria"], name: "index_golfer_segments_on_filter_criteria", using: :gin
     t.index ["organization_id", "name"], name: "index_golfer_segments_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_golfer_segments_on_organization_id"
-  end
-
-  create_table "golfer_profiles", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.decimal "handicap_index", precision: 4, scale: 1
-    t.string "home_course"
-    t.string "preferred_tee"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_golfer_profiles_on_user_id", unique: true
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -233,6 +233,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
     t.index ["sms_campaign_id"], name: "index_sms_messages_on_sms_campaign_id"
     t.index ["twilio_sid"], name: "index_sms_messages_on_twilio_sid", unique: true, where: "(twilio_sid IS NOT NULL)"
     t.index ["user_id"], name: "index_sms_messages_on_user_id"
+  end
+
+  create_table "stripe_events", force: :cascade do |t|
+    t.string "stripe_event_id", null: false
+    t.string "event_type", null: false
+    t.integer "status", default: 0, null: false
+    t.jsonb "payload", null: false
+    t.datetime "processed_at"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_stripe_events_on_event_type"
+    t.index ["status"], name: "index_stripe_events_on_status"
+    t.index ["stripe_event_id"], name: "index_stripe_events_on_stripe_event_id", unique: true
   end
 
   create_table "tee_sheets", force: :cascade do |t|
@@ -413,11 +427,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_010000) do
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
+  add_foreign_key "golfer_profiles", "users", on_delete: :cascade
   add_foreign_key "golfer_segment_memberships", "golfer_segments", on_delete: :cascade
   add_foreign_key "golfer_segment_memberships", "users", on_delete: :cascade
   add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
   add_foreign_key "golfer_segments", "users", column: "created_by_id"
-  add_foreign_key "golfer_profiles", "users", on_delete: :cascade
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
   add_foreign_key "payments", "bookings", on_delete: :cascade

@@ -54,6 +54,9 @@ Rails.application.routes.draw do
 
       # SMS status callback (Twilio webhook)
       post "/sms/status_callback", to: "sms#status_callback"
+
+      # Stripe webhooks (no authentication required)
+      post "/stripe/webhooks", to: "stripe_webhooks#create"
     end
   end
 
