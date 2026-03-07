@@ -398,6 +398,73 @@ module Types
     def fnb_tab(id:)
       org = require_auth!
       org.fnb_tabs.includes(:course, :user, :fnb_tab_items).find_by(id: id)
+    # Member accounts
+    field :member_account_charges, [Types::MemberAccountChargeType], null: false do
+      argument :membership_id, ID, required: false
+      argument :charge_type, String, required: false
+      argument :status, String, required: false
+      argument :limit, Integer, required: false
+    end
+    def member_account_charges(membership_id: nil, charge_type: nil, status: nil, limit: 50)
+      org = require_auth!
+
+      scope = org.member_account_charges.includes(:membership, :charged_by).recent
+      scope = scope.where(membership_id: membership_id) if membership_id.present?
+      scope = scope.where(charge_type: charge_type) if charge_type.present?
+      scope = scope.where(status: status) if status.present?
+      scope.limit([limit, 100].min)
+    end
+
+    field :member_account_statement, Types::MemberAccountStatementType, null: true do
+      argument :membership_id, ID, required: true
+      argument :start_date, GraphQL::Types::ISO8601Date, required: false
+      argument :end_date, GraphQL::Types::ISO8601Date, required: false
+      argument :page, Integer, required: false
+      argument :per_page, Integer, required: false
+    end
+    def member_account_statement(membership_id:, start_date: nil, end_date: nil, page: nil, per_page: nil)
+      org = require_auth!
+
+      result = MemberAccounts::ViewStatementService.call(
+        organization: org,
+        user: context[:current_user],
+        membership_id: membership_id,
+        start_date: start_date,
+        end_date: end_date,
+        page: page,
+        per_page: per_page
+      )
+
+      if result.success?
+        result.data
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
+    field :memberships, [Types::MembershipType], null: false do
+      argument :status, String, required: false
+      argument :tier, String, required: false
+      argument :with_balance, Boolean, required: false
+    end
+    def memberships(status: nil, tier: nil, with_balance: nil)
+      org = require_auth!
+
+      scope = org.memberships.includes(:user).order(created_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      scope = scope.where(tier: tier) if tier.present?
+      scope = scope.with_balance if with_balance
+      scope.limit(100)
+    end
+
+    field :membership, Types::MembershipType, null: true do
+      argument :id, ID, required: true
+    end
+    def membership(id:)
+      org = require_auth!
+      org.memberships.includes(:user, :member_account_charges).find(id)
+    end
+
     # Pricing rules
     field :pricing_rules, [Types::PricingRuleType], null: false do
       argument :course_id, ID, required: false
