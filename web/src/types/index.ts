@@ -140,7 +140,15 @@ export interface Booking {
 export interface BookingPlayer {
   id: string;
   name: string;
+  email: string | null;
+  phone: string | null;
   handicap: number | null;
+}
+
+export interface PlayerDetailInput {
+  name: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface VoiceCallLogSummary {

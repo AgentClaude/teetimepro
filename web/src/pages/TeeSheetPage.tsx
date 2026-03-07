@@ -48,8 +48,7 @@ export function TeeSheetPage() {
               priceCents: 5500,
               courseName: 'Course',
             }}
-            onSubmit={(data) => {
-              console.log('Book:', data);
+            onBookingComplete={() => {
               setBookingTeeTimeId(null);
             }}
             onCancel={() => setBookingTeeTimeId(null)}

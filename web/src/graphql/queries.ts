@@ -259,6 +259,58 @@ export const GET_AVAILABLE_TEE_TIMES = gql`
   }
 `;
 
+export const CHECK_AVAILABILITY = gql`
+  query CheckAvailability(
+    $courseId: ID
+    $date: ISO8601Date!
+    $endDate: ISO8601Date
+    $players: Int
+    $timePreference: String
+    $includePricing: Boolean
+  ) {
+    checkAvailability(
+      courseId: $courseId
+      date: $date
+      endDate: $endDate
+      players: $players
+      timePreference: $timePreference
+      includePricing: $includePricing
+    ) {
+      slots {
+        teeTimeId
+        courseId
+        courseName
+        date
+        startsAt
+        formattedTime
+        availableSpots
+        maxPlayers
+        bookedPlayers
+        basePriceCents
+        dynamicPriceCents
+        pricePerPlayerCents
+        totalPriceCents
+        hasDynamicPricing
+        appliedRules
+        formattedBasePrice
+        formattedDynamicPrice
+        formattedTotalPrice
+      }
+      totalAvailable
+      dateRange {
+        startDate
+        endDate
+        days
+      }
+      filters {
+        players
+        timePreference
+        courseId
+      }
+    }
+  }
+`;
+
 export const GET_VOICE_CALL_LOGS = gql`
   query GetVoiceCallLogs($courseId: ID, $channel: String, $limit: Int) {
     voiceCallLogs(courseId: $courseId, channel: $channel, limit: $limit) {
