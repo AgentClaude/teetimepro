@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '@/screens/home/HomeScreen';
-import { BookingScreen } from '@/screens/booking/BookingScreen';
+import { BookingNavigator } from './BookingNavigator';
 import { ProfileScreen } from '@/screens/profile/ProfileScreen';
 import type { MainTabParamList } from '@/types/navigation';
 
@@ -32,10 +32,11 @@ export const MainNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="BookTab"
-        component={BookingScreen}
+        component={BookingNavigator}
         options={{
           title: 'Book',
           tabBarLabel: 'Book',
+          headerShown: false,
         }}
       />
       <Tab.Screen
