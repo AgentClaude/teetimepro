@@ -17,6 +17,8 @@ module Types
     field :collect_deposit, mutation: Mutations::CollectDeposit
     field :create_course, mutation: Mutations::CreateCourse
     field :update_tee_time, mutation: Mutations::UpdateTeeTime
+    field :block_tee_times, mutation: Mutations::BlockTeeTimes
+    field :unblock_tee_times, mutation: Mutations::UnblockTeeTimes
     field :update_course_voice_config, mutation: Mutations::UpdateCourseVoiceConfig
     field :initiate_voice_handoff, mutation: Mutations::InitiateVoiceHandoff
     field :update_voice_handoff, mutation: Mutations::UpdateVoiceHandoff

@@ -1,5 +1,6 @@
 class TeeTime < ApplicationRecord
   belongs_to :tee_sheet
+  belongs_to :tee_time_block, optional: true
   has_many :bookings, dependent: :destroy
   has_many :booking_players, through: :bookings
   has_many :waitlist_entries, dependent: :destroy

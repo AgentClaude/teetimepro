@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_08_054000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -825,6 +825,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_054000) do
     t.index ["course_id"], name: "index_tee_sheets_on_course_id"
   end
 
+  create_table "tee_time_blocks", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "created_by_id", null: false
+    t.integer "block_type", default: 0, null: false
+    t.string "reason", null: false
+    t.text "description"
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.boolean "recurring", default: false, null: false
+    t.string "recurrence_pattern"
+    t.boolean "active", default: true, null: false
+    t.integer "affected_tee_time_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_tee_time_blocks_on_active"
+    t.index ["course_id", "starts_at", "ends_at"], name: "index_tee_time_blocks_on_course_id_and_starts_at_and_ends_at"
+    t.index ["course_id"], name: "index_tee_time_blocks_on_course_id"
+    t.index ["created_by_id"], name: "index_tee_time_blocks_on_created_by_id"
+    t.index ["organization_id"], name: "index_tee_time_blocks_on_organization_id"
+  end
+
   create_table "tee_times", force: :cascade do |t|
     t.bigint "tee_sheet_id", null: false
     t.datetime "starts_at", null: false
@@ -836,9 +858,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_054000) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "tee_time_block_id"
+    t.integer "previous_status"
     t.index ["starts_at"], name: "index_tee_times_on_starts_at"
     t.index ["status"], name: "index_tee_times_on_status"
     t.index ["tee_sheet_id"], name: "index_tee_times_on_tee_sheet_id"
+    t.index ["tee_time_block_id"], name: "index_tee_times_on_tee_time_block_id"
   end
 
   create_table "tournament_entries", force: :cascade do |t|
@@ -1167,7 +1192,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_054000) do
   add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade
   add_foreign_key "sms_messages", "users", on_delete: :cascade
   add_foreign_key "tee_sheets", "courses", on_delete: :cascade
+  add_foreign_key "tee_time_blocks", "courses", on_delete: :cascade
+  add_foreign_key "tee_time_blocks", "organizations", on_delete: :cascade
+  add_foreign_key "tee_time_blocks", "users", column: "created_by_id", on_delete: :cascade
   add_foreign_key "tee_times", "tee_sheets", on_delete: :cascade
+  add_foreign_key "tee_times", "tee_time_blocks", on_delete: :nullify
   add_foreign_key "tournament_entries", "payments", on_delete: :nullify
   add_foreign_key "tournament_entries", "tournaments", on_delete: :cascade
   add_foreign_key "tournament_entries", "users", on_delete: :cascade

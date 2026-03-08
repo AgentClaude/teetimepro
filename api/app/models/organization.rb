@@ -26,6 +26,7 @@ class Organization < ApplicationRecord
   has_many :payments, dependent: :destroy
   has_many :prepaid_packages, dependent: :destroy
   has_many :prepaid_purchases, dependent: :destroy
+  has_many :tee_time_blocks, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
