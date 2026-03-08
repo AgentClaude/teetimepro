@@ -2,6 +2,7 @@
 
 module Prepaid
   class RedeemPackageService < ApplicationService
+    class InsufficientBalanceError < StandardError; end
     attr_accessor :prepaid_purchase, :booking, :user, :value_cents
 
     validates :prepaid_purchase, :booking, :user, presence: true
@@ -19,6 +20,8 @@ module Prepaid
 
         success(redemption: redemption, purchase: prepaid_purchase.reload)
       end
+    rescue InsufficientBalanceError => e
+      failure([e.message])
     rescue ActiveRecord::RecordInvalid => e
       failure([e.message])
     end
@@ -43,7 +46,7 @@ module Prepaid
         amount = value_cents || booking.total_cents
         amount = [amount, prepaid_purchase.balance_cents].min
 
-        return failure(["Insufficient balance"]) if amount <= 0
+        raise InsufficientBalanceError, "Insufficient balance" if amount <= 0
 
         PrepaidRedemption.create!(
           prepaid_purchase: prepaid_purchase,
