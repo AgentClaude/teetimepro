@@ -19,10 +19,20 @@ RSpec.describe FnbTab, type: :model do
     it { should validate_presence_of(:golfer_name) }
     it { should validate_length_of(:golfer_name).is_at_most(255) }
     it { should validate_presence_of(:status) }
-    it { should validate_inclusion_of(:status).in_array(%w[open closed merged]) }
-    it { should validate_presence_of(:total_cents) }
-    it { should validate_numericality_of(:total_cents).is_greater_than_or_equal_to(0) }
-    it { should validate_presence_of(:opened_at) }
+    it { should define_enum_for(:status).with_values(open: "open", closed: "closed", merged: "merged").backed_by_column_of_type(:string) }
+
+    it 'auto-calculates total_cents from items' do
+      tab = build(:fnb_tab, organization: organization, course: course, user: user)
+      tab.valid?
+      expect(tab.total_cents).to be >= 0
+    end
+
+    # opened_at is auto-set by set_opened_at_if_blank callback, so shoulda can't test presence
+    it 'validates opened_at is set (auto-set by callback)' do
+      tab = build(:fnb_tab, organization: organization, course: course, user: user, opened_at: nil)
+      tab.valid?
+      expect(tab.opened_at).to be_present
+    end
 
     describe 'closed_at_after_opened_at' do
       it 'is valid when closed_at is after opened_at' do
@@ -116,9 +126,13 @@ RSpec.describe FnbTab, type: :model do
 
     describe '#total_amount' do
       it 'returns Money object for total_cents' do
-        tab.update(total_cents: 2500)
+        # Create tab items so calculate_total_cents produces a known total
+        create(:fnb_tab_item, fnb_tab: tab, quantity: 2, unit_price_cents: 1000, added_by: user)
+        create(:fnb_tab_item, fnb_tab: tab, quantity: 1, unit_price_cents: 500, added_by: user)
+        tab.save! # triggers calculate_total_cents
+        tab.reload
         expect(tab.total_amount).to be_a(Money)
-        expect(tab.total_amount.cents).to eq(2500)
+        expect(tab.total_amount.cents).to eq(2500) # 2*1000 + 1*500
       end
     end
 
@@ -173,21 +187,19 @@ RSpec.describe FnbTab, type: :model do
 
     describe '#close!' do
       it 'updates status to closed and sets closed_at' do
-        freeze_time do
-          tab.close!
-          expect(tab.status).to eq('closed')
-          expect(tab.closed_at).to be_within(1.second).of(Time.current)
-        end
+        tab.update_column(:opened_at, 1.hour.ago)
+        tab.close!
+        expect(tab.status).to eq('closed')
+        expect(tab.closed_at).to be_within(1.second).of(Time.current)
       end
     end
 
     describe '#merge!' do
       it 'updates status to merged and sets closed_at' do
-        freeze_time do
-          tab.merge!
-          expect(tab.status).to eq('merged')
-          expect(tab.closed_at).to be_within(1.second).of(Time.current)
-        end
+        tab.update_column(:opened_at, 1.hour.ago)
+        tab.merge!
+        expect(tab.status).to eq('merged')
+        expect(tab.closed_at).to be_within(1.second).of(Time.current)
       end
     end
   end

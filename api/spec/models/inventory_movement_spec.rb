@@ -17,10 +17,15 @@ RSpec.describe InventoryMovement, type: :model do
   describe 'validations' do
     subject { build(:inventory_movement, organization: organization, pos_product: product, course: course, performed_by: user) }
 
-    it { should validate_presence_of(:movement_type) }
-    it { should validate_inclusion_of(:movement_type).in_array(%w[receipt sale adjustment transfer_in transfer_out]) }
+    it { should define_enum_for(:movement_type).with_values(receipt: 'receipt', sale: 'sale', adjustment: 'adjustment', transfer_in: 'transfer_in', transfer_out: 'transfer_out').backed_by_column_of_type(:string) }
     it { should validate_presence_of(:quantity) }
-    it { should validate_numericality_of(:quantity).other_than(0) }
+
+    it 'validates quantity is not zero' do
+      movement = build(:inventory_movement, quantity: 0, movement_type: 'adjustment',
+                       organization: organization, pos_product: product, course: course, performed_by: user)
+      expect(movement).not_to be_valid
+      expect(movement.errors[:quantity]).to be_present
+    end
     it { should validate_numericality_of(:unit_cost_cents).is_greater_than_or_equal_to(0).allow_nil }
     it { should validate_numericality_of(:total_cost_cents).is_greater_than_or_equal_to(0).allow_nil }
 
@@ -36,7 +41,8 @@ RSpec.describe InventoryMovement, type: :model do
 
       it 'validates product belongs to organization' do
         other_org = create(:organization)
-        other_product = create(:pos_product, organization: other_org)
+        other_course = create(:course, organization: other_org)
+        other_product = create(:pos_product, organization: other_org, course: other_course)
         movement = build(:inventory_movement, organization: organization, pos_product: other_product, course: course, performed_by: user)
 
         expect(movement).not_to be_valid

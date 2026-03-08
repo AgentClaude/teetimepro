@@ -110,7 +110,7 @@ RSpec.describe Voice::CancelVoiceBookingService, type: :service do
         result = described_class.call(params)
         
         expect(result.failure?).to be true
-        expect(result.errors).to include("Booking id can't be blank")
+        expect(result.errors).to include("Booking can't be blank")
       end
     end
 

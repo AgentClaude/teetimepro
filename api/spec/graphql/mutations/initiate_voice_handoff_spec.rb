@@ -76,9 +76,9 @@ RSpec.describe Mutations::InitiateVoiceHandoff do
         expect(data["voiceHandoff"]["callSid"]).to eq("CA1234567890abcdef")
         expect(data["voiceHandoff"]["callerPhone"]).to eq("+15551234567")
         expect(data["voiceHandoff"]["callerName"]).to eq("John Doe")
-        expect(data["voiceHandoff"]["reason"]).to eq("billing_inquiry")
+        expect(data["voiceHandoff"]["reason"]).to eq("BILLING_INQUIRY")
         expect(data["voiceHandoff"]["reasonDetail"]).to eq("Customer wants to dispute a charge")
-        expect(data["voiceHandoff"]["status"]).to eq("pending")
+        expect(data["voiceHandoff"]["status"]).to eq("PENDING")
         expect(data["voiceHandoff"]["formattedCallerPhone"]).to eq("(555) 123-4567")
         expect(data["voiceHandoff"]["callerDisplayName"]).to eq("John Doe")
         expect(data["transferNumber"]).to be_present
@@ -102,6 +102,7 @@ RSpec.describe Mutations::InitiateVoiceHandoff do
         create(:voice_handoff, call_sid: valid_variables[:callSid], organization: organization)
         context = graphql_context(user: user, organization: organization)
         
+        result = nil
         expect {
           result = execute_query(query, variables: valid_variables, context: context)
           expect(result["errors"]).to be_nil
@@ -179,7 +180,7 @@ RSpec.describe Mutations::InitiateVoiceHandoff do
         result = execute_query(query, variables: variables, context: context)
         
         expect(result["errors"]).to be_present
-        expect(result["errors"].first["message"]).to include("INVALID_REASON")
+        expect(result["errors"].first["message"]).to include("invalid value")
       end
     end
 

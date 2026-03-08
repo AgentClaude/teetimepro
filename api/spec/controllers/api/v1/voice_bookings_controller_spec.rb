@@ -51,10 +51,11 @@ RSpec.describe Api::V1::VoiceBookingsController, type: :controller do
       end
 
       it "calls the service with correct parameters" do
+        # Controller params are strings, not integers
         expect(Voice::BookVoiceCallService).to receive(:call).with(
           organization: organization,
-          tee_time_id: tee_time.id,
-          players_count: 2,
+          tee_time_id: tee_time.id.to_s,
+          players_count: "2",
           caller_name: "John Doe",
           caller_phone: "+15551234567"
         )
@@ -136,7 +137,7 @@ RSpec.describe Api::V1::VoiceBookingsController, type: :controller do
       it "calls the service with correct parameters" do
         expect(Voice::ConfirmVoiceBookingService).to receive(:call).with(
           organization: organization,
-          booking_id: 123
+          booking_id: "123"
         )
 
         make_request
@@ -217,7 +218,7 @@ RSpec.describe Api::V1::VoiceBookingsController, type: :controller do
       it "calls the service with correct parameters" do
         expect(Voice::CancelVoiceBookingService).to receive(:call).with(
           organization: organization,
-          booking_id: 123,
+          booking_id: "123",
           reason: "Caller changed their mind"
         )
 
@@ -271,7 +272,7 @@ RSpec.describe Api::V1::VoiceBookingsController, type: :controller do
       it "calls the service with nil reason" do
         expect(Voice::CancelVoiceBookingService).to receive(:call).with(
           organization: organization,
-          booking_id: 123,
+          booking_id: "123",
           reason: nil
         )
 

@@ -162,14 +162,18 @@ RSpec.describe InventoryLevel, type: :model do
              organization: organization, pos_product: product, course: course, performed_by: user)
     end
 
-    it 'creates inventory level if it does not exist' do
-      expect {
-        InventoryLevel.refresh_for_product!(product, course)
-      }.to change(InventoryLevel, :count).by(1)
+    it 'creates or updates inventory level' do
+      # The after_create callbacks on InventoryMovement already called refresh_for_product!
+      # so the level already exists. Verify it has the correct stock.
+      level = InventoryLevel.find_by(pos_product: product, course: course)
+      expect(level).to be_present
+      expect(level.current_stock).to eq(12) # 10 + 5 - 3
     end
 
-    it 'updates existing inventory level' do
-      level = create(:inventory_level, organization: organization, pos_product: product, course: course, current_stock: 0)
+    it 'updates existing inventory level with correct stock' do
+      level = InventoryLevel.find_by(pos_product: product, course: course)
+      # Manually set to wrong value, then refresh
+      level.update_column(:current_stock, 0)
       
       InventoryLevel.refresh_for_product!(product, course)
       level.reload

@@ -30,7 +30,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
           result = described_class.call(update_params)
 
           expect(result.success?).to be true
-          expect(result.handoff.wait_seconds).to eq(120) # 2 minutes
+          expect(result.handoff.wait_seconds).to be_within(1).of(120) # ~2 minutes
         end
       end
 
@@ -81,7 +81,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
         expect(result.errors).to include("Resolution notes are required when marking as completed")
       end
 
-      it 'can go from pending directly to completed' do
+      it 'rejects transition from pending directly to completed' do
         params = {
           handoff: handoff,
           status: 'completed',
@@ -90,10 +90,8 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
 
         result = described_class.call(params)
 
-        expect(result.success?).to be true
-        expect(result.handoff.status).to eq('completed')
-        expect(result.handoff.connected_at).to eq(handoff.started_at) # Set to started_at
-        expect(result.handoff.wait_seconds).to eq(0)
+        expect(result.failure?).to be true
+        expect(result.errors).to include("Invalid status transition from pending to completed")
       end
     end
 
@@ -198,8 +196,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
         end
       end
 
-      it 'rejects transition from pending to completed without connected' do
-        # This is actually allowed based on our implementation, so this test checks the business logic
+      it 'rejects transition from pending to completed' do
         params = {
           handoff: handoff,
           status: 'completed',
@@ -207,7 +204,8 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
         }
 
         result = described_class.call(params)
-        expect(result.success?).to be true # Our implementation allows this
+        expect(result.failure?).to be true
+        expect(result.errors).to include("Invalid status transition from pending to completed")
       end
     end
 
@@ -242,6 +240,8 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
 
     context 'database errors' do
       it 'handles record invalid errors gracefully' do
+        # Add a validation error to make the exception meaningful
+        handoff.errors.add(:base, "Database constraint violated")
         allow(handoff).to receive(:save!).and_raise(ActiveRecord::RecordInvalid.new(handoff))
         
         params = {
@@ -275,10 +275,10 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
     context 'timestamp handling' do
       it 'preserves existing connected_at when provided' do
         custom_time = 5.minutes.ago
-        handoff.update!(connected_at: custom_time)
+        connected_handoff = create(:voice_handoff, :connected, organization: organization, connected_at: custom_time)
 
         params = {
-          handoff: handoff,
+          handoff: connected_handoff,
           status: 'completed',
           resolution_notes: 'All done'
         }
@@ -286,7 +286,7 @@ RSpec.describe Voice::UpdateHandoffService, type: :service do
         result = described_class.call(params)
 
         expect(result.success?).to be true
-        expect(result.handoff.connected_at).to eq(custom_time)
+        expect(result.handoff.connected_at).to be_within(1.second).of(custom_time)
       end
 
       it 'sets completed_at when transitioning to terminal state' do

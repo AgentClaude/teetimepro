@@ -108,7 +108,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         
         expect(result["errors"]).to be_nil
         data = result["data"]["updateVoiceHandoff"]
-        expect(data["voiceHandoff"]["status"]).to eq("cancelled")
+        expect(data["voiceHandoff"]["status"]).to eq("CANCELLED")
         expect(data["voiceHandoff"]["resolutionNotes"]).to eq("Customer hung up")
         expect(data["voiceHandoff"]["completedAt"]).to be_present
       end
@@ -251,7 +251,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         result = execute_query(query, variables: variables, context: context)
         
         expect(result["errors"]).to be_present
-        expect(result["errors"].first["message"]).to include("INVALID_STATUS")
+        expect(result["errors"].first["message"]).to include("invalid value")
       end
     end
 
@@ -273,8 +273,10 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
       end
 
       it "returns service errors for missing resolution notes on completed" do
+        # Must use a connected handoff (pending→completed is invalid transition)
+        connected_handoff = create(:voice_handoff, :connected, organization: organization)
         variables = {
-          id: handoff.id.to_s,
+          id: connected_handoff.id.to_s,
           status: "COMPLETED"
           # Missing resolutionNotes
         }

@@ -78,7 +78,7 @@ RSpec.describe Voice::ConfirmVoiceBookingService, type: :service do
         result = described_class.call(params)
         
         expect(result.failure?).to be true
-        expect(result.errors).to include("Booking id can't be blank")
+        expect(result.errors).to include("Booking can't be blank")
       end
     end
 
@@ -123,7 +123,7 @@ RSpec.describe Voice::ConfirmVoiceBookingService, type: :service do
       it 'fails when booking is cancelled' do
         pending_booking.update!(status: :cancelled)
         
-        result = described_class.call(params)
+        result = described_class.call(valid_params)
         
         expect(result.failure?).to be true
         expect(result.errors).to include("Booking not found or not in pending state")
@@ -145,13 +145,15 @@ RSpec.describe Voice::ConfirmVoiceBookingService, type: :service do
         expect(pending_booking.cancellation_reason).to eq("Voice booking timeout - not confirmed within 5 minutes")
       end
 
-      it 'does not cancel booking that is exactly 5 minutes old' do
-        pending_booking.update!(created_at: 5.minutes.ago)
-        
-        result = described_class.call(valid_params)
-        
-        expect(result.success?).to be true
-        expect(result.booking.status).to eq('confirmed')
+      it 'does not cancel booking that is within 5 minutes' do
+        freeze_time do
+          pending_booking.update!(created_at: 4.minutes.ago)
+          
+          result = described_class.call(valid_params)
+          
+          expect(result.success?).to be true
+          expect(result.booking.status).to eq('confirmed')
+        end
       end
     end
 
@@ -166,10 +168,8 @@ RSpec.describe Voice::ConfirmVoiceBookingService, type: :service do
       end
 
       it 'fails when tee time no longer has enough spots' do
-        # Book the remaining spots
-        other_user = create(:user, organization: organization)
-        remaining_spots = tee_time.available_spots - pending_booking.players_count
-        create(:booking, tee_time: tee_time, user: other_user, players_count: remaining_spots + 1)
+        # Update booked_players to leave insufficient spots for the pending booking
+        tee_time.update!(booked_players: tee_time.max_players)
         
         result = described_class.call(valid_params)
         

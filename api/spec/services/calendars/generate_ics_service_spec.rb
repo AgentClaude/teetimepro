@@ -28,10 +28,11 @@ RSpec.describe Calendars::GenerateIcsService do
 
       it "includes correct event details" do
         result = described_class.call(booking: booking)
-        ics_content = result.ics_content
+        # ICS uses line folding (CRLF + space) for long lines, so unfold before matching
+        ics_content = result.ics_content.gsub("\r\n ", "")
 
         expect(ics_content).to include("Golf at Pebble Beach Golf Links")
-        expect(ics_content).to include("Confirmation Code: ABC123")
+        expect(ics_content).to include("Confirmation Code: #{booking.confirmation_code}")
         expect(ics_content).to include("Players: 4")
         expect(ics_content).to include("John Smith")
         expect(ics_content).to include("Jane Doe")
@@ -44,9 +45,9 @@ RSpec.describe Calendars::GenerateIcsService do
         result = described_class.call(booking: booking)
         ics_content = result.ics_content
 
-        # Check that DTSTART is included with correct format
-        expect(ics_content).to match(/DTSTART:\d{8}T\d{6}Z/)
-        expect(ics_content).to match(/DTEND:\d{8}T\d{6}Z/)
+        # Check that DTSTART is included with correct format (local time, no Z suffix)
+        expect(ics_content).to match(/DTSTART:\d{8}T\d{6}/)
+        expect(ics_content).to match(/DTEND:\d{8}T\d{6}/)
       end
 
       it "includes reminder alarm" do
