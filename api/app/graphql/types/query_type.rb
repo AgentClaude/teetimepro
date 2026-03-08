@@ -998,6 +998,38 @@ module Types
       CallRecording.for_organization(org).includes(:call_transcriptions, :voice_call_log).find(id)
     end
 
+    # Tee time blocks
+    field :tee_time_blocks, [Types::TeeTimeBlockType], null: false do
+      argument :course_id, ID, required: false
+      argument :block_type, Types::BlockTypeEnum, required: false
+      argument :active_only, Boolean, required: false, default_value: true
+      argument :include_past, Boolean, required: false, default_value: false
+    end
+    def tee_time_blocks(course_id: nil, block_type: nil, active_only: true, include_past: false)
+      org = require_auth!
+      require_role!(:staff)
+
+      scope = TeeTimeBlock.where(organization_id: org.id)
+                          .includes(:course, :created_by)
+                          .order(starts_at: :desc)
+      scope = scope.for_course(course_id) if course_id.present?
+      scope = scope.by_type(block_type) if block_type.present?
+      scope = scope.active if active_only
+      scope = scope.where("ends_at > ?", Time.current) unless include_past
+      scope.limit(100)
+    end
+
+    field :tee_time_block, Types::TeeTimeBlockType, null: true do
+      argument :id, ID, required: true
+    end
+    def tee_time_block(id:)
+      org = require_auth!
+      require_role!(:staff)
+      TeeTimeBlock.where(organization_id: org.id)
+                  .includes(:course, :created_by, :tee_times)
+                  .find(id)
+    end
+
     # Waitlist entries (for current user)
     field :waitlist_entries, [Types::WaitlistEntryType], null: false do
       argument :status, String, required: false
