@@ -53,7 +53,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         
         expect(result["errors"]).to be_nil
         data = result["data"]["updateVoiceHandoff"]
-        expect(data["voiceHandoff"]["status"]).to eq("connected")
+        expect(data["voiceHandoff"]["status"]).to eq("CONNECTED")
         expect(data["voiceHandoff"]["staffName"]).to eq("Manager Smith")
         expect(data["voiceHandoff"]["connectedAt"]).to be_present
         expect(data["voiceHandoff"]["active"]).to be true
@@ -73,7 +73,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         
         expect(result["errors"]).to be_nil
         data = result["data"]["updateVoiceHandoff"]
-        expect(data["voiceHandoff"]["status"]).to eq("completed")
+        expect(data["voiceHandoff"]["status"]).to eq("COMPLETED")
         expect(data["voiceHandoff"]["resolutionNotes"]).to eq("Issue resolved successfully")
         expect(data["voiceHandoff"]["completedAt"]).to be_present
         expect(data["voiceHandoff"]["active"]).to be false
@@ -91,7 +91,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         
         expect(result["errors"]).to be_nil
         data = result["data"]["updateVoiceHandoff"]
-        expect(data["voiceHandoff"]["status"]).to eq("missed")
+        expect(data["voiceHandoff"]["status"]).to eq("MISSED")
         expect(data["voiceHandoff"]["resolutionNotes"]).to eq("No staff available")
         expect(data["voiceHandoff"]["completedAt"]).to be_present
       end
@@ -159,7 +159,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         
         expect(result["errors"]).to be_nil
         data = result["data"]["updateVoiceHandoff"]
-        expect(data["voiceHandoff"]["status"]).to eq("connected")
+        expect(data["voiceHandoff"]["status"]).to eq("CONNECTED")
         expect(data["voiceHandoff"]["staffName"]).to eq("Manager Smith")
         expect(data["voiceHandoff"]["waitSeconds"]).to eq(30)
       end
@@ -182,7 +182,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
 
     context "when user lacks sufficient permissions" do
       it "returns authorization error for customer role" do
-        customer = create(:user, :customer, organization: organization)
+        customer = create(:user, organization: organization) # golfer role is default
         variables = {
           id: handoff.id.to_s,
           status: "CONNECTED",

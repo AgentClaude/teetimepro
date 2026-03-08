@@ -103,7 +103,7 @@ RSpec.describe Mutations::RecordTournamentScore do
   end
 
   it "requires staff role" do
-    viewer = create(:user, organization: organization, role: :viewer)
+    viewer = create(:user, organization: organization, role: :golfer)
     result = TeeTimeProSchema.execute(
       query,
       variables: variables,

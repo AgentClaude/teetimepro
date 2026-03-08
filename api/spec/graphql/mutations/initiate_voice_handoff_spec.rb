@@ -135,7 +135,7 @@ RSpec.describe Mutations::InitiateVoiceHandoff do
 
     context "when user lacks sufficient permissions" do
       it "returns authorization error for customer role" do
-        customer = create(:user, :customer, organization: organization)
+        customer = create(:user, organization: organization) # golfer role is default
         context = graphql_context(user: customer, organization: organization)
         
         result = execute_query(query, variables: valid_variables, context: context)
