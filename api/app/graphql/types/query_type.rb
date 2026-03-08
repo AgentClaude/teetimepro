@@ -200,7 +200,7 @@ module Types
         )
       end
       
-      scope.includes(tee_time: { tee_sheet: :course }, :user).order("tee_times.starts_at DESC")
+      scope.includes(:user, tee_time: { tee_sheet: :course }).order("tee_times.starts_at DESC")
     end
 
     # SMS Campaigns
