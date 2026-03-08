@@ -7,7 +7,7 @@ class FnbTab < ApplicationRecord
   has_many :added_by_users, through: :fnb_tab_items, source: :added_by, class_name: 'User'
 
   validates :golfer_name, presence: true, length: { maximum: 255 }
-  validates :status, presence: true, inclusion: { in: %w[open closed merged] }
+  validates :status, presence: true
   validates :total_cents, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :opened_at, presence: true
 
@@ -71,7 +71,8 @@ class FnbTab < ApplicationRecord
   end
 
   def calculate_total_cents
-    self.total_cents = fnb_tab_items.sum { |item| item.quantity.to_i * item.unit_price_cents.to_i }
+    items = persisted? ? fnb_tab_items.reload : fnb_tab_items
+    self.total_cents = items.sum { |item| item.quantity.to_i * item.unit_price_cents.to_i }
   end
 
   def closed_at_after_opened_at

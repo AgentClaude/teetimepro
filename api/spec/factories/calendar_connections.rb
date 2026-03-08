@@ -20,6 +20,7 @@ FactoryBot.define do
       access_token { nil }
       refresh_token { nil }
       token_expires_at { nil }
+      enabled { false }
     end
 
     trait :disabled do

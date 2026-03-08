@@ -50,12 +50,14 @@ RSpec.describe CallRecording, type: :model do
     end
 
     describe '.completed' do
-      let!(:completed_recording) { create(:call_recording, :completed, organization: org1) }
-      let!(:pending_recording) { create(:call_recording, :pending, organization: org1) }
+      let!(:completed_recording) { create(:call_recording, status: 'completed', organization: org1) }
+      let!(:pending_recording) { create(:call_recording, status: 'pending', organization: org1) }
 
       it 'returns only completed recordings' do
-        expect(CallRecording.completed).to include(completed_recording)
-        expect(CallRecording.completed).not_to include(pending_recording)
+        # Note: recording1 and old_recording also have default status 'completed'
+        completed_results = CallRecording.completed
+        expect(completed_results).to include(completed_recording)
+        expect(completed_results).not_to include(pending_recording)
       end
     end
   end
@@ -101,7 +103,7 @@ RSpec.describe CallRecording, type: :model do
     end
 
     it 'returns nil when no completed transcriptions exist' do
-      create(:call_transcription, :pending, call_recording: recording)
+      create(:call_transcription, call_recording: recording, status: 'pending')
       expect(recording.latest_transcription).to be_nil
     end
   end

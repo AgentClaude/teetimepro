@@ -16,7 +16,7 @@ RSpec.describe TournamentPrize, type: :model do
     it { should validate_numericality_of(:position).is_greater_than(0) }
     it { should validate_presence_of(:description) }
     it { should validate_numericality_of(:amount_cents).is_greater_than_or_equal_to(0) }
-    it { should validate_presence_of(:prize_type) }
+    it { should define_enum_for(:prize_type).with_values(cash: 'cash', voucher: 'voucher', trophy: 'trophy', merchandise: 'merchandise', custom: 'custom').backed_by_column_of_type(:string) }
 
     it 'validates position uniqueness within tournament' do
       create(:tournament_prize, tournament: tournament, position: 1)
@@ -51,7 +51,8 @@ RSpec.describe TournamentPrize, type: :model do
 
     describe '.by_position' do
       it 'orders prizes by position' do
-        expect(TournamentPrize.by_position).to eq([first_place, second_place, third_place, other_tournament_prize])
+        result = TournamentPrize.for_tournament(tournament).by_position
+        expect(result).to eq([first_place, second_place, third_place])
       end
     end
 

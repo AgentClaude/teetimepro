@@ -32,23 +32,20 @@ FactoryBot.define do
 
     trait :pending do
       status { 'pending' }
-      transcription_text { '' }
+      transcription_text { 'Pending transcription placeholder' }
       confidence_score { 0.0 }
-      word_count { 0 }
     end
 
     trait :processing do
       status { 'processing' }
-      transcription_text { '' }
+      transcription_text { 'Processing transcription placeholder' }
       confidence_score { 0.0 }
-      word_count { 0 }
     end
 
     trait :failed do
       status { 'failed' }
-      transcription_text { '' }
+      transcription_text { 'Failed transcription placeholder' }
       confidence_score { 0.0 }
-      word_count { 0 }
     end
 
     trait :high_confidence do

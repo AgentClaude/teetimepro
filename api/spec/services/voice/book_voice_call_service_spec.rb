@@ -132,7 +132,7 @@ RSpec.describe Voice::BookVoiceCallService, type: :service do
         result = described_class.call(params)
         
         expect(result.failure?).to be true
-        expect(result.errors).to include("Tee time id can't be blank")
+        expect(result.errors).to include("Tee time can't be blank")
       end
 
       it 'fails when players_count is missing' do
@@ -197,9 +197,8 @@ RSpec.describe Voice::BookVoiceCallService, type: :service do
       end
 
       it 'fails when tee time does not have enough available spots' do
-        # Book the tee time partially
-        user = create(:user, organization: organization)
-        create(:booking, tee_time: tee_time, user: user, players_count: tee_time.max_players - 1)
+        # Update booked_players to leave insufficient spots
+        tee_time.update!(booked_players: tee_time.max_players - 1)
         
         result = described_class.call(valid_params)
         

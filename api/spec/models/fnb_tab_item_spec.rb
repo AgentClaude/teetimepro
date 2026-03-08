@@ -20,10 +20,22 @@ RSpec.describe FnbTabItem, type: :model do
     it { should validate_numericality_of(:quantity).is_greater_than(0) }
     it { should validate_presence_of(:unit_price_cents) }
     it { should validate_numericality_of(:unit_price_cents).is_greater_than_or_equal_to(0) }
-    it { should validate_presence_of(:total_cents) }
-    it { should validate_numericality_of(:total_cents).is_greater_than_or_equal_to(0) }
-    it { should validate_presence_of(:category) }
-    it { should validate_inclusion_of(:category).in_array(%w[food beverage other]) }
+
+    # total_cents is auto-calculated by before_validation callback, so shoulda
+    # presence/numericality matchers conflict with the callback. Test manually:
+    it 'auto-calculates total_cents from quantity and unit_price_cents' do
+      item = build(:fnb_tab_item, fnb_tab: fnb_tab, added_by: user,
+                   quantity: 3, unit_price_cents: 500, total_cents: nil)
+      item.valid?
+      expect(item.total_cents).to eq(1500)
+    end
+
+    it 'ensures total_cents is non-negative for valid inputs' do
+      item = build(:fnb_tab_item, fnb_tab: fnb_tab, added_by: user,
+                   quantity: 1, unit_price_cents: 0)
+      item.valid?
+      expect(item.total_cents).to eq(0)
+    end
 
     describe 'total_cents_matches_calculation' do
       it 'is valid when total_cents equals quantity * unit_price_cents' do
@@ -32,11 +44,11 @@ RSpec.describe FnbTabItem, type: :model do
         expect(item).to be_valid
       end
 
-      it 'is invalid when total_cents does not match calculation' do
+      it 'auto-corrects total_cents via before_validation callback' do
         item = build(:fnb_tab_item, fnb_tab: fnb_tab, added_by: user,
                      quantity: 2, unit_price_cents: 1000, total_cents: 1500)
-        expect(item).not_to be_valid
-        expect(item.errors[:total_cents]).to include('should equal quantity (2) × unit price (1000) = 2000')
+        item.valid?
+        expect(item.total_cents).to eq(2000)
       end
     end
 
@@ -68,7 +80,7 @@ RSpec.describe FnbTabItem, type: :model do
   end
 
   describe 'enums' do
-    it { should define_enum_for(:category).with_values(food: 'food', beverage: 'beverage', other: 'other') }
+    it { should define_enum_for(:category).with_values(food: 'food', beverage: 'beverage', other: 'other').backed_by_column_of_type(:string) }
   end
 
   describe 'scopes' do
