@@ -176,8 +176,24 @@ export const GET_TEE_SHEET = gql`
 `;
 
 export const GET_BOOKINGS = gql`
-  query GetBookings($courseId: ID, $date: ISO8601Date, $status: String) {
-    bookings(courseId: $courseId, date: $date, status: $status) {
+  query GetBookings(
+    $courseId: ID
+    $date: ISO8601Date
+    $status: String
+    $search: String
+    $dateFrom: ISO8601Date
+    $dateTo: ISO8601Date
+    $bookingType: String
+  ) {
+    bookings(
+      courseId: $courseId
+      date: $date
+      status: $status
+      search: $search
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+      bookingType: $bookingType
+    ) {
       id
       confirmationCode
       status

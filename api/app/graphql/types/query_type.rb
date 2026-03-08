@@ -145,8 +145,12 @@ module Types
       argument :course_id, ID, required: false
       argument :date, GraphQL::Types::ISO8601Date, required: false
       argument :status, String, required: false
+      argument :search, String, required: false, description: "Search by confirmation code, user name, or email"
+      argument :date_from, GraphQL::Types::ISO8601Date, required: false, description: "Start date for date range filter"
+      argument :date_to, GraphQL::Types::ISO8601Date, required: false, description: "End date for date range filter"
+      argument :booking_type, String, required: false, description: "Filter by booking type (online, phone, walk_in, staff)"
     end
-    def bookings(course_id: nil, date: nil, status: nil)
+    def bookings(course_id: nil, date: nil, status: nil, search: nil, date_from: nil, date_to: nil, booking_type: nil)
       require_auth!
       user = context[:current_user]
       scope = if user.can_manage_bookings?
@@ -158,9 +162,29 @@ module Types
       if course_id.present?
         scope = scope.joins(tee_time: { tee_sheet: :course }).where(courses: { id: course_id })
       end
-      scope = scope.for_date(date) if date
-      scope = scope.where(status: status) if status
-      scope.includes(tee_time: { tee_sheet: :course }).order("tee_times.starts_at DESC")
+      
+      # Date filters (date takes precedence over date_from/date_to for backward compatibility)
+      if date.present?
+        scope = scope.for_date(date)
+      elsif date_from.present? || date_to.present?
+        scope = scope.joins(tee_time: :tee_sheet)
+        scope = scope.where("tee_sheets.date >= ?", date_from) if date_from.present?
+        scope = scope.where("tee_sheets.date <= ?", date_to) if date_to.present?
+      end
+      
+      scope = scope.where(status: status) if status.present?
+      scope = scope.where(booking_type: booking_type) if booking_type.present?
+      
+      # Search filter
+      if search.present?
+        search_term = "%#{search.strip}%"
+        scope = scope.joins(:user).where(
+          "bookings.confirmation_code ILIKE :q OR users.first_name ILIKE :q OR users.last_name ILIKE :q OR users.email ILIKE :q OR CONCAT(users.first_name, ' ', users.last_name) ILIKE :q",
+          q: search_term
+        )
+      end
+      
+      scope.includes(tee_time: { tee_sheet: :course }, :user).order("tee_times.starts_at DESC")
     end
 
     # SMS Campaigns
