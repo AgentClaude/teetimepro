@@ -3,56 +3,26 @@ module Api
     skip_before_action :set_current_organization, only: [:create]
 
     def create
-      organization = find_or_create_organization
-
-      user = User.new(
+      result = Auth::RegisterUserService.call(
         email: params[:email],
         password: params[:password],
         password_confirmation: params[:password_confirmation],
         first_name: params[:first_name],
         last_name: params[:last_name],
-        role: params[:role] || :golfer,
-        organization: organization
+        organization_name: params[:organization_name],
+        organization_id: params[:organization_id]
       )
 
-      if user.save
-        secret = ENV.fetch("JWT_SECRET_KEY", Rails.application.secret_key_base)
-        token = JWT.encode(
-          {
-            sub: user.id,
-            email: user.email,
-            role: user.role,
-            organization_id: user.organization_id,
-            exp: 24.hours.from_now.to_i
-          },
-          secret
-        )
-
+      if result.success?
         render json: {
-          token: token,
-          user: {
-            id: user.id,
-            email: user.email,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            role: user.role,
-            organization_id: user.organization_id
-          }
+          access_token: result.data[:access_token],
+          refresh_token: result.data[:refresh_token],
+          token_type: result.data[:token_type],
+          expires_in: result.data[:expires_in],
+          user: result.data[:user]
         }, status: :created
       else
-        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
-      end
-    end
-
-    private
-
-    def find_or_create_organization
-      if params[:organization_id].present?
-        Organization.find(params[:organization_id])
-      elsif params[:organization_name].present?
-        Organization.create!(name: params[:organization_name])
-      else
-        Organization.first_or_create!(name: "Default Organization")
+        render json: { errors: result.errors }, status: :unprocessable_entity
       end
     end
   end
