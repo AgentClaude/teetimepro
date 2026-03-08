@@ -15,6 +15,8 @@ Rails.application.routes.draw do
     post "/auth/refresh", to: "sessions#refresh"
     delete "/auth/logout", to: "sessions#destroy"
     post "/auth/register", to: "registrations#create"
+    post "/auth/password/reset", to: "password_resets#create"
+    put "/auth/password/reset", to: "password_resets#update"
 
     # Voice Bot — Twilio webhook (redirects to voice-agent service)
     scope :voice, controller: :voice_bot do
