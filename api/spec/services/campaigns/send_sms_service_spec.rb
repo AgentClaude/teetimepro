@@ -9,9 +9,9 @@ RSpec.describe Campaigns::SendSmsService do
   let(:user) { create(:user, organization: organization, phone: "+15551234567") }
   let(:sms_message) { create(:sms_message, sms_campaign: campaign, user: user, to_phone: "+15551234567") }
 
-  let(:twilio_client) { instance_double(Twilio::REST::Client) }
-  let(:messages_resource) { instance_double(Twilio::REST::Api::V2010::AccountContext::MessageList) }
-  let(:twilio_response) { instance_double(Twilio::REST::Api::V2010::AccountContext::MessageContext::MessageInstance, sid: "SM12345") }
+  let(:twilio_client) { instance_double("Twilio::REST::Client") }
+  let(:messages_resource) { instance_double("Twilio::REST::Api::V2010::AccountContext::MessageList") }
+  let(:twilio_response) { double("TwilioMessage", sid: "SM12345") }
 
   before do
     allow(TwilioConfig).to receive(:client).and_return(twilio_client)
@@ -50,6 +50,21 @@ RSpec.describe Campaigns::SendSmsService do
 
     context "when Twilio raises an error" do
       before do
+        # Twilio::REST::RestException may not be loaded in test env; define a stub if needed
+        unless defined?(Twilio::REST::RestException)
+          module Twilio; module REST
+            class RestException < StandardError
+              attr_reader :code, :status_code
+              def initialize(status_code, response)
+                @status_code = status_code
+                body = response.respond_to?(:body) ? response.body : {}
+                @code = body["code"]
+                super(body["message"] || "Twilio error")
+              end
+            end
+          end; end
+        end
+
         allow(messages_resource).to receive(:create).and_raise(
           Twilio::REST::RestException.new(400, OpenStruct.new(body: { "code" => 21211, "message" => "Invalid phone" }))
         )

@@ -62,7 +62,7 @@ RSpec.describe FnbTab, type: :model do
   end
 
   describe 'enums' do
-    it { should define_enum_for(:status).with_values(open: 'open', closed: 'closed', merged: 'merged') }
+    it { should define_enum_for(:status).with_values(open: 'open', closed: 'closed', merged: 'merged').backed_by_column_of_type(:string) }
   end
 
   describe 'scopes' do

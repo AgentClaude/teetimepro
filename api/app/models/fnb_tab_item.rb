@@ -6,7 +6,6 @@ class FnbTabItem < ApplicationRecord
   validates :quantity, presence: true, numericality: { greater_than: 0 }
   validates :unit_price_cents, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :total_cents, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :category, presence: true, inclusion: { in: %w[food beverage other] }
 
   validate :total_cents_matches_calculation
   validate :tab_can_be_modified
@@ -20,7 +19,7 @@ class FnbTabItem < ApplicationRecord
 
   before_validation :calculate_total_cents
   after_create :update_tab_total
-  after_update :update_tab_total, if: :saved_change_to_quantity? || :saved_change_to_unit_price_cents?
+  after_update :update_tab_total, if: -> { saved_change_to_quantity? || saved_change_to_unit_price_cents? }
   after_destroy :update_tab_total
 
   def unit_price_amount
