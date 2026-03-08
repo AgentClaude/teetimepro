@@ -10,7 +10,7 @@ class TournamentPrize < ApplicationRecord
   validates :position, uniqueness: { scope: :tournament_id, message: "already exists for this tournament" }
   validates :description, presence: true
   validates :amount_cents, numericality: { greater_than_or_equal_to: 0 }
-  validates :prize_type, presence: true
+  validates :prize_type, inclusion: { in: prize_types.keys }
 
   scope :for_tournament, ->(tournament) { where(tournament: tournament) }
   scope :by_position, -> { order(:position) }

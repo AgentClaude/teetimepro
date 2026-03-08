@@ -67,7 +67,7 @@ module Voice
     end
 
     def transfer_number
-      @transfer_number ||= organization.voice_config&.dig('handoff_phone_number') || 
+      @transfer_number ||= organization.settings&.dig('handoff_phone_number') || 
                           ENV.fetch('HANDOFF_PHONE_NUMBER', '+1234567890')
     end
 

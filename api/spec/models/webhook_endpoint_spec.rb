@@ -11,7 +11,8 @@ RSpec.describe WebhookEndpoint, type: :model do
 
   describe "validations" do
     it { should validate_presence_of(:url) }
-    it { should validate_presence_of(:secret) }
+    # secret is auto-generated via before_validation, so validate length instead
+    it { should validate_length_of(:secret).is_at_least(32) }
     it { should validate_presence_of(:events) }
 
     context "url validation" do

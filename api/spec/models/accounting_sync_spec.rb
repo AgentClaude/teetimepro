@@ -11,10 +11,13 @@ RSpec.describe AccountingSync, type: :model do
       account_mapping: {}
     )
   end
-  let(:booking) { create(:booking, organization: organization) }
+  let(:course) { create(:course, organization: organization) }
+  let(:tee_sheet) { create(:tee_sheet, course: course) }
+  let(:tee_time) { create(:tee_time, tee_sheet: tee_sheet) }
+  let(:booking) { create(:booking, tee_time: tee_time) }
 
   subject(:sync) do
-    described_class.new(
+    described_class.create!(
       accounting_integration: integration,
       sync_type: "invoice",
       status: :pending,
@@ -76,11 +79,14 @@ RSpec.describe AccountingSync, type: :model do
           status: :connected,
           account_mapping: {}
         )
+        other_course = create(:course, organization: other_org)
+        other_tee_sheet = create(:tee_sheet, course: other_course)
+        other_tee_time = create(:tee_time, tee_sheet: other_tee_sheet)
         other_sync = described_class.create!(
           accounting_integration: other_integration,
           sync_type: "invoice",
           status: :pending,
-          syncable: create(:booking, organization: other_org)
+          syncable: create(:booking, tee_time: other_tee_time)
         )
 
         expect(described_class.for_organization(organization)).to contain_exactly(sync)

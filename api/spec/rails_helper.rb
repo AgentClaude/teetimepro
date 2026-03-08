@@ -41,6 +41,15 @@ RSpec.configure do |config|
       example.run
     end
   end
+
+  # ActiveJob test adapter for job and service specs
+  config.before(:each, type: :job) do
+    ActiveJob::Base.queue_adapter = :test
+  end
+
+  config.before(:each, type: :service) do
+    ActiveJob::Base.queue_adapter = :test
+  end
 end
 
 # Shoulda matchers

@@ -63,13 +63,10 @@ RSpec.describe Webhooks::DeliverWebhookService, type: :service do
       it "generates valid HMAC signature" do
         described_class.call(webhook_event: webhook_event)
 
-        # Extract the signature from the request
-        request = WebMock.requests.last
-        signature = request.headers['X-Webhook-Signature']
-
-        # Verify signature
+        # Verify signature by checking the request was made with a valid HMAC
         expected_signature = OpenSSL::HMAC.hexdigest('SHA256', webhook_endpoint.secret, webhook_event.payload.to_json)
-        expect(signature).to eq(expected_signature)
+        expect(WebMock).to have_requested(:post, webhook_endpoint.url)
+          .with(headers: { 'X-Webhook-Signature' => expected_signature })
       end
     end
 

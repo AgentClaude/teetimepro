@@ -99,7 +99,7 @@ RSpec.describe Recordings::SearchService, type: :service do
     end
 
     context 'with caller filter' do
-      let(:voice_call_log) { create(:voice_call_log, organization: organization, caller_id: '+1234567890') }
+      let(:voice_call_log) { create(:voice_call_log, organization: organization, caller_phone: '+1234567890') }
       let!(:recording_with_caller) { create(:call_recording, organization: organization, voice_call_log: voice_call_log) }
 
       # Note: This test assumes VoiceCallLog has caller_id and caller_name fields

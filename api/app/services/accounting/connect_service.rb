@@ -7,8 +7,10 @@ module Accounting
     validates :oauth_params, presence: true
 
     def call
+      return validation_failure(self) unless valid?
+      
       validate_oauth_params!
-      return failure(errors: errors.full_messages) if errors.any?
+      return failure(errors.full_messages) if errors.any?
 
       begin
         exchange_oauth_code_for_tokens!
@@ -17,8 +19,8 @@ module Accounting
         
         success(integration: @integration)
       rescue => e
-        @integration&.mark_error!(e.message)
-        failure(errors: ["Failed to connect to #{provider.titleize}: #{e.message}"])
+        @integration&.mark_error!(e.message) if @integration&.persisted?
+        failure(["Failed to connect to #{provider.titleize}: #{e.message}"])
       end
     end
 
@@ -34,12 +36,14 @@ module Accounting
     end
 
     def validate_quickbooks_params!
+      return unless oauth_params.is_a?(Hash)
       unless oauth_params[:code] && oauth_params[:state] && oauth_params[:realmId]
         errors.add(:oauth_params, 'Missing required QuickBooks OAuth parameters')
       end
     end
 
     def validate_xero_params!
+      return unless oauth_params.is_a?(Hash)
       unless oauth_params[:code] && oauth_params[:state]
         errors.add(:oauth_params, 'Missing required Xero OAuth parameters')
       end

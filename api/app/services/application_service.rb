@@ -34,8 +34,11 @@ class ApplicationService
   end
 
   # Helper for failed results
-  def failure(errors = {}, data = {})
-    ServiceResult.new(success: false, errors: errors, data: data)
+  # Supports: failure(["msg"]), failure(errors: ["msg"]), failure(["msg"], response_code: 500)
+  def failure(errors_or_hash = nil, data = nil, errors: nil, **extra_data)
+    err = errors || errors_or_hash || []
+    d = data || extra_data
+    ServiceResult.new(success: false, errors: err, data: d)
   end
 
   # Helper for validation failures

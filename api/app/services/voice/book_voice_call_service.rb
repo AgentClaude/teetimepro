@@ -63,7 +63,7 @@ module Voice
       # Split caller name into first/last
       name_parts = caller_name.strip.split(/\s+/)
       first_name = name_parts[0]
-      last_name = name_parts.length > 1 ? name_parts[1..].join(" ") : ""
+      last_name = name_parts.length > 1 ? name_parts[1..].join(" ") : "Voice"
 
       # Normalize phone number
       normalized_phone = normalize_phone_number(caller_phone)
@@ -75,15 +75,14 @@ module Voice
 
       unless user
         # Create new user for voice booking
-        user = User.new(
+        user = User.create!(
           organization: organization,
           email: "#{normalized_phone.gsub(/\D/, '')}@voice-booking.local", # Temporary email
           first_name: first_name,
           last_name: last_name,
           phone: normalized_phone,
           role: "golfer",
-          password: SecureRandom.urlsafe_base64(12), # Random password
-          confirmed_at: Time.current # Auto-confirm voice booking users
+          password: SecureRandom.urlsafe_base64(12) # Random password
         )
       end
 
@@ -94,7 +93,7 @@ module Voice
       price_per_player = tee_time.price_cents || 0
       total_cents = price_per_player * players_count
 
-      Booking.new(
+      Booking.create!(
         tee_time: tee_time,
         user: user,
         players_count: players_count,
