@@ -85,6 +85,31 @@ module Types
       course.tee_sheets.find_by(date: date)
     end
 
+    # Prepaid Packages
+    field :prepaid_packages, [Types::PrepaidPackageType], null: false do
+      argument :active_only, Boolean, required: false
+      argument :course_id, ID, required: false
+    end
+    def prepaid_packages(active_only: true, course_id: nil)
+      org = require_auth!
+      scope = PrepaidPackage.where(organization_id: org.id)
+      scope = scope.available if active_only
+      scope = scope.for_course(course_id) if course_id.present?
+      scope.order(created_at: :desc)
+    end
+
+    field :prepaid_purchases, [Types::PrepaidPurchaseType], null: false do
+      argument :user_id, ID, required: false
+      argument :status, String, required: false
+    end
+    def prepaid_purchases(user_id: nil, status: nil)
+      org = require_auth!
+      scope = PrepaidPurchase.where(organization_id: org.id)
+      scope = scope.for_user(user_id) if user_id.present?
+      scope = scope.where(status: status) if status.present?
+      scope.includes(:prepaid_package).order(created_at: :desc)
+    end
+
     # Single booking
     # Payments
     field :payments, [Types::PaymentType], null: false do
