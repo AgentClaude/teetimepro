@@ -36,6 +36,27 @@ export const GET_PUBLIC_AVAILABLE_TEE_TIMES = gql`
   }
 `;
 
+export const LOOKUP_PUBLIC_BOOKING = gql`
+  query LookupPublicBooking($confirmationCode: String!, $email: String!) {
+    publicBookingLookup(confirmationCode: $confirmationCode, email: $email) {
+      id
+      confirmationCode
+      status
+      playersCount
+      totalCents
+      bookingType
+      cancelledAt
+      cancellationReason
+      createdAt
+      courseName
+      teeTimeStartsAt
+      teeTimeFormatted
+      teeTimeDate
+      playerNames
+    }
+  }
+`;
+
 // Public mutations
 export const CREATE_PUBLIC_BOOKING = gql`
   mutation CreatePublicBooking(

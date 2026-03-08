@@ -32,6 +32,22 @@ module Types
       TeeTime.where(id: tee_time_ids).order(:starts_at)
     end
 
+    # Public booking lookup by confirmation code + email
+    field :public_booking_lookup, Types::PublicBookingType, null: true,
+      description: "Look up a booking by confirmation code and email (no auth required)" do
+      argument :confirmation_code, String, required: true
+      argument :email, String, required: true
+    end
+    def public_booking_lookup(confirmation_code:, email:)
+      result = Bookings::LookupBookingService.call(
+        confirmation_code: confirmation_code,
+        email: email
+      )
+      return nil unless result.success?
+
+      result.data[:booking]
+    end
+
     # Current user
     field :me, Types::UserType, null: true
     def me
