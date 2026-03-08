@@ -3,6 +3,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 import { PublicBookingPage } from "./pages/PublicBookingPage";
+import { BookingLookupPage } from "./pages/BookingLookupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { TeeSheetPage } from "./pages/TeeSheetPage";
 import { BookingsPage } from "./pages/BookingsPage";
@@ -28,6 +29,7 @@ function App() {
       {/* Public booking routes (no auth required) */}
       <Route path="/book/:courseSlug" element={<PublicBookingPage />} />
       <Route path="/book" element={<PublicBookingPage />} />
+      <Route path="/booking/lookup" element={<BookingLookupPage />} />
       <Route
         element={
           <ProtectedRoute>
