@@ -20,7 +20,7 @@ RSpec.describe Tournaments::DefinePrizesService, type: :service do
         result = service.call
         
         expect(result).to be_success
-        expect(result.data[:prizes]).to have(3).items
+        expect(result.data[:prizes].size).to eq(3)
         
         prizes = tournament.tournament_prizes.reload
         expect(prizes.count).to eq(3)

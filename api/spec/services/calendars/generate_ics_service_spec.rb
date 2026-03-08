@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Calendars::GenerateIcsService do
   let(:organization) { create(:organization) }
   let(:user) { create(:user, organization: organization) }
-  let(:course) { create(:course, organization: organization, name: "Pebble Beach Golf Links", address: "1700 17-Mile Drive", city: "Pebble Beach", state: "CA", zip_code: "93953") }
+  let(:course) { create(:course, organization: organization, name: "Pebble Beach Golf Links", address: "1700 17-Mile Drive", city: "Pebble Beach", state: "CA", zip: "93953") }
   let(:tee_sheet) { create(:tee_sheet, course: course, date: Date.tomorrow) }
   let(:tee_time) { create(:tee_time, tee_sheet: tee_sheet, starts_at: DateTime.tomorrow.beginning_of_day + 14.hours) }
   let(:booking) { create(:booking, tee_time: tee_time, user: user, players_count: 4, confirmation_code: "ABC123", notes: "Birthday celebration") }

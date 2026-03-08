@@ -62,8 +62,8 @@ RSpec.describe Tournaments::FinalizeResultsService, type: :service do
         result = service.call
         
         expect(result).to be_success
-        expect(result.data[:results]).to have(3).items
-        expect(result.data[:awarded_prizes]).to have(3).items
+        expect(result.data[:results].size).to eq(3)
+        expect(result.data[:awarded_prizes].size).to eq(3)
         
         # Check results were created
         results = tournament.tournament_results.reload
@@ -251,7 +251,7 @@ RSpec.describe Tournaments::FinalizeResultsService, type: :service do
         result = service.call
         
         expect(result).to be_success
-        expect(result.data[:results]).to have(3).items
+        expect(result.data[:results].size).to eq(3)
         expect(result.data[:awarded_prizes]).to be_empty
         
         # Results should still be created without prizes
