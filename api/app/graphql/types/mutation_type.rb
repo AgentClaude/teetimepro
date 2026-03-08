@@ -6,6 +6,7 @@ module Types
     field :create_booking, mutation: Mutations::CreateBooking
     field :cancel_booking, mutation: Mutations::CancelBooking
     field :update_booking, mutation: Mutations::UpdateBooking
+    field :create_walk_on_booking, mutation: Mutations::CreateWalkOnBooking
     field :create_payment_intent, mutation: Mutations::CreatePaymentIntent
     field :create_payment, mutation: Mutations::CreatePayment
     field :capture_payment, mutation: Mutations::CapturePayment

@@ -6,6 +6,13 @@ module Types
     field :players_count, Integer, null: false
     field :total_cents, Integer, null: false
     field :notes, String, null: true
+    field :booking_type, String, null: false
+    field :guest_name, String, null: true
+    field :guest_email, String, null: true
+    field :guest_phone, String, null: true
+    field :walk_on_notes, String, null: true
+    field :created_by, Types::UserType, null: true, description: "Staff member who created the booking (for walk-ons)"
+    field :is_walk_on, Boolean, null: false
     field :cancellable, Boolean, null: false
     field :cancelled_at, GraphQL::Types::ISO8601DateTime, null: true
     field :cancellation_reason, String, null: true
@@ -22,6 +29,10 @@ module Types
 
     def cancellable
       object.cancellable?
+    end
+
+    def is_walk_on
+      object.walk_on?
     end
 
     def turn_order

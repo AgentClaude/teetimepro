@@ -9,8 +9,18 @@ class Booking < ApplicationRecord
   has_many :accounting_syncs, as: :syncable, dependent: :destroy
 
   enum :status, { confirmed: 0, checked_in: 1, completed: 2, cancelled: 3, no_show: 4, pending_voice_confirmation: 5 }
+  enum :booking_type, { online: 0, walk_on: 1, phone: 2, staff: 3 }
+
+  belongs_to :created_by, class_name: "User", optional: true
 
   validates :players_count, presence: true, numericality: { in: 1..5 }
+  validates :guest_name, presence: true, if: :walk_on?
+
+  scope :walk_ons, -> { where(booking_type: :walk_on) }
+  scope :walk_ons_today, -> {
+    walk_ons.joins(tee_time: :tee_sheet)
+            .where(tee_sheets: { date: Date.current })
+  }
 
   monetize :total_cents
 

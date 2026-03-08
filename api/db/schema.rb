@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_210001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_08_054000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -109,7 +109,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_210001) do
     t.datetime "updated_at", null: false
     t.datetime "reminder_sent_at", precision: nil
     t.datetime "morning_reminder_sent_at", precision: nil
+    t.integer "booking_type", default: 0, null: false
+    t.string "guest_name"
+    t.string "guest_email"
+    t.string "guest_phone"
+    t.bigint "created_by_id"
+    t.text "walk_on_notes"
+    t.index ["booking_type"], name: "index_bookings_on_booking_type"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
+    t.index ["created_by_id"], name: "index_bookings_on_created_by_id"
     t.index ["morning_reminder_sent_at"], name: "index_bookings_on_morning_reminder_sent_at"
     t.index ["reminder_sent_at"], name: "index_bookings_on_reminder_sent_at"
     t.index ["status"], name: "index_bookings_on_status"
@@ -1088,6 +1096,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_210001) do
   add_foreign_key "booking_players", "bookings", on_delete: :cascade
   add_foreign_key "booking_players", "golfer_profiles", on_delete: :nullify
   add_foreign_key "bookings", "tee_times", on_delete: :cascade
+  add_foreign_key "bookings", "users", column: "created_by_id"
   add_foreign_key "bookings", "users", on_delete: :cascade
   add_foreign_key "calendar_connections", "users"
   add_foreign_key "call_recordings", "organizations"
