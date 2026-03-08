@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Calendars::GenerateIcsService do
   let(:organization) { create(:organization) }
   let(:user) { create(:user, organization: organization) }
-  let(:course) { create(:course, organization: organization, name: "Pebble Beach Golf Links", address: "1700 17-Mile Drive", city: "Pebble Beach", state: "CA", zip_code: "93953") }
+  let(:course) { create(:course, organization: organization, name: "Pebble Beach Golf Links", address: "1700 17-Mile Drive", city: "Pebble Beach", state: "CA", zip: "93953") }
   let(:tee_sheet) { create(:tee_sheet, course: course, date: Date.tomorrow) }
   let(:tee_time) { create(:tee_time, tee_sheet: tee_sheet, starts_at: DateTime.tomorrow.beginning_of_day + 14.hours) }
   let(:booking) { create(:booking, tee_time: tee_time, user: user, players_count: 4, confirmation_code: "ABC123", notes: "Birthday celebration") }
@@ -29,7 +29,7 @@ RSpec.describe Calendars::GenerateIcsService do
       it "includes correct event details" do
         result = described_class.call(booking: booking)
         # ICS uses line folding (CRLF + space) for long lines, so unfold before matching
-        ics_content = result.ics_content.gsub("\r\n ", "")
+        ics_content = result.data.ics_content.gsub("\r\n ", "")
 
         expect(ics_content).to include("Golf at Pebble Beach Golf Links")
         expect(ics_content).to include("Confirmation Code: #{booking.confirmation_code}")
@@ -43,7 +43,7 @@ RSpec.describe Calendars::GenerateIcsService do
 
       it "sets correct date and time" do
         result = described_class.call(booking: booking)
-        ics_content = result.ics_content
+        ics_content = result.data.ics_content
 
         # Check that DTSTART is included with correct format (local time, no Z suffix)
         expect(ics_content).to match(/DTSTART:\d{8}T\d{6}/)
@@ -52,7 +52,7 @@ RSpec.describe Calendars::GenerateIcsService do
 
       it "includes reminder alarm" do
         result = described_class.call(booking: booking)
-        ics_content = result.ics_content
+        ics_content = result.data.ics_content
 
         expect(ics_content).to include("BEGIN:VALARM")
         expect(ics_content).to include("ACTION:DISPLAY")
@@ -62,14 +62,14 @@ RSpec.describe Calendars::GenerateIcsService do
       it "generates appropriate filename" do
         result = described_class.call(booking: booking)
 
-        expect(result.filename).to include("golf-booking")
-        expect(result.filename).to include("pebble-beach-golf-links")
-        expect(result.filename).to end_with(".ics")
+        expect(result.data.filename).to include("golf-booking")
+        expect(result.data.filename).to include("pebble-beach-golf-links")
+        expect(result.data.filename).to end_with(".ics")
       end
 
       it "includes unique UID" do
         result = described_class.call(booking: booking)
-        ics_content = result.ics_content
+        ics_content = result.data.ics_content
 
         expect(ics_content).to include("UID:booking-#{booking.id}@teetimespro.com")
       end
@@ -91,7 +91,7 @@ RSpec.describe Calendars::GenerateIcsService do
         result = described_class.call(booking: simple_booking)
 
         expect(result).to be_success
-        expect(result.ics_content).to be_present
+        expect(result.data.ics_content).to be_present
       end
     end
 
@@ -102,7 +102,7 @@ RSpec.describe Calendars::GenerateIcsService do
         result = described_class.call(booking: booking_no_notes)
 
         expect(result).to be_success
-        expect(result.ics_content).not_to include("Notes:")
+        expect(result.data.ics_content).not_to include("Notes:")
       end
     end
   end

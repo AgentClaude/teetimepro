@@ -82,8 +82,8 @@ module Calendars
         location_parts << "#{course.city}, #{course.state}"
       end
 
-      if course.zip_code.present?
-        location_parts << course.zip_code
+      if course.zip.present?
+        location_parts << course.zip
       end
 
       location_parts.join(", ")
