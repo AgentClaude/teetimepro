@@ -7,6 +7,7 @@ class Booking < ApplicationRecord
   has_many :payments, dependent: :destroy
   has_many :fnb_tabs, dependent: :nullify
   has_many :accounting_syncs, as: :syncable, dependent: :destroy
+  has_many :prepaid_redemptions, dependent: :destroy
 
   enum :status, { confirmed: 0, checked_in: 1, completed: 2, cancelled: 3, no_show: 4, pending_voice_confirmation: 5 }
   enum :booking_type, { online: 0, walk_on: 1, phone: 2, staff: 3 }

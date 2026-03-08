@@ -11,6 +11,10 @@ module Types
     field :create_payment, mutation: Mutations::CreatePayment
     field :capture_payment, mutation: Mutations::CapturePayment
     field :refund_payment, mutation: Mutations::RefundPayment
+    field :create_prepaid_package, mutation: Mutations::CreatePrepaidPackage
+    field :purchase_prepaid_package, mutation: Mutations::PurchasePrepaidPackage
+    field :redeem_prepaid_package, mutation: Mutations::RedeemPrepaidPackage
+    field :collect_deposit, mutation: Mutations::CollectDeposit
     field :create_course, mutation: Mutations::CreateCourse
     field :update_tee_time, mutation: Mutations::UpdateTeeTime
     field :update_course_voice_config, mutation: Mutations::UpdateCourseVoiceConfig
