@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Card } from '../components/ui/Card';
+import { Booking } from '../types';
 
 interface BookingFilters {
   search: string;
@@ -104,15 +105,9 @@ export function BookingsPage() {
 
   // Format bookings for BookingList component
   const bookings = useMemo(() => {
-    return (data?.bookings || []).map((booking) => ({
+    return (data?.bookings || []).map((booking: Booking) => ({
       ...booking,
       totalFormatted: booking.totalCents != null ? `$${(booking.totalCents / 100).toFixed(2)}` : '--',
-      teeTime: {
-        ...booking.teeTime,
-        course: { 
-          name: booking.teeTime?.course?.name || 'Unknown Course'
-        },
-      },
     }));
   }, [data?.bookings]);
 
@@ -136,7 +131,7 @@ export function BookingsPage() {
   }, []);
 
   const handleCancelBooking = useCallback((bookingId: string) => {
-    const booking = data?.bookings?.find((b) => b.id === bookingId);
+    const booking = data?.bookings?.find((b: Booking) => b.id === bookingId);
     if (booking) {
       setCancelDialog({
         isOpen: true,
@@ -161,12 +156,11 @@ export function BookingsPage() {
   const handleExportCSV = useCallback(() => {
     if (!bookings.length) return;
 
-    const headers = ['Confirmation Code', 'Course', 'Date/Time', 'Golfer', 'Email', 'Players', 'Status', 'Total'];
+    const headers = ['Confirmation Code', 'Date/Time', 'Golfer', 'Email', 'Players', 'Status', 'Total'];
     const csvContent = [
       headers.join(','),
-      ...bookings.map((booking) => [
+      ...bookings.map((booking: Booking & { totalFormatted: string }) => [
         booking.confirmationCode,
-        booking.teeTime.course.name,
         new Date(booking.teeTime.startsAt).toLocaleString(),
         `"${booking.user.fullName}"`,
         booking.user.email,
