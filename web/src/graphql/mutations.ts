@@ -1067,3 +1067,119 @@ export const LEAVE_WAITLIST = gql`
     }
   }
 `;
+
+// Scorecard mutations
+export const CREATE_SCORECARD = gql`
+  mutation CreateScorecard(
+    $golferProfileId: ID!
+    $courseId: ID!
+    $playedOn: ISO8601Date!
+    $holesPlayed: Int
+    $teeColor: String
+    $courseRating: Float
+    $slopeRating: Int
+    $bookingId: ID
+    $notes: String
+  ) {
+    createScorecard(
+      golferProfileId: $golferProfileId
+      courseId: $courseId
+      playedOn: $playedOn
+      holesPlayed: $holesPlayed
+      teeColor: $teeColor
+      courseRating: $courseRating
+      slopeRating: $slopeRating
+      bookingId: $bookingId
+      notes: $notes
+    ) {
+      scorecard {
+        id
+        status
+        holesPlayed
+        playedOn
+        holeScores {
+          id
+          holeNumber
+          par
+        }
+      }
+      errors
+    }
+  }
+`;
+
+export const UPDATE_HOLE_SCORE = gql`
+  mutation UpdateHoleScore(
+    $scorecardId: ID!
+    $holeNumber: Int!
+    $strokes: Int
+    $putts: Int
+    $fairwayHit: Boolean
+    $greenInRegulation: Boolean
+    $penalties: Int
+    $notes: String
+  ) {
+    updateHoleScore(
+      scorecardId: $scorecardId
+      holeNumber: $holeNumber
+      strokes: $strokes
+      putts: $putts
+      fairwayHit: $fairwayHit
+      greenInRegulation: $greenInRegulation
+      penalties: $penalties
+      notes: $notes
+    ) {
+      holeScore {
+        id
+        holeNumber
+        par
+        strokes
+        putts
+        fairwayHit
+        greenInRegulation
+        penalties
+        scoreToPar
+      }
+      scorecard {
+        id
+        totalStrokes
+        totalPutts
+        totalFairwaysHit
+        totalGreensInRegulation
+        totalPenalties
+        frontNineStrokes
+        backNineStrokes
+        scoreToPar
+        holesCompleted
+      }
+      errors
+    }
+  }
+`;
+
+export const FINALIZE_SCORECARD = gql`
+  mutation FinalizeScorecard($scorecardId: ID!) {
+    finalizeScorecard(scorecardId: $scorecardId) {
+      scorecard {
+        id
+        status
+        totalStrokes
+        scoreToPar
+        completedAt
+      }
+      errors
+    }
+  }
+`;
+
+export const ABANDON_SCORECARD = gql`
+  mutation AbandonScorecard($scorecardId: ID!) {
+    abandonScorecard(scorecardId: $scorecardId) {
+      scorecard {
+        id
+        status
+      }
+      errors
+    }
+  }
+`;
