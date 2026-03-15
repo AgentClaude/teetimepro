@@ -42,8 +42,8 @@ jobs:
               if curl -sf http://localhost:3007/health > /dev/null 2>&1; then
                 echo "✅ Deploy successful - API healthy"
                 
-                # Now bring up frontend
-                docker compose --env-file .env.prod up -d frontend
+                # Now bring up web frontend
+                docker compose --env-file .env.prod up -d web
                 exit 0
               fi
               echo "Waiting for API... ($i/12)"
