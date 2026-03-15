@@ -3,6 +3,7 @@ class GolferProfile < ApplicationRecord
   has_many :booking_players, dependent: :nullify
   has_many :rounds, dependent: :destroy
   has_many :handicap_revisions, dependent: :destroy
+  has_many :scorecards, dependent: :destroy
 
   validates :handicap_index, numericality: { in: -10.0..54.0 }, allow_nil: true
 

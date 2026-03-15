@@ -183,6 +183,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.index ["voice_call_log_id"], name: "index_call_transcriptions_on_voice_call_log_id"
   end
 
+  create_table "course_holes", force: :cascade do |t|
+    t.bigint "course_id", null: false
+    t.integer "hole_number", null: false
+    t.integer "par", null: false
+    t.integer "yardage"
+    t.integer "handicap_index"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id", "hole_number"], name: "index_course_holes_on_course_id_and_hole_number", unique: true
+    t.index ["course_id"], name: "index_course_holes_on_course_id"
+  end
+
   create_table "courses", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.string "name", null: false
@@ -419,6 +431,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.datetime "updated_at", null: false
     t.index ["golfer_profile_id", "effective_date"], name: "idx_on_golfer_profile_id_effective_date_e541a980ad"
     t.index ["golfer_profile_id"], name: "index_handicap_revisions_on_golfer_profile_id"
+  end
+
+  create_table "hole_scores", force: :cascade do |t|
+    t.bigint "scorecard_id", null: false
+    t.integer "hole_number", null: false
+    t.integer "par", null: false
+    t.integer "strokes"
+    t.integer "putts"
+    t.boolean "fairway_hit"
+    t.boolean "green_in_regulation"
+    t.integer "penalties", default: 0
+    t.integer "score_to_par"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hole_number"], name: "index_hole_scores_on_hole_number"
+    t.index ["scorecard_id", "hole_number"], name: "index_hole_scores_on_scorecard_id_and_hole_number", unique: true
+    t.index ["scorecard_id"], name: "index_hole_scores_on_scorecard_id"
   end
 
   create_table "inventory_levels", force: :cascade do |t|
@@ -755,6 +785,38 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.index ["golfer_profile_id", "played_on"], name: "index_rounds_on_golfer_profile_id_and_played_on"
     t.index ["golfer_profile_id"], name: "index_rounds_on_golfer_profile_id"
     t.index ["played_on"], name: "index_rounds_on_played_on"
+  end
+
+  create_table "scorecards", force: :cascade do |t|
+    t.bigint "golfer_profile_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "booking_id"
+    t.bigint "round_id"
+    t.date "played_on", null: false
+    t.integer "holes_played", default: 18, null: false
+    t.integer "total_strokes"
+    t.integer "total_putts"
+    t.integer "total_fairways_hit"
+    t.integer "total_greens_in_regulation"
+    t.integer "total_penalties"
+    t.integer "front_nine_strokes"
+    t.integer "back_nine_strokes"
+    t.integer "score_to_par"
+    t.string "status", default: "in_progress", null: false
+    t.string "tee_color"
+    t.decimal "course_rating", precision: 4, scale: 1
+    t.integer "slope_rating"
+    t.text "notes"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_scorecards_on_booking_id"
+    t.index ["course_id"], name: "index_scorecards_on_course_id"
+    t.index ["golfer_profile_id", "played_on"], name: "index_scorecards_on_golfer_profile_id_and_played_on"
+    t.index ["golfer_profile_id"], name: "index_scorecards_on_golfer_profile_id"
+    t.index ["round_id"], name: "index_scorecards_on_round_id"
+    t.index ["status"], name: "index_scorecards_on_status"
   end
 
   create_table "sms_campaigns", force: :cascade do |t|
@@ -1129,6 +1191,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   add_foreign_key "call_transcriptions", "call_recordings"
   add_foreign_key "call_transcriptions", "organizations"
   add_foreign_key "call_transcriptions", "voice_call_logs"
+  add_foreign_key "course_holes", "courses", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
   add_foreign_key "email_campaigns", "email_providers"
   add_foreign_key "email_campaigns", "email_templates"
@@ -1151,6 +1214,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   add_foreign_key "golfer_segments", "organizations", on_delete: :cascade
   add_foreign_key "golfer_segments", "users", column: "created_by_id"
   add_foreign_key "handicap_revisions", "golfer_profiles", on_delete: :cascade
+  add_foreign_key "hole_scores", "scorecards", on_delete: :cascade
   add_foreign_key "inventory_levels", "courses"
   add_foreign_key "inventory_levels", "organizations"
   add_foreign_key "inventory_levels", "pos_products"
@@ -1187,6 +1251,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   add_foreign_key "pricing_rules", "organizations"
   add_foreign_key "rounds", "courses", on_delete: :nullify
   add_foreign_key "rounds", "golfer_profiles", on_delete: :cascade
+  add_foreign_key "scorecards", "bookings", on_delete: :nullify
+  add_foreign_key "scorecards", "courses", on_delete: :cascade
+  add_foreign_key "scorecards", "golfer_profiles", on_delete: :cascade
+  add_foreign_key "scorecards", "rounds", on_delete: :nullify
   add_foreign_key "sms_campaigns", "organizations", on_delete: :cascade
   add_foreign_key "sms_campaigns", "users", column: "created_by_id", on_delete: :cascade
   add_foreign_key "sms_messages", "sms_campaigns", on_delete: :cascade

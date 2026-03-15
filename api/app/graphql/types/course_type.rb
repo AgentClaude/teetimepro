@@ -19,9 +19,19 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
     field :tee_sheets, [Types::TeeSheetType], null: false
+    field :course_holes, [Types::CourseHoleType], null: false
+    field :total_par, Integer, null: true
 
     def tee_sheets
       object.tee_sheets.upcoming.order(:date).limit(30)
+    end
+
+    def course_holes
+      object.course_holes.ordered
+    end
+
+    def total_par
+      object.course_holes.sum(:par).presence
     end
 
     def first_tee_time

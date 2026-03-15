@@ -115,5 +115,11 @@ module Types
     # Golfer profiles
     field :record_round, mutation: Mutations::RecordRound
     field :update_handicap, mutation: Mutations::UpdateHandicap
+
+    # Digital scorecard
+    field :create_scorecard, mutation: Mutations::CreateScorecard
+    field :update_hole_score, mutation: Mutations::UpdateHoleScore
+    field :finalize_scorecard, mutation: Mutations::FinalizeScorecard
+    field :abandon_scorecard, mutation: Mutations::AbandonScorecard
   end
 end

@@ -8,6 +8,8 @@ class Course < ApplicationRecord
   has_many :pricing_rules, dependent: :destroy
   has_many :marketplace_connections, dependent: :destroy
   has_many :marketplace_listings, through: :marketplace_connections
+  has_many :course_holes, -> { order(:hole_number) }, dependent: :destroy
+  has_many :scorecards, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

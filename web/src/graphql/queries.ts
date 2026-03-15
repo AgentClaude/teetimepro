@@ -1185,3 +1185,113 @@ export const GET_WAITLIST_ENTRIES = gql`
     }
   }
 `;
+
+// Scorecard queries
+export const GET_SCORECARD = gql`
+  query GetScorecard($id: ID!) {
+    scorecard(id: $id) {
+      id
+      golferProfile {
+        id
+        displayName
+        handicapIndex
+      }
+      course {
+        id
+        name
+      }
+      bookingId
+      playedOn
+      holesPlayed
+      totalStrokes
+      totalPutts
+      totalFairwaysHit
+      totalGreensInRegulation
+      totalPenalties
+      frontNineStrokes
+      backNineStrokes
+      scoreToPar
+      status
+      teeColor
+      courseRating
+      slopeRating
+      notes
+      startedAt
+      completedAt
+      createdAt
+      holesCompleted
+      holeScores {
+        id
+        holeNumber
+        par
+        strokes
+        putts
+        fairwayHit
+        greenInRegulation
+        penalties
+        scoreToPar
+        notes
+      }
+    }
+  }
+`;
+
+export const GET_SCORECARDS = gql`
+  query GetScorecards($golferProfileId: ID!, $status: ScorecardStatusEnum, $limit: Int) {
+    scorecards(golferProfileId: $golferProfileId, status: $status, limit: $limit) {
+      id
+      course {
+        id
+        name
+      }
+      playedOn
+      holesPlayed
+      totalStrokes
+      scoreToPar
+      status
+      holesCompleted
+      completedAt
+    }
+  }
+`;
+
+export const GET_ACTIVE_SCORECARD = gql`
+  query GetActiveScorecard($golferProfileId: ID!) {
+    activeScorecard(golferProfileId: $golferProfileId) {
+      id
+      course {
+        id
+        name
+      }
+      playedOn
+      holesPlayed
+      totalStrokes
+      scoreToPar
+      status
+      holesCompleted
+      holeScores {
+        id
+        holeNumber
+        par
+        strokes
+        putts
+        fairwayHit
+        greenInRegulation
+        penalties
+        scoreToPar
+      }
+    }
+  }
+`;
+
+export const GET_COURSE_HOLES = gql`
+  query GetCourseHoles($courseId: ID!) {
+    courseHoles(courseId: $courseId) {
+      id
+      holeNumber
+      par
+      yardage
+      handicapIndex
+    }
+  }
+`;

@@ -1163,5 +1163,48 @@ module Types
       scope = scope.where(loyalty_accounts: { user_id: user_id }) if user_id.present?
       scope.limit([limit, 100].min)
     end
+
+    # Digital Scorecards
+    field :scorecard, Types::ScorecardType, null: true, description: "Find a scorecard by ID" do
+      argument :id, ID, required: true
+    end
+
+    field :scorecards, [Types::ScorecardType], null: false, description: "List scorecards for a golfer profile" do
+      argument :golfer_profile_id, ID, required: true
+      argument :status, Types::ScorecardStatusEnum, required: false
+      argument :limit, Integer, required: false, default_value: 20
+    end
+
+    field :active_scorecard, Types::ScorecardType, null: true, description: "Get the current in-progress scorecard for a golfer" do
+      argument :golfer_profile_id, ID, required: true
+    end
+
+    field :course_holes, [Types::CourseHoleType], null: false, description: "Get hole configuration for a course" do
+      argument :course_id, ID, required: true
+    end
+
+    def scorecard(id:)
+      Scorecard.includes(:hole_scores, :course, :golfer_profile).find_by(id: id)
+    end
+
+    def scorecards(golfer_profile_id:, status: nil, limit: 20)
+      scope = Scorecard.where(golfer_profile_id: golfer_profile_id)
+                       .includes(:hole_scores, :course)
+                       .recent
+      scope = scope.where(status: status) if status.present?
+      scope.limit([limit, 50].min)
+    end
+
+    def active_scorecard(golfer_profile_id:)
+      Scorecard.where(golfer_profile_id: golfer_profile_id)
+               .in_progress
+               .includes(:hole_scores, :course)
+               .order(created_at: :desc)
+               .first
+    end
+
+    def course_holes(course_id:)
+      CourseHole.where(course_id: course_id).ordered
+    end
   end
 end
