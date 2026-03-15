@@ -61,6 +61,7 @@ services:
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - DOMAIN=${DOMAIN:-localhost}
       - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
       - VOICE_BOT_BASE_URL=${VOICE_BOT_BASE_URL}
       - DB_HOST=db
@@ -112,6 +113,7 @@ services:
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - DOMAIN=${DOMAIN:-localhost}
     volumes:
       - rails_storage:/app/storage
       - rails_logs:/app/log
