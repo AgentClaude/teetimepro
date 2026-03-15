@@ -25,16 +25,31 @@ jobs:
             cd /opt/teetimepro
             git fetch origin main
             git reset --hard origin/main
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq web
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d db redis
+            
+            # Build with env file for variable interpolation
+            docker compose --env-file .env.prod build api sidekiq
+            
+            # Remove orphaned containers and bring up infrastructure first
+            docker compose --env-file .env.prod up -d --remove-orphans db redis
             sleep 5
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d api sidekiq web voice-agent
-            sleep 15
-            # Health check via the mapped port
-            if curl -sf http://localhost:3007/health > /dev/null; then
-              echo "✅ Deploy successful - API healthy"
-            else
-              echo "❌ Deploy failed - API unhealthy"
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml logs api --tail 20
-              exit 1
-            fi
+            
+            # Bring up application services
+            docker compose --env-file .env.prod up -d api sidekiq voice-agent
+            sleep 20
+            
+            # Wait for API to be healthy (up to 60s)
+            for i in $(seq 1 12); do
+              if curl -sf http://localhost:3007/health > /dev/null 2>&1; then
+                echo "✅ Deploy successful - API healthy"
+                
+                # Now bring up frontend
+                docker compose --env-file .env.prod up -d frontend
+                exit 0
+              fi
+              echo "Waiting for API... ($i/12)"
+              sleep 5
+            done
+            
+            echo "❌ Deploy failed - API unhealthy after 60s"
+            docker compose --env-file .env.prod logs api --tail 30
+            exit 1

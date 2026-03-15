@@ -53,6 +53,16 @@ jobs:
       SECRET_KEY_BASE: ci-test-secret-key-base
       JWT_SECRET_KEY: ci-test-jwt-secret
       BUNDLE_WITHOUT: development
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ci-test-primary-key-that-is-at-least-12-bytes
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ci-test-deterministic-key-at-least-12-bytes
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ci-test-key-derivation-salt-at-least-12
+      STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      TWILIO_ACCOUNT_SID: AC_ci_placeholder
+      TWILIO_AUTH_TOKEN: ci_placeholder_token
+      TWILIO_PHONE_NUMBER: "+10000000000"
+      DOMAIN: localhost
 
     steps:
       - uses: actions/checkout@v4
