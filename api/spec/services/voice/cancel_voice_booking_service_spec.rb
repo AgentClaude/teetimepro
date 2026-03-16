@@ -174,7 +174,11 @@ RSpec.describe Voice::CancelVoiceBookingService, type: :service do
     context 'when database error occurs' do
       it 'handles transaction rollback gracefully' do
         allow_any_instance_of(Booking).to receive(:save).and_return(false)
-        allow_any_instance_of(Booking).to receive(:errors).and_return(double(full_messages: ["Database error"]))
+        
+        error_mock = double("errors")
+        allow(error_mock).to receive(:full_messages).and_return(["Database error"])
+        allow(error_mock).to receive(:clear)
+        allow_any_instance_of(Booking).to receive(:errors).and_return(error_mock)
         
         result = described_class.call(valid_params)
         

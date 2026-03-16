@@ -5,13 +5,22 @@ RSpec.describe GenerateDailyTeeSheetJob do
   let(:course) { create(:course, organization: organization) }
 
   describe "#perform" do
+    before do
+      # Clean up any existing courses/tee sheets from other tests
+      Course.destroy_all
+      TeeSheet.destroy_all
+    end
+
     it "generates tee sheets for the next 7 days" do
+      course # ensure course is created
+
       expect {
         described_class.new.perform
       }.to change(TeeSheet, :count).by(7)
     end
 
     it "generates tee sheets for multiple courses" do
+      course # ensure first course is created
       course_2 = create(:course, organization: organization)
 
       expect {
@@ -29,6 +38,7 @@ RSpec.describe GenerateDailyTeeSheetJob do
     end
 
     it "is idempotent when run multiple times" do
+      course # ensure course is created
       described_class.new.perform
 
       expect {
