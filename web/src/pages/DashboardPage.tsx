@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { Card } from '../components/ui/Card';
-import { GET_DASHBOARD_STATS, GET_COURSES } from '../graphql/queries';
-import { formatCents, formatTime, formatShortDate } from '../lib/utils';
+import { GET_DASHBOARD_STATS, GET_COURSES, GET_UTILIZATION_HEAT_MAP } from '../graphql/queries';
+import { formatCents, formatTime } from '../lib/utils';
+import { RevenueChart } from '../components/dashboard/RevenueChart';
+import { UtilizationHeatMap } from '../components/dashboard/UtilizationHeatMap';
+import type { UtilizationHeatMap as UtilizationHeatMapType } from '../types';
 import {
   CalendarDaysIcon,
   CurrencyDollarIcon,
@@ -36,11 +40,31 @@ interface Course {
 }
 
 export function DashboardPage() {
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+
+  // Get date range for utilization heatmap (last 7 days)
+  const endDate = new Date().toISOString().split('T')[0];
+  const startDate = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
   const { data: statsData, loading: statsLoading, error: statsError } = useQuery<{
     dashboardStats: DashboardStats;
-  }>(GET_DASHBOARD_STATS);
+  }>(GET_DASHBOARD_STATS, {
+    variables: {
+      courseId: selectedCourseId || undefined,
+    },
+  });
 
   const { data: coursesData } = useQuery<{ courses: Course[] }>(GET_COURSES);
+
+  const { data: utilizationData, loading: utilizationLoading } = useQuery<{
+    utilizationHeatMap: UtilizationHeatMapType;
+  }>(GET_UTILIZATION_HEAT_MAP, {
+    variables: {
+      courseId: selectedCourseId || undefined,
+      startDate,
+      endDate,
+    },
+  });
 
   const stats = statsData?.dashboardStats;
   const courses = coursesData?.courses || [];
@@ -72,14 +96,12 @@ export function DashboardPage() {
     },
   ];
 
-  const maxRevenue = Math.max(...(stats?.weeklyRevenue?.map(d => d.revenueCents) || [0]));
-
   if (statsError) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
         <Card className="p-6">
-          <p className="text-red-600">Error loading dashboard data: {statsError.message}</p>
+          <p className="text-red-600 dark:text-red-400">Error loading dashboard data: {statsError.message}</p>
         </Card>
       </div>
     );
@@ -88,9 +110,13 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
         {courses.length > 1 && (
-          <select className="rounded-md border-gray-300 text-sm">
+          <select 
+            className="rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+          >
             <option value="">All Courses</option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
@@ -106,12 +132,12 @@ export function DashboardPage() {
         {statsCards.map((stat) => (
           <Card key={stat.name} className="p-6">
             <div className="flex items-center gap-4">
-              <div className={`rounded-lg bg-gray-50 p-3 ${stat.color}`}>
+              <div className={`rounded-lg bg-gray-50 dark:bg-gray-800 p-3 ${stat.color}`}>
                 <stat.icon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">{stat.name}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.name}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</p>
               </div>
             </div>
           </Card>
@@ -121,29 +147,29 @@ export function DashboardPage() {
       {/* Upcoming Bookings & Weekly Revenue */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Upcoming Bookings</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Upcoming Bookings</h2>
           {statsLoading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
           ) : !stats?.upcomingBookings?.length ? (
-            <p className="text-sm text-gray-500">No upcoming bookings found.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming bookings found.</p>
           ) : (
             <div className="space-y-3">
               {stats.upcomingBookings.map((booking) => (
-                <div key={booking.id} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-b-0">
+                <div key={booking.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 last:border-b-0">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-blue-50 p-2">
-                      <ClockIcon className="h-4 w-4 text-blue-600" />
+                    <div className="rounded-lg bg-blue-50 dark:bg-blue-900/40 p-2">
+                      <ClockIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {booking.confirmationCode} - {booking.userName}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {formatTime(booking.teeTime)} • {booking.courseName} • {booking.playersCount} players
                       </p>
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {formatCents(booking.totalCents)}
                   </div>
                 </div>
@@ -153,36 +179,30 @@ export function DashboardPage() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Revenue This Week</h2>
-          {statsLoading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
-          ) : !stats?.weeklyRevenue?.length ? (
-            <p className="text-sm text-gray-500">No revenue data available.</p>
-          ) : (
-            <div className="space-y-2">
-              {stats.weeklyRevenue.map((day, _index) => (
-                <div key={day.date} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">
-                    {formatShortDate(day.date)}
-                  </span>
-                  <div className="flex items-center gap-2 flex-1 mx-4">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: maxRevenue > 0 ? `${(day.revenueCents / maxRevenue) * 100}%` : '0%'
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900 min-w-[4rem] text-right">
-                    {formatCents(day.revenueCents)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue This Week</h2>
+          <RevenueChart 
+            data={stats?.weeklyRevenue || []}
+            loading={statsLoading}
+          />
         </Card>
+      </div>
+
+      {/* Utilization Heat Map */}
+      <div>
+        <UtilizationHeatMap
+          cells={utilizationData?.utilizationHeatMap.cells || []}
+          summary={utilizationData?.utilizationHeatMap.summary || {
+            overallUtilization: 0,
+            totalBookedPlayers: 0,
+            totalCapacity: 0,
+            peakHour: null,
+            peakHourUtilization: 0,
+            peakDayOfWeek: null,
+            peakDayUtilization: 0,
+            dateRangeDays: 7,
+          }}
+          loading={utilizationLoading}
+        />
       </div>
     </div>
   );
