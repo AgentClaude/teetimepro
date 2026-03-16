@@ -7,8 +7,10 @@ module Accounting
     validates :oauth_params, presence: true
 
     def call
-      validate_oauth_params!
       return validation_failure(self) unless valid?
+      
+      validate_oauth_params!
+      return validation_failure(self) unless errors.empty?
 
       begin
         exchange_oauth_code_for_tokens!

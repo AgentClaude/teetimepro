@@ -40,9 +40,14 @@ class Course < ApplicationRecord
   end
 
   def twilight_time?(time)
-    return false unless respond_to?(:twilight_start_time) && twilight_start_time.present?
+    # Default twilight start time to 3 PM if not set
+    start_time = if respond_to?(:twilight_start_time) && twilight_start_time.present?
+      twilight_start_time
+    else
+      Time.zone.parse("15:00")
+    end
 
-    time >= twilight_start_time
+    time.hour * 60 + time.min >= start_time.hour * 60 + start_time.min
   end
 
   private
