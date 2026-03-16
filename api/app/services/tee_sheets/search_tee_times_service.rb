@@ -198,8 +198,15 @@ class TeeSheets::SearchTeeTimesService < ApplicationService
     organization.try(:timezone) || "UTC"
   end
 
-  # Filter out tee times that have already passed (only applies to today/past dates)
+  # Filter out tee times that have already passed (only applies to today's date)
   def exclude_past_tee_times(query)
-    query.where("tee_times.starts_at > ?", Time.current)
+    # Only filter out past times if we're searching for today specifically
+    # For past or future dates, we want to show all tee times for that date
+    reference_date = resolve_reference_date
+    if reference_date == Date.current
+      query.where("tee_times.starts_at > ?", Time.current)
+    else
+      query
+    end
   end
 end
