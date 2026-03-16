@@ -173,8 +173,30 @@ RSpec.describe Voice::CancelVoiceBookingService, type: :service do
 
     context 'when database error occurs' do
       it 'handles transaction rollback gracefully' do
-        allow_any_instance_of(Booking).to receive(:save).and_return(false)
-        allow_any_instance_of(Booking).to receive(:errors).and_return(double(full_messages: ["Database error"]))
+        # First create the booking normally to ensure it exists
+        booking = pending_booking
+        
+        # Now mock the save method to fail only for updates (not creation)
+        allow(booking).to receive(:save).and_return(false)
+        
+        # Create a proper errors mock that includes all necessary methods
+        errors_mock = double("ActiveModel::Errors")
+        allow(errors_mock).to receive(:full_messages).and_return(["Database error"])
+        allow(errors_mock).to receive(:clear)
+        allow(errors_mock).to receive(:uniq!)
+        allow(errors_mock).to receive(:empty?).and_return(false)
+        allow(errors_mock).to receive(:any?).and_return(true)
+        allow(errors_mock).to receive(:count).and_return(1)
+        allow(errors_mock).to receive(:size).and_return(1)
+        allow(errors_mock).to receive(:length).and_return(1)
+        
+        allow(booking).to receive(:errors).and_return(errors_mock)
+        
+        # Mock the complex query chain used by find_and_validate_booking
+        booking_relation_mock = double("ActiveRecord::Relation")
+        allow(Booking).to receive(:joins).and_return(booking_relation_mock)
+        allow(booking_relation_mock).to receive(:where).and_return(booking_relation_mock)
+        allow(booking_relation_mock).to receive(:first).and_return(booking)
         
         result = described_class.call(valid_params)
         
