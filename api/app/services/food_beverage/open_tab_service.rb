@@ -21,6 +21,8 @@ module FoodBeverage
 
         success(tab: tab)
       end
+    rescue AuthorizationError
+      raise
     rescue ActiveRecord::RecordInvalid => e
       failure([e.message])
     rescue StandardError => e

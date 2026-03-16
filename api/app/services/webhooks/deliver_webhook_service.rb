@@ -65,22 +65,18 @@ module Webhooks
         # Schedule retry with exponential backoff
         delay = webhook_event.next_retry_delay
         WebhookDeliveryJob.set(wait: delay.seconds).perform_later(webhook_event.id)
-        
+
         failure(
           ["Delivery failed, retry scheduled"],
-          webhook_event: webhook_event,
-          response_code: response_code,
-          retry_in: delay
+          { webhook_event: webhook_event, response_code: response_code, retry_in: delay }
         )
       else
         # No more retries, mark as failed
         webhook_event.mark_failed!(response_code, response_body)
-        
+
         failure(
           ["Delivery failed after maximum attempts"],
-          webhook_event: webhook_event,
-          response_code: response_code,
-          max_attempts_reached: true
+          { webhook_event: webhook_event, response_code: response_code, max_attempts_reached: true }
         )
       end
     end

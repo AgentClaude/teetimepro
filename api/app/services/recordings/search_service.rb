@@ -53,11 +53,13 @@ module Recordings
 
     def apply_date_range_filter!
       if filters[:date_from].present?
-        @query_scope = @query_scope.where('created_at >= ?', filters[:date_from])
+        from_time = filters[:date_from].respond_to?(:beginning_of_day) ? filters[:date_from].beginning_of_day : filters[:date_from]
+        @query_scope = @query_scope.where('created_at >= ?', from_time)
       end
-      
+
       if filters[:date_to].present?
-        @query_scope = @query_scope.where('created_at <= ?', filters[:date_to])
+        to_time = filters[:date_to].respond_to?(:end_of_day) ? filters[:date_to].end_of_day : filters[:date_to]
+        @query_scope = @query_scope.where('created_at <= ?', to_time)
       end
     end
 

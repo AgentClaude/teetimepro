@@ -73,13 +73,13 @@ RSpec.describe TournamentResult, type: :model do
 
     describe '.podium' do
       it 'returns top 3 positions' do
-        expect(TournamentResult.podium).to contain_exactly(first_place, second_place, third_place)
+        expect(TournamentResult.for_tournament(tournament).podium).to contain_exactly(first_place, second_place, third_place)
       end
     end
 
     describe '.by_position' do
       it 'orders results by position, then by score' do
-        expect(TournamentResult.by_position).to eq([first_place, second_place, third_place, other_tournament_result])
+        expect(TournamentResult.for_tournament(tournament).by_position).to eq([first_place, second_place, third_place])
       end
     end
 

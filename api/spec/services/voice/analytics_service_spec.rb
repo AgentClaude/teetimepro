@@ -116,7 +116,7 @@ RSpec.describe Voice::AnalyticsService, type: :service do
     end
 
     context 'with missing required parameters' do
-      let(:service) { described_class.new(organization: organization) }
+      let(:service) { described_class.new(organization: organization, start_date: nil, end_date: nil) }
 
       it 'returns validation failure' do
         result = service.call

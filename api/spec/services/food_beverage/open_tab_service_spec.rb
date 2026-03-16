@@ -166,7 +166,7 @@ RSpec.describe FoodBeverage::OpenTabService do
         )
 
         expect(result).to be_failure
-        expect(result.errors.first).to include('Record invalid')
+        expect(result.errors.first).to include('Validation failed')
       end
     end
   end

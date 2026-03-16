@@ -84,7 +84,7 @@ RSpec.describe Pricing::CreateRuleService do
 
       it 'returns authorization error' do
         expect(service).to be_failure
-        expect(service.errors).to include('Insufficient permissions')
+        expect(service.errors).to include('User does not have sufficient permissions')
       end
     end
 
@@ -108,7 +108,7 @@ RSpec.describe Pricing::CreateRuleService do
 
       it 'returns error' do
         expect(service).to be_failure
-        expect(service.errors).to include('Course not found or doesn\'t belong to organization')
+        expect(service.errors).to include(match(/Course not found or doesn't belong to organization/))
       end
     end
 

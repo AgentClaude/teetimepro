@@ -35,7 +35,7 @@ module Api
               message: 'Recording stored successfully'
             }
           else
-            Rails.logger.error "Failed to store recording: #{result.error_messages}"
+            Rails.logger.error "Failed to store recording: #{result.errors.join(', ')}"
             render json: { 
               status: 'error',
               errors: result.errors 

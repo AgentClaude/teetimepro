@@ -56,7 +56,7 @@ RSpec.describe Webhooks::DispatchEventService, type: :service do
 
         webhook_event = result.webhook_events.first
         expect(webhook_event.event_type).to eq("booking.created")
-        expect(webhook_event.payload).to eq(event_payload)
+        expect(webhook_event.payload).to eq(event_payload.deep_stringify_keys)
         expect(webhook_event.status).to eq("pending")
         expect(webhook_event.attempts).to eq(0)
       end
@@ -199,7 +199,7 @@ RSpec.describe Webhooks::DispatchEventService, type: :service do
 
         expect(result).to be_success
         webhook_event = result.webhook_events.first
-        expect(webhook_event.payload).to eq(large_payload)
+        expect(webhook_event.payload).to eq(large_payload.deep_stringify_keys)
       end
 
       it "processes multiple endpoints efficiently" do

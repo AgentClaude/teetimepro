@@ -71,10 +71,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
     )
 
     if result.success?
-      render_service_success(
-        OpenStruct.new(data: booking_data(result.booking)),
-        status: :created
-      )
+      render json: booking_data(result.booking), status: :created
     else
       render_service_error(result)
     end
@@ -89,9 +86,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
     )
 
     if result.success?
-      render_service_success(
-        OpenStruct.new(data: booking_data(result.booking))
-      )
+      render json: booking_data(result.booking)
     else
       render_service_error(result)
     end

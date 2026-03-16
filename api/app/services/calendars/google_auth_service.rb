@@ -6,8 +6,6 @@ module Calendars
 
     validates :user, :authorization_code, presence: true
 
-    GOOGLE_CLIENT_ID = Rails.application.credentials.google&.client_id
-    GOOGLE_CLIENT_SECRET = Rails.application.credentials.google&.client_secret
     REDIRECT_URI = "https://app.teetimespro.com/auth/google/callback"
     SCOPE = ["https://www.googleapis.com/auth/calendar"]
 
@@ -52,17 +50,25 @@ module Calendars
 
     private
 
+    def google_client_id
+      Rails.application.credentials.google&.client_id
+    end
+
+    def google_client_secret
+      Rails.application.credentials.google&.client_secret
+    end
+
     def credentials_present?
-      GOOGLE_CLIENT_ID.present? && GOOGLE_CLIENT_SECRET.present?
+      google_client_id.present? && google_client_secret.present?
     end
 
     def exchange_code_for_tokens
       uri = URI('https://oauth2.googleapis.com/token')
-      
+
       params = {
         code: authorization_code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
+        client_id: google_client_id,
+        client_secret: google_client_secret,
         redirect_uri: REDIRECT_URI,
         grant_type: 'authorization_code'
       }
@@ -104,7 +110,7 @@ module Calendars
 
     def self.authorization_url(state = nil)
       params = {
-        client_id: GOOGLE_CLIENT_ID,
+        client_id: Rails.application.credentials.google&.client_id,
         redirect_uri: REDIRECT_URI,
         scope: SCOPE.join(' '),
         response_type: 'code',

@@ -87,8 +87,8 @@ RSpec.describe Payments::CreatePaymentIntentService do
 
       context "with connected Stripe account" do
         before do
+          allow(organization).to receive(:respond_to?).and_call_original
           allow(organization).to receive(:stripe_account_id).and_return("acct_test_123")
-          allow(organization).to receive(:respond_to?).with(:stripe_account_id).and_return(true)
         end
 
         it "includes transfer_data for connected account" do
@@ -109,8 +109,8 @@ RSpec.describe Payments::CreatePaymentIntentService do
 
       context "without connected Stripe account" do
         before do
+          allow(organization).to receive(:respond_to?).and_call_original
           allow(organization).to receive(:stripe_account_id).and_return(nil)
-          allow(organization).to receive(:respond_to?).with(:stripe_account_id).and_return(true)
         end
 
         it "does not include transfer_data" do
@@ -138,7 +138,7 @@ RSpec.describe Payments::CreatePaymentIntentService do
         )
 
         expect(result).to be_failure
-        expect(result.errors).to include(match(/tee_time/i))
+        expect(result.errors).to include(match(/tee.time/i))
       end
 
       it "fails when players_count is missing" do
@@ -150,7 +150,7 @@ RSpec.describe Payments::CreatePaymentIntentService do
         )
 
         expect(result).to be_failure
-        expect(result.errors).to include(match(/players_count/i))
+        expect(result.errors).to include(match(/players.count/i))
       end
 
       it "fails when user is missing" do

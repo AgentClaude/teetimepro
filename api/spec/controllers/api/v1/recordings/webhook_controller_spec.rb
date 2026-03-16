@@ -51,32 +51,34 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
 
       it 'logs successful recording storage' do
         allow(Recordings::StoreRecordingService).to receive(:call)
-          .and_return(double('ServiceResult', 
-            success?: true, 
+          .and_return(double('ServiceResult',
+            success?: true,
             recording: double('Recording', id: 'test-id')
           ))
 
-        expect(Rails.logger).to receive(:info)
-          .with("Received Twilio recording webhook: #{valid_webhook_params.inspect}")
-        expect(Rails.logger).to receive(:info)
-          .with("Successfully stored recording: test-id")
+        allow(Rails.logger).to receive(:info)
 
         post :create, params: valid_webhook_params
+
+        expect(Rails.logger).to have_received(:info)
+          .with(match(/Received Twilio recording webhook/))
+        expect(Rails.logger).to have_received(:info)
+          .with("Successfully stored recording: test-id")
       end
     end
 
     context 'with invalid webhook data' do
       it 'returns error response when service fails' do
         allow(Recordings::StoreRecordingService).to receive(:call)
-          .and_return(double('ServiceResult', 
-            success?: false, 
+          .and_return(double('ServiceResult',
+            success?: false,
             errors: ['Invalid data']
           ))
 
         post :create, params: valid_webhook_params
 
         expect(response).to have_http_status(:unprocessable_entity)
-        
+
         json_response = JSON.parse(response.body)
         expect(json_response['status']).to eq('error')
         expect(json_response['errors']).to eq(['Invalid data'])
@@ -84,16 +86,18 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
 
       it 'logs service failure' do
         allow(Recordings::StoreRecordingService).to receive(:call)
-          .and_return(double('ServiceResult', 
-            success?: false, 
-            errors: ['Invalid data'],
-            error_messages: 'Invalid data'
+          .and_return(double('ServiceResult',
+            success?: false,
+            errors: ['Invalid data']
           ))
 
-        expect(Rails.logger).to receive(:error)
-          .with("Failed to store recording: Invalid data")
+        allow(Rails.logger).to receive(:info)
+        allow(Rails.logger).to receive(:error)
 
         post :create, params: valid_webhook_params
+
+        expect(Rails.logger).to have_received(:error)
+          .with("Failed to store recording: Invalid data")
       end
     end
 

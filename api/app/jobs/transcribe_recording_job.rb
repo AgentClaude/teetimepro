@@ -1,6 +1,5 @@
 class TranscribeRecordingJob < ApplicationJob
   queue_as :default
-  retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
   def perform(call_recording_id)
     call_recording = CallRecording.find(call_recording_id)

@@ -32,14 +32,13 @@ RSpec.describe Notifications::SendBookingEmailService do
       it "fails validation" do
         result = described_class.call(booking: booking, email_type: "invalid")
         expect(result).not_to be_success
-        expect(result.errors).to include(match(/email_type/i))
+        expect(result.errors).to include(match(/email.type/i))
       end
     end
 
     context "when user has no email" do
-      let(:user) { create(:user, organization: organization, email: nil) }
-
       it "returns failure" do
+        booking.user.update_column(:email, nil)
         result = described_class.call(booking: booking, email_type: "confirmation")
         expect(result).not_to be_success
         expect(result.errors).to include("User has no email address")
