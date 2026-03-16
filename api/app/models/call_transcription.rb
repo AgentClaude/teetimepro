@@ -3,7 +3,7 @@ class CallTranscription < ApplicationRecord
   belongs_to :call_recording
   belongs_to :voice_call_log, optional: true
 
-  validates :transcription_text, presence: true
+  validates :transcription_text, presence: true, unless: :processing?
   validates :confidence_score, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
   validates :language, presence: true
   validates :provider, presence: true, inclusion: { in: %w[deepgram whisper] }
@@ -33,6 +33,10 @@ class CallTranscription < ApplicationRecord
 
   def low_confidence?
     confidence_score < 0.6
+  end
+
+  def processing?
+    status == 'processing'
   end
 
   def mark_completed!
