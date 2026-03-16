@@ -1323,3 +1323,28 @@ export const GET_COURSE_HOLES = gql`
     }
   }
 `;
+
+// Notification preferences
+export const GET_NOTIFICATION_PREFERENCES = gql`
+  query GetNotificationPreferences {
+    notificationPreferences {
+      id
+      userId
+      emailBookingConfirmation
+      emailBookingCancellation
+      emailBookingReminder
+      emailMarketing
+      smsBookingConfirmation
+      smsBookingCancellation
+      smsBookingReminder
+      smsMarketing
+      pushBookingConfirmation
+      pushBookingCancellation
+      pushBookingReminder
+      pushMarketing
+      reminderHoursBefore
+      createdAt
+      updatedAt
+    }
+  }
+`;

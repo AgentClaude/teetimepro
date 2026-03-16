@@ -466,3 +466,23 @@ export interface WaitlistEntry {
     };
   };
 }
+
+export interface NotificationPreference {
+  id: string;
+  userId: string;
+  emailBookingConfirmation: boolean;
+  emailBookingCancellation: boolean;
+  emailBookingReminder: boolean;
+  emailMarketing: boolean;
+  smsBookingConfirmation: boolean;
+  smsBookingCancellation: boolean;
+  smsBookingReminder: boolean;
+  smsMarketing: boolean;
+  pushBookingConfirmation: boolean;
+  pushBookingCancellation: boolean;
+  pushBookingReminder: boolean;
+  pushMarketing: boolean;
+  reminderHoursBefore: number;
+  createdAt: string;
+  updatedAt: string;
+}

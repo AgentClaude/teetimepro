@@ -1183,3 +1183,59 @@ export const ABANDON_SCORECARD = gql`
     }
   }
 `;
+
+// Notification preferences
+export const UPDATE_NOTIFICATION_PREFERENCES = gql`
+  mutation UpdateNotificationPreferences(
+    $emailBookingConfirmation: Boolean
+    $emailBookingCancellation: Boolean
+    $emailBookingReminder: Boolean
+    $emailMarketing: Boolean
+    $smsBookingConfirmation: Boolean
+    $smsBookingCancellation: Boolean
+    $smsBookingReminder: Boolean
+    $smsMarketing: Boolean
+    $pushBookingConfirmation: Boolean
+    $pushBookingCancellation: Boolean
+    $pushBookingReminder: Boolean
+    $pushMarketing: Boolean
+    $reminderHoursBefore: Int
+  ) {
+    updateNotificationPreferences(
+      emailBookingConfirmation: $emailBookingConfirmation
+      emailBookingCancellation: $emailBookingCancellation
+      emailBookingReminder: $emailBookingReminder
+      emailMarketing: $emailMarketing
+      smsBookingConfirmation: $smsBookingConfirmation
+      smsBookingCancellation: $smsBookingCancellation
+      smsBookingReminder: $smsBookingReminder
+      smsMarketing: $smsMarketing
+      pushBookingConfirmation: $pushBookingConfirmation
+      pushBookingCancellation: $pushBookingCancellation
+      pushBookingReminder: $pushBookingReminder
+      pushMarketing: $pushMarketing
+      reminderHoursBefore: $reminderHoursBefore
+    ) {
+      notificationPreference {
+        id
+        userId
+        emailBookingConfirmation
+        emailBookingCancellation
+        emailBookingReminder
+        emailMarketing
+        smsBookingConfirmation
+        smsBookingCancellation
+        smsBookingReminder
+        smsMarketing
+        pushBookingConfirmation
+        pushBookingCancellation
+        pushBookingReminder
+        pushMarketing
+        reminderHoursBefore
+        createdAt
+        updatedAt
+      }
+      errors
+    }
+  }
+`;
