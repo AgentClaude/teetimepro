@@ -2,8 +2,15 @@ require 'rails_helper'
 
 RSpec.describe Recordings::SearchService, type: :service do
   let(:organization) { create(:organization) }
-  let!(:recording1) { create(:call_recording, organization: organization, created_at: 2.days.ago) }
-  let!(:recording2) { create(:call_recording, organization: organization, created_at: 1.day.ago) }
+  
+  around do |example|
+    travel_to(Date.current.noon) do
+      example.run
+    end
+  end
+  
+  let!(:recording1) { create(:call_recording, organization: organization, created_at: 2.days.ago.noon) }
+  let!(:recording2) { create(:call_recording, organization: organization, created_at: 1.day.ago.noon) }
   let!(:recording3) { create(:call_recording, organization: organization, status: 'failed', created_at: Time.current) }
 
   describe '.call' do

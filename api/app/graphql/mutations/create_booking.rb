@@ -16,9 +16,14 @@ module Mutations
     def resolve(tee_time_id:, players_count:, payment_method_id: nil,
                 player_names: nil, player_details: nil, loyalty_redemption_code: nil)
       org = require_auth!
-      tee_time = TeeTime.joins(tee_sheet: :course)
-                        .where(courses: { organization_id: org.id })
-                        .find(tee_time_id)
+      
+      begin
+        tee_time = TeeTime.joins(tee_sheet: :course)
+                          .where(courses: { organization_id: org.id })
+                          .find(tee_time_id)
+      rescue ActiveRecord::RecordNotFound
+        raise GraphQL::ExecutionError, "Couldn't find TeeTime with id #{tee_time_id}"
+      end
 
       # Convert player_details to the format the service expects
       resolved_player_details = nil

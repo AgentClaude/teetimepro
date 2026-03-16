@@ -83,9 +83,9 @@ RSpec.describe "API Integration", type: :request do
 
       post "/api/v1/bookings", headers: headers, params: booking_payload.to_json
       expect(response).to have_http_status(:created)
-      expect(json_response["confirmation_code"]).to eq("ABC123XYZ")
+      expect(json_response["data"]["booking"]["confirmation_code"]).to eq("ABC123XYZ")
       
-      booking_id = json_response["id"]
+      booking_id = json_response["data"]["booking"]["id"]
 
       # 6. Get booking details
       get "/api/v1/bookings/#{booking_id}", headers: headers

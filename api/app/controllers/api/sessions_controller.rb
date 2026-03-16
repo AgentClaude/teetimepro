@@ -1,6 +1,7 @@
 module Api
   class SessionsController < ApplicationController
-    skip_before_action :set_current_organization, only: [:create, :refresh]
+    skip_before_action :set_current_organization, only: [:create, :refresh, :destroy]
+    skip_before_action :verify_organization_membership, only: [:create, :refresh, :destroy]
 
     ACCESS_TOKEN_EXPIRY = 1.hour
     REFRESH_TOKEN_EXPIRY = 7.days
