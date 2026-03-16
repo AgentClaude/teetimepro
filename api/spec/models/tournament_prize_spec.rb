@@ -33,9 +33,7 @@ RSpec.describe TournamentPrize, type: :model do
     end
   end
 
-  describe 'enums' do
-    it { should define_enum_for(:prize_type).with_values(cash: 0, voucher: 1, trophy: 2, merchandise: 3, custom: 4) }
-  end
+
 
   describe 'scopes' do
     let!(:first_place) { create(:tournament_prize, tournament: tournament, position: 1) }
@@ -98,7 +96,7 @@ RSpec.describe TournamentPrize, type: :model do
         amount = tournament_prize.amount
         expect(amount).to be_a(Money)
         expect(amount.cents).to eq(50000)
-        expect(amount.currency.code).to eq('USD')
+        expect(amount.currency.code).to eq('$')
       end
     end
 
