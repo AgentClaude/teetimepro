@@ -51,7 +51,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
     user_attrs = bp[:user] || {}
 
     tee_time_id = bp[:tee_time_id] || params[:tee_time_id]
-    players_count = bp[:players_count] || params[:players_count]
+    players_count = (bp[:players_count] || params[:players_count]).to_i
     phone = user_attrs[:phone] || params[:phone]
     first_name = user_attrs[:first_name] || params[:first_name]
     last_name = user_attrs[:last_name] || params[:last_name]
@@ -71,10 +71,8 @@ class Api::V1::BookingsController < Api::V1::BaseController
     )
 
     if result.success?
-      render_service_success(
-        OpenStruct.new(data: booking_data(result.data[:booking])),
-        status: :created
-      )
+      booking_hash = booking_data(result.data.booking)
+      render json: booking_hash, status: :created
     else
       render_service_error(result)
     end
