@@ -27,7 +27,7 @@ jobs:
             git reset --hard origin/main
             
             # Build with env file for variable interpolation
-            docker compose --env-file .env.prod build api sidekiq
+            docker compose --env-file .env.prod build api sidekiq web
             
             # Remove orphaned containers and bring up infrastructure first
             docker compose --env-file .env.prod up -d --remove-orphans db redis
