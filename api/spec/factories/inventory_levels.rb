@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :inventory_level do
     association :organization
-    association :pos_product
-    association :course
+    course { association :course, organization: organization }
+    pos_product { association :pos_product, organization: organization, course: course }
     
     current_stock { 10 }
     reserved_stock { 0 }

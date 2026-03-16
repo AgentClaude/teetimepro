@@ -50,6 +50,11 @@ class Booking < ApplicationRecord
     course.organization
   end
 
+  # Convenience: returns the primary (most recent) payment
+  def payment
+    payments.order(created_at: :desc).first
+  end
+
   def cancellable?
     confirmed? && starts_at > 24.hours.from_now
   end

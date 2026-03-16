@@ -5,7 +5,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
     paginated_bookings = paginate(bookings)
 
     render json: {
-      data: bookings_data(paginated_bookings.includes(:tee_time, :user, :course)),
+      data: bookings_data(paginated_bookings.includes(:user, tee_time: { tee_sheet: :course })),
       meta: pagination_meta(paginated_bookings)
     }
   end

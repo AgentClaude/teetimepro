@@ -109,17 +109,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.datetime "updated_at", null: false
     t.datetime "reminder_sent_at", precision: nil
     t.datetime "morning_reminder_sent_at", precision: nil
+    t.integer "deposit_cents"
+    t.string "deposit_currency", default: "USD"
+    t.datetime "deposit_paid_at"
+    t.boolean "deposit_required", default: false, null: false
     t.integer "booking_type", default: 0, null: false
     t.string "guest_name"
     t.string "guest_email"
     t.string "guest_phone"
     t.bigint "created_by_id"
     t.text "walk_on_notes"
+    t.string "calendar_event_id"
     t.index ["booking_type"], name: "index_bookings_on_booking_type"
+    t.index ["calendar_event_id"], name: "index_bookings_on_calendar_event_id"
     t.index ["confirmation_code"], name: "index_bookings_on_confirmation_code", unique: true
     t.index ["created_by_id"], name: "index_bookings_on_created_by_id"
-    t.index ["morning_reminder_sent_at"], name: "index_bookings_on_morning_reminder_sent_at"
-    t.index ["reminder_sent_at"], name: "index_bookings_on_reminder_sent_at"
     t.index ["status"], name: "index_bookings_on_status"
     t.index ["tee_time_id"], name: "index_bookings_on_tee_time_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
@@ -742,6 +746,72 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.check_constraint "price_cents >= 0", name: "pos_products_price_non_negative"
   end
 
+  create_table "prepaid_packages", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "course_id"
+    t.string "name", null: false
+    t.text "description"
+    t.integer "package_type", default: 0, null: false
+    t.integer "rounds_included"
+    t.integer "price_cents", null: false
+    t.string "price_currency", default: "USD", null: false
+    t.integer "value_cents"
+    t.string "value_currency", default: "USD", null: false
+    t.integer "validity_days"
+    t.integer "max_players_per_round", default: 4
+    t.boolean "transferable", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.jsonb "restrictions", default: {}
+    t.datetime "available_from"
+    t.datetime "available_until"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_prepaid_packages_on_course_id"
+    t.index ["organization_id", "active"], name: "idx_prepaid_packages_org_active"
+    t.index ["organization_id"], name: "index_prepaid_packages_on_organization_id"
+  end
+
+  create_table "prepaid_purchases", force: :cascade do |t|
+    t.bigint "prepaid_package_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "payment_id"
+    t.string "code", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "rounds_remaining"
+    t.integer "balance_cents"
+    t.string "balance_currency", default: "USD", null: false
+    t.datetime "purchased_at", null: false
+    t.datetime "expires_at"
+    t.datetime "activated_at"
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_prepaid_purchases_on_code", unique: true
+    t.index ["expires_at"], name: "index_prepaid_purchases_on_expires_at"
+    t.index ["organization_id"], name: "index_prepaid_purchases_on_organization_id"
+    t.index ["payment_id"], name: "index_prepaid_purchases_on_payment_id"
+    t.index ["prepaid_package_id"], name: "index_prepaid_purchases_on_prepaid_package_id"
+    t.index ["user_id", "status"], name: "idx_prepaid_purchases_user_status"
+    t.index ["user_id"], name: "index_prepaid_purchases_on_user_id"
+  end
+
+  create_table "prepaid_redemptions", force: :cascade do |t|
+    t.bigint "prepaid_purchase_id", null: false
+    t.bigint "booking_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "redemption_type", default: 0, null: false
+    t.integer "rounds_used", default: 1
+    t.integer "value_cents"
+    t.string "value_currency", default: "USD", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_prepaid_redemptions_on_booking_id"
+    t.index ["prepaid_purchase_id", "booking_id"], name: "idx_prepaid_redemptions_purchase_booking", unique: true
+    t.index ["prepaid_purchase_id"], name: "index_prepaid_redemptions_on_prepaid_purchase_id"
+    t.index ["user_id"], name: "index_prepaid_redemptions_on_user_id"
+  end
+
   create_table "pricing_rules", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "course_id"
@@ -1247,6 +1317,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   add_foreign_key "payments", "users", on_delete: :nullify
   add_foreign_key "pos_products", "courses"
   add_foreign_key "pos_products", "organizations"
+  add_foreign_key "prepaid_packages", "courses", on_delete: :nullify
+  add_foreign_key "prepaid_packages", "organizations", on_delete: :cascade
+  add_foreign_key "prepaid_purchases", "organizations", on_delete: :cascade
+  add_foreign_key "prepaid_purchases", "payments", on_delete: :nullify
+  add_foreign_key "prepaid_purchases", "prepaid_packages", on_delete: :restrict
+  add_foreign_key "prepaid_purchases", "users", on_delete: :cascade
+  add_foreign_key "prepaid_redemptions", "bookings", on_delete: :cascade
+  add_foreign_key "prepaid_redemptions", "prepaid_purchases", on_delete: :cascade
+  add_foreign_key "prepaid_redemptions", "users", on_delete: :cascade
   add_foreign_key "pricing_rules", "courses"
   add_foreign_key "pricing_rules", "organizations"
   add_foreign_key "rounds", "courses", on_delete: :nullify

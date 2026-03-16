@@ -82,8 +82,7 @@ module Voice
           last_name: last_name,
           phone: normalized_phone,
           role: "golfer",
-          password: SecureRandom.urlsafe_base64(12), # Random password
-          confirmed_at: Time.current # Auto-confirm voice booking users
+          password: SecureRandom.urlsafe_base64(12) # Random password
         )
       end
 

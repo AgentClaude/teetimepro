@@ -48,8 +48,8 @@ RSpec.describe Voice::InitiateHandoffService, type: :service do
         expect(result.handoff.transfer_to).to eq('+15559876543')
       end
 
-      it 'uses organization voice_config handoff number if available' do
-        organization.update!(voice_config: { 'handoff_phone_number' => '+15554445555' })
+      it 'uses organization settings handoff number if available' do
+        organization.update!(settings: { 'handoff_phone_number' => '+15554445555' })
         
         result = described_class.call(valid_params)
         

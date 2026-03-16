@@ -1,6 +1,10 @@
 FactoryBot.define do
   factory :booking do
-    tee_time
+    transient do
+      organization { nil }
+    end
+
+    tee_time { association :tee_time, tee_sheet: association(:tee_sheet, course: association(:course, organization: organization || association(:organization))) }
     user
     players_count { 2 }
     total_cents { 15000 }

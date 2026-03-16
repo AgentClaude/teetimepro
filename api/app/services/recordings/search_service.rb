@@ -76,7 +76,7 @@ module Recordings
         # This would need to be adjusted based on how caller info is stored
         # For now, we'll search in the voice_call_log
         call_log_ids = organization.voice_call_logs
-                                  .where("caller_id ILIKE ? OR caller_name ILIKE ?", 
+                                  .where("caller_phone ILIKE ? OR caller_name ILIKE ?", 
                                         "%#{filters[:caller]}%", 
                                         "%#{filters[:caller]}%")
                                   .pluck(:id)

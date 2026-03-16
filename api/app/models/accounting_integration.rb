@@ -2,7 +2,7 @@ class AccountingIntegration < ApplicationRecord
   belongs_to :organization
   has_many :accounting_syncs, dependent: :destroy
 
-  enum :provider, { quickbooks: 0, xero: 1 }
+  enum :provider, { quickbooks: "quickbooks", xero: "xero" }
   enum :status, { disconnected: 0, connected: 1, error: 2 }
 
   # Encrypt sensitive OAuth data

@@ -5,9 +5,10 @@ module FoodBeverage
     validates :organization, :user, :tab_id, :name, presence: true
     validates :quantity, presence: true, numericality: { greater_than: 0 }
     validates :unit_price_cents, presence: true, numericality: { greater_than_or_equal_to: 0 }
-    validates :category, inclusion: { in: %w[food beverage other] }
+    validates :category, inclusion: { in: %w[food beverage other] }, allow_nil: true
 
     def call
+      self.category ||= 'food'
       return validation_failure(self) unless valid?
 
       tab = find_tab

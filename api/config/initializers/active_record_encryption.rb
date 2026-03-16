@@ -4,4 +4,9 @@ if ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"].present?
   Rails.application.config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
   Rails.application.config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
   Rails.application.config.active_record.encryption.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
+elsif Rails.env.test? || Rails.env.development?
+  # Provide default keys for test/development environments
+  Rails.application.config.active_record.encryption.primary_key = "test-primary-key-that-is-at-least-12-bytes"
+  Rails.application.config.active_record.encryption.deterministic_key = "test-deterministic-key-at-least-12-bytes"
+  Rails.application.config.active_record.encryption.key_derivation_salt = "test-key-derivation-salt-at-least-12-bytes"
 end

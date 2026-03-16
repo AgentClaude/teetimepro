@@ -36,7 +36,7 @@ RSpec.describe PosProduct, type: :model do
 
     it 'validates category inclusion' do
       expect(build(:pos_product, category: 'food')).to be_valid
-      expect(build(:pos_product, category: 'invalid')).not_to be_valid
+      expect { build(:pos_product, category: 'invalid') }.to raise_error(ArgumentError)
     end
 
     it 'validates organization consistency' do

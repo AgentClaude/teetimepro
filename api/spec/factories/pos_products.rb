@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :pos_product do
     organization
-    course
+    course { association :course, organization: organization }
     name { Faker::Commerce.product_name }
     sequence(:sku) { |n| "SKU-#{n.to_s.rjust(6, '0')}" }
     barcode { Faker::Barcode.ean(8) }

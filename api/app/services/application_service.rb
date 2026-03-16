@@ -34,8 +34,23 @@ class ApplicationService
   end
 
   # Helper for failed results
-  def failure(errors = {}, data = {})
-    ServiceResult.new(success: false, errors: errors, data: data)
+  # Supports both positional and keyword arguments:
+  #   failure(["error1", "error2"])
+  #   failure(errors: ["error1"], data: {})
+  def failure(errors_or_hash = nil, data = {}, errors: nil, **kwargs)
+    if errors_or_hash.is_a?(Hash) && errors_or_hash.key?(:errors)
+      # Called as failure(errors: [...]) — Ruby treats this as positional hash
+      actual_errors = errors_or_hash[:errors]
+      actual_data = errors_or_hash[:data] || data
+    elsif errors
+      # Called with explicit keyword: failure(errors: [...])
+      actual_errors = errors
+      actual_data = data
+    else
+      actual_errors = errors_or_hash || []
+      actual_data = data
+    end
+    ServiceResult.new(success: false, errors: actual_errors, data: actual_data)
   end
 
   # Helper for validation failures
