@@ -84,6 +84,26 @@ module Types
       end
     end
 
+    # Dashboard recent activity
+    field :recent_activity, [Types::RecentActivityType], null: false do
+      argument :course_id, ID, required: false
+      argument :limit, Integer, required: false, default_value: 20
+    end
+    def recent_activity(course_id: nil, limit: 20)
+      org = require_auth!
+      result = Dashboard::RecentActivityService.call(
+        organization: org,
+        course_id: course_id,
+        limit: limit
+      )
+      
+      if result.success?
+        result.activities
+      else
+        raise GraphQL::ExecutionError, result.errors.join(", ")
+      end
+    end
+
     # Single course
     field :course, Types::CourseType, null: true do
       argument :id, ID, required: true
