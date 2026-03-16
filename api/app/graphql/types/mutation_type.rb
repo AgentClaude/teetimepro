@@ -127,5 +127,10 @@ module Types
     field :update_hole_score, mutation: Mutations::UpdateHoleScore
     field :finalize_scorecard, mutation: Mutations::FinalizeScorecard
     field :abandon_scorecard, mutation: Mutations::AbandonScorecard
+
+    # GPS & Rangefinder
+    field :create_course_gps_feature, mutation: Mutations::CreateCourseGpsFeature
+    field :update_player_location, mutation: Mutations::UpdatePlayerLocation
+    field :register_rangefinder_device, mutation: Mutations::RegisterRangefinderDevice
   end
 end
