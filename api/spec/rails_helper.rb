@@ -41,7 +41,8 @@ RSpec.configure do |config|
   config.before(:suite) do
     DatabaseCleaner.allow_remote_database_url = true
     DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with(:truncation)
+    # Use deletion instead of truncation to avoid deadlocks with schema maintenance
+    DatabaseCleaner.clean_with(:deletion)
   end
 
   config.around(:each) do |example|

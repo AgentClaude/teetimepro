@@ -66,26 +66,20 @@ module Webhooks
         delay = webhook_event.next_retry_delay
         WebhookDeliveryJob.set(wait: delay.seconds).perform_later(webhook_event.id)
         
-        failure(
-          errors: ["Delivery failed, retry scheduled"],
-          data: {
-            webhook_event: webhook_event,
-            response_code: response_code,
-            retry_in: delay
-          }
-        )
+        result = failure(["Delivery failed, retry scheduled"])
+        result.data.webhook_event = webhook_event
+        result.data.response_code = response_code
+        result.data.retry_in = delay
+        result
       else
         # No more retries, mark as failed
         webhook_event.mark_failed!(response_code, response_body)
         
-        failure(
-          errors: ["Delivery failed after maximum attempts"],
-          data: {
-            webhook_event: webhook_event,
-            response_code: response_code,
-            max_attempts_reached: true
-          }
-        )
+        result = failure(["Delivery failed after maximum attempts"])
+        result.data.webhook_event = webhook_event
+        result.data.response_code = response_code
+        result.data.max_attempts_reached = true
+        result
       end
     end
   end
