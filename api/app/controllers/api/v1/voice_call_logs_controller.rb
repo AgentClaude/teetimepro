@@ -55,7 +55,12 @@ class Api::V1::VoiceCallLogsController < Api::V1::BaseController
     )
     # Permit transcript as raw JSON array — strong params can't handle
     # arbitrary nested structures in function_call results
-    permitted[:transcript] = params[:transcript].map(&:to_unsafe_h) if params[:transcript].present?
+    if params[:transcript].present?
+      # Handle case where transcript might be a JSON string or already parsed array
+      transcript = params[:transcript]
+      transcript = JSON.parse(transcript) if transcript.is_a?(String)
+      permitted[:transcript] = transcript.is_a?(Array) ? transcript.map(&:to_unsafe_h) : []
+    end
     permitted
   end
 
