@@ -27,7 +27,7 @@ RSpec.describe Tournaments::RegisterParticipantService do
     end
 
     it "rejects registration when tournament is full" do
-      tournament.update!(max_participants: 1)
+      tournament.update!(min_participants: 1, max_participants: 1)
       other_golfer = create(:user, organization: org, role: :golfer)
       described_class.call(tournament: tournament, user: other_golfer)
 

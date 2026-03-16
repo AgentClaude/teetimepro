@@ -199,7 +199,7 @@ RSpec.describe Webhooks::DispatchEventService, type: :service do
 
         expect(result).to be_success
         webhook_event = result.webhook_events.first
-        expect(webhook_event.payload).to eq(large_payload)
+        expect(webhook_event.payload).to eq(large_payload.deep_stringify_keys)
       end
 
       it "processes multiple endpoints efficiently" do
