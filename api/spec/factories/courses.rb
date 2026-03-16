@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :course do
     organization
-    name { "#{Faker::Address.community} Golf Course" }
+    sequence(:name) { |n| "#{Faker::Address.community} Golf Course #{n}" }
     holes { 18 }
     interval_minutes { 10 }
     max_players_per_slot { 4 }
