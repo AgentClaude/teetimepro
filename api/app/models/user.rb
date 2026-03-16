@@ -17,6 +17,7 @@ class User < ApplicationRecord
   has_many :prepaid_purchases, dependent: :destroy
   has_many :prepaid_redemptions, dependent: :destroy
   has_many :device_tokens, dependent: :destroy
+  has_one :notification_preference, dependent: :destroy
 
   enum :role, { golfer: 0, staff: 1, pro_shop: 2, manager: 3, admin: 4, owner: 5 }
 

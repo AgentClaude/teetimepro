@@ -54,6 +54,16 @@ module Types
       context[:current_user]
     end
 
+    # Current user's notification preferences
+    field :notification_preferences, Types::NotificationPreferenceType, null: true
+    def notification_preferences
+      user = context[:current_user]
+      return nil unless user
+
+      # Return existing preferences or defaults
+      user.notification_preference || NotificationPreference.new(NotificationPreference.default_preferences.merge(user: user))
+    end
+
     # Dashboard stats
     field :dashboard_stats, Types::DashboardStatsType, null: false do
       argument :course_id, ID, required: false

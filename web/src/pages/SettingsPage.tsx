@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { PricingRulesSection } from '../components/pricing/PricingRulesSection';
+import { NotificationPreferencesCard } from '../components/settings/NotificationPreferencesCard';
 import { useCourse } from '../contexts/CourseContext';
 import { GET_COURSE, GET_VOICE_CALL_LOGS } from '../graphql/queries';
 import { UPDATE_COURSE_VOICE_CONFIG } from '../graphql/mutations';
@@ -170,6 +171,9 @@ export function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      {/* Notification Preferences */}
+      <NotificationPreferencesCard />
 
       {/* Voice Bot Configuration */}
       <Card className="p-6">
