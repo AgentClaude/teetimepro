@@ -6,13 +6,9 @@ RSpec.describe Calendars::GoogleAuthService do
   let(:authorization_code) { "auth_code_123" }
 
   before do
-    # Mock credentials
-    allow(Rails.application.credentials).to receive(:google).and_return(
-      OpenStruct.new(
-        client_id: "mock_client_id",
-        client_secret: "mock_client_secret"
-      )
-    )
+    # Stub the constants since they're loaded at class definition time
+    stub_const("Calendars::GoogleAuthService::GOOGLE_CLIENT_ID", "mock_client_id")
+    stub_const("Calendars::GoogleAuthService::GOOGLE_CLIENT_SECRET", "mock_client_secret")
   end
 
   describe ".call" do
@@ -42,19 +38,19 @@ RSpec.describe Calendars::GoogleAuthService do
           )
 
         # Mock the Google Calendar API call
-        calendar_list_response = {
-          items: [
-            {
-              id: "primary",
-              summary: "Personal Calendar",
-              primary: true
-            }
-          ]
-        }
+        calendar_item = OpenStruct.new(
+          id: "primary",
+          summary: "Personal Calendar",
+          primary: true
+        )
+
+        calendar_list_response = OpenStruct.new(
+          items: [calendar_item]
+        )
 
         allow_any_instance_of(Google::Apis::CalendarV3::CalendarService)
           .to receive(:list_calendar_lists)
-          .and_return(OpenStruct.new(calendar_list_response))
+          .and_return(calendar_list_response)
       end
 
       it "creates calendar connection successfully" do
@@ -107,13 +103,15 @@ RSpec.describe Calendars::GoogleAuthService do
         )
 
         expect(result).to be_failure
-        expect(result.errors).to include(/Google Calendar authorization failed/)
+        expect(result.errors).to include(/Calendar authorization failed/)
       end
     end
 
     context "with missing credentials" do
       before do
-        allow(Rails.application.credentials).to receive(:google).and_return(nil)
+        # Override the constants to be nil/empty
+        stub_const("Calendars::GoogleAuthService::GOOGLE_CLIENT_ID", nil)
+        stub_const("Calendars::GoogleAuthService::GOOGLE_CLIENT_SECRET", nil)
       end
 
       it "returns failure for missing credentials" do
@@ -154,7 +152,7 @@ RSpec.describe Calendars::GoogleAuthService do
         )
 
         expect(result).to be_failure
-        expect(result.errors).to include(/Google Calendar authorization failed/)
+        expect(result.errors).to include(/Calendar authorization failed/)
       end
     end
 
