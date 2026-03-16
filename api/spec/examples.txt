@@ -141,10 +141,10 @@ example_id                                                                      
 ./spec/graphql/queries/customer_search_spec.rb[1:7:1]                                  | passed  | 1.93 seconds    |
 ./spec/graphql/queries/customer_search_spec.rb[1:7:2]                                  | passed  | 1.92 seconds    |
 ./spec/graphql/queries/customer_search_spec.rb[1:7:3]                                  | passed  | 1.92 seconds    |
-./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:1]                                | failed  | 0.00185 seconds |
-./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:2]                                | failed  | 0.25284 seconds |
-./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:3]                                | passed  | 0.24914 seconds |
-./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:4]                                | passed  | 0.00218 seconds |
+./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:1]                                | passed  | 0.31536 seconds |
+./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:2]                                | passed  | 0.62673 seconds |
+./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:3]                                | passed  | 0.41089 seconds |
+./spec/jobs/generate_daily_tee_sheet_job_spec.rb[1:1:4]                                | passed  | 0.03143 seconds |
 ./spec/jobs/process_stripe_webhook_job_spec.rb[1:1:1:1]                                | passed  | 0.00084 seconds |
 ./spec/jobs/process_stripe_webhook_job_spec.rb[1:1:1:2]                                | passed  | 0.00095 seconds |
 ./spec/jobs/process_stripe_webhook_job_spec.rb[1:1:2:1]                                | passed  | 0.00087 seconds |

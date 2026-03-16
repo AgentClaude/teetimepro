@@ -6,12 +6,15 @@ RSpec.describe GenerateDailyTeeSheetJob do
 
   describe "#perform" do
     it "generates tee sheets for the next 7 days" do
+      course # explicitly create the course
+
       expect {
         described_class.new.perform
       }.to change(TeeSheet, :count).by(7)
     end
 
     it "generates tee sheets for multiple courses" do
+      course # explicitly create the first course
       course_2 = create(:course, organization: organization)
 
       expect {
