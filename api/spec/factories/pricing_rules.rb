@@ -3,7 +3,7 @@ FactoryBot.define do
     association :organization
     name { "Weekend Premium" }
     rule_type { "day_of_week" }
-    conditions { { days: ["saturday", "sunday"] } }
+    conditions { { days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] } }
     multiplier { 1.25 }
     flat_adjustment_cents { 0 }
     priority { 100 }

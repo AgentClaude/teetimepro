@@ -13,7 +13,7 @@ module Bookings
       booking = Booking
         .joins(:user)
         .where(confirmation_code: confirmation_code.strip.upcase)
-        .where(users: { email: email.strip.downcase })
+        .where("LOWER(users.email) = ?", email.strip.downcase)
         .includes(tee_time: { tee_sheet: :course }, user: [], booking_players: [])
         .first
 

@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Api::Sessions", type: :request do
   let(:organization) { create(:organization) }
   let(:user) { create(:user, organization: organization, password: "password123") }
-  let(:secret) { ENV.fetch("JWT_SECRET_KEY", "test-secret") }
+  let(:secret) { ENV.fetch("JWT_SECRET_KEY", Rails.application.secret_key_base) }
 
   describe "POST /api/auth/login" do
     it "returns access and refresh tokens on valid login" do

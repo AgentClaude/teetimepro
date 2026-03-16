@@ -28,6 +28,12 @@ RSpec.configure do |config|
   # Include custom helpers
   config.include AuthHelper
   config.include GraphQLHelper
+  config.include ActiveJob::TestHelper
+
+  # Use test adapter for ActiveJob/ActionMailer in specs
+  config.before(:each) do
+    ActiveJob::Base.queue_adapter = :test
+  end
 
   # Database cleaner
   config.before(:suite) do
