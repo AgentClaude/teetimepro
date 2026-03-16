@@ -6,7 +6,8 @@ RSpec.describe PushNotifications::SendBookingReminderPushService do
   let(:organization) { create(:organization) }
   let(:user) { create(:user, organization: organization) }
   let(:course) { create(:course, organization: organization) }
-  let(:tee_time) { create(:tee_time, course: course, starts_at: 1.day.from_now) }
+  let(:tee_sheet) { create(:tee_sheet, course: course) }
+  let(:tee_time) { create(:tee_time, tee_sheet: tee_sheet, starts_at: 1.day.from_now) }
   let(:booking) { create(:booking, user: user, tee_time: tee_time, organization: organization) }
 
   before do

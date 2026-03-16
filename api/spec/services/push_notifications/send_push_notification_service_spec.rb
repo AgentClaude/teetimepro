@@ -41,10 +41,9 @@ RSpec.describe PushNotifications::SendPushNotificationService do
     end
 
     context "with empty tokens" do
-      it "returns success with zero sent" do
+      it "returns failure due to validation" do
         result = described_class.call(tokens: [], title: title, body: body)
-        expect(result).to be_success
-        expect(result.sent).to eq(0)
+        expect(result).to be_failure
       end
     end
 

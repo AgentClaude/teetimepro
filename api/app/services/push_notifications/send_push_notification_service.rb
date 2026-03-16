@@ -43,7 +43,7 @@ module PushNotifications
       response = connection.post(EXPO_PUSH_URL) do |req|
         req.headers["Content-Type"] = "application/json"
         req.headers["Accept"] = "application/json"
-        req.body = Oj.dump(messages)
+        req.body = Oj.dump(messages, mode: :compat)
       end
 
       parsed = Oj.load(response.body)

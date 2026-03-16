@@ -2,9 +2,9 @@
 
 class CreateDeviceTokens < ActiveRecord::Migration[8.0]
   def change
-    create_table :device_tokens, id: :uuid do |t|
-      t.references :user, null: false, foreign_key: true, type: :uuid
-      t.references :organization, null: false, foreign_key: true, type: :uuid
+    create_table :device_tokens do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :organization, null: false, foreign_key: true
       t.string :token, null: false
       t.string :platform, null: false # ios, android
       t.string :device_id # unique device identifier for dedup

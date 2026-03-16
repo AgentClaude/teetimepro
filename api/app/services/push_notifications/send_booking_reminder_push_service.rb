@@ -16,7 +16,7 @@ module PushNotifications
       return success(sent: 0, reason: "no_device_tokens") if device_tokens.empty?
 
       tee_time = booking.tee_time
-      course = tee_time.course
+      course = tee_time.tee_sheet.course
 
       title, body = build_message(course, tee_time)
 

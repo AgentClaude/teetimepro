@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_16_040000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -232,6 +232,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
     t.index ["organization_id", "name"], name: "index_courses_on_organization_id_and_name", unique: true
     t.index ["organization_id"], name: "index_courses_on_organization_id"
     t.index ["slug"], name: "index_courses_on_slug", unique: true
+  end
+
+  create_table "device_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "token", null: false
+    t.string "platform", null: false
+    t.string "device_id"
+    t.boolean "active", default: true, null: false
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_device_tokens_on_active"
+    t.index ["organization_id"], name: "index_device_tokens_on_organization_id"
+    t.index ["token"], name: "index_device_tokens_on_token", unique: true
+    t.index ["user_id", "platform"], name: "index_device_tokens_on_user_id_and_platform"
+    t.index ["user_id"], name: "index_device_tokens_on_user_id"
   end
 
   create_table "email_campaigns", force: :cascade do |t|
@@ -1263,6 +1280,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_08_100001) do
   add_foreign_key "call_transcriptions", "voice_call_logs"
   add_foreign_key "course_holes", "courses", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
+  add_foreign_key "device_tokens", "organizations"
+  add_foreign_key "device_tokens", "users"
   add_foreign_key "email_campaigns", "email_providers"
   add_foreign_key "email_campaigns", "email_templates"
   add_foreign_key "email_campaigns", "organizations", on_delete: :cascade
