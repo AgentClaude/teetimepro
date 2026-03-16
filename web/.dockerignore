@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Version control
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Documentation
+README.md
+docs/
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+coverage/
+
+# Development files
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Storybook
+.storybook/
+*.stories.tsx
+*.stories.ts
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Misc
+*.log
+npm-debug.log*
