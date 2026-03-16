@@ -7,7 +7,7 @@ RSpec.describe Gps::GetHoleOverviewService do
 
   before do
     create(:course_gps_feature, :tee_box, course_hole: hole,
-           latitude: 33.4480, longitude: -112.074, distance_from_tee_yards: 0)
+           latitude: 33.4480, longitude: -112.074, distance_from_tee_yards: 1)
     create(:course_gps_feature, course_hole: hole,
            name: "Green Center", latitude: 33.4515, longitude: -112.074, distance_from_tee_yards: 385)
     create(:course_gps_feature, :bunker, course_hole: hole,

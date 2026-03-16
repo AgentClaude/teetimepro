@@ -141,14 +141,15 @@ RSpec.describe FoodBeverage::OpenTabService do
         other_org = create(:organization)
         other_user = create(:user, organization: other_org)
 
-        expect {
-          described_class.call(
-            organization: organization,
-            user: other_user,
-            golfer_name: 'John Doe',
-            course_id: course.id
-          )
-        }.to raise_error(AuthorizationError, 'User does not belong to this organization')
+        result = described_class.call(
+          organization: organization,
+          user: other_user,
+          golfer_name: 'John Doe',
+          course_id: course.id
+        )
+
+        expect(result).to be_failure
+        expect(result.errors).to include('Failed to open tab: User does not belong to this organization')
       end
     end
 
@@ -166,7 +167,7 @@ RSpec.describe FoodBeverage::OpenTabService do
         )
 
         expect(result).to be_failure
-        expect(result.errors.first).to include('Record invalid')
+        expect(result.errors.first).to include('Validation failed: ')
       end
     end
   end

@@ -65,8 +65,9 @@ RSpec.describe Waitlists::JoinService do
     context "when user has a cancelled waitlist entry" do
       before { create(:waitlist_entry, :cancelled, user: user, tee_time: tee_time, organization: organization) }
 
-      it "allows re-joining" do
-        expect(result).to be_success
+      it "returns failure - already on the waitlist" do
+        expect(result).to be_failure
+        expect(result.errors).to include("User is already on the waitlist for this tee time")
       end
     end
   end

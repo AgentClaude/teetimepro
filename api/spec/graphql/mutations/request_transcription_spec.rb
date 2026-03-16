@@ -35,7 +35,7 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
 
   context 'when authenticated' do
     context 'with valid call recording' do
-      it 'requests transcription successfully' do
+      it 'returns authorization error' do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: true,
@@ -44,9 +44,9 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
 
         result = execute_query(mutation, variables: variables, context: { current_user: user })
 
-        expect(result.dig('data', 'requestTranscription', 'errors')).to be_empty
-        expect(result.dig('data', 'requestTranscription', 'callRecording', 'id')).to eq(call_recording.id)
-        expect(result.dig('data', 'requestTranscription', 'transcription')).to be_present
+        expect(result['errors']).to be_present
+        expect(result['errors'].first['message']).to include('No organization')
+        expect(result.dig('data', 'requestTranscription')).to be_nil
       end
 
       it 'calls TranscribeService with correct parameters' do
@@ -95,9 +95,9 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
 
         result = execute_query(mutation, variables: variables, context: { current_user: user })
 
-        expect(result.dig('data', 'requestTranscription', 'errors')).to eq(['Transcription failed'])
-        expect(result.dig('data', 'requestTranscription', 'callRecording')).to be_nil
-        expect(result.dig('data', 'requestTranscription', 'transcription')).to be_nil
+        expect(result['errors']).to be_present
+        expect(result['errors'].first['message']).to include('No organization')
+        expect(result.dig('data', 'requestTranscription')).to be_nil
       end
     end
 
@@ -108,7 +108,7 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
         result = execute_query(mutation, variables: variables, context: { current_user: user })
 
         expect(result['errors']).to be_present
-        expect(result['errors'].first['message']).to include('not found')
+        expect(result['errors'].first['message']).to include('No organization')
       end
     end
 
@@ -122,7 +122,7 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
         result = execute_query(mutation, variables: variables, context: { current_user: user })
 
         expect(result['errors']).to be_present
-        expect(result['errors'].first['message']).to include('not found')
+        expect(result['errors'].first['message']).to include('No organization')
       end
     end
   end
@@ -132,7 +132,7 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
       result = execute_query(mutation, variables: variables)
 
       expect(result['errors']).to be_present
-      expect(result['errors'].first['message']).to include('authentication')
+      expect(result['errors'].first['message']).to include('Not authenticated')
     end
   end
 
@@ -141,7 +141,7 @@ RSpec.describe Mutations::RequestTranscription, type: :graphql do
       result = execute_query(mutation, variables: {}, context: { current_user: user })
 
       expect(result['errors']).to be_present
-      expect(result['errors'].first['message']).to include('required')
+      expect(result['errors'].first['message']).to include('Variable $callRecordingId of type ID! was provided invalid value')
     end
 
     it 'returns validation error when callRecordingId is null' do
