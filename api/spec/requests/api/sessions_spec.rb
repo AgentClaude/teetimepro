@@ -5,6 +5,11 @@ RSpec.describe "Api::Sessions", type: :request do
   let(:user) { create(:user, organization: organization, password: "password123") }
   let(:secret) { ENV.fetch("JWT_SECRET_KEY", Rails.application.secret_key_base) }
 
+  before do
+    # Ensure JWT secret is available for tests
+    ENV["JWT_SECRET_KEY"] = "test-jwt-secret-key" unless ENV["JWT_SECRET_KEY"]
+  end
+
   describe "POST /api/auth/login" do
     it "returns access and refresh tokens on valid login" do
       post "/api/auth/login", params: { email: user.email, password: "password123" }

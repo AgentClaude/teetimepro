@@ -71,12 +71,13 @@ RSpec.describe Mutations::CreateBooking do
 
       it "returns not found error" do
         context = graphql_context(user: user)
-        expect {
-          execute_query(query, variables: {
-            teeTimeId: other_tee_time.id.to_s,
-            playersCount: 2
-          }, context: context)
-        }.to raise_error(ActiveRecord::RecordNotFound)
+        result = execute_query(query, variables: {
+          teeTimeId: other_tee_time.id.to_s,
+          playersCount: 2
+        }, context: context)
+        
+        expect(result["errors"]).to be_present
+        expect(result["errors"].first["message"]).to include("Couldn't find TeeTime")
       end
     end
 

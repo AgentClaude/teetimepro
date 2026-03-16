@@ -10,9 +10,9 @@ FactoryBot.define do
     activated_at { Time.current }
 
     after(:build) do |purchase|
-      if purchase.prepaid_package.round_pack?
+      if purchase.prepaid_package.round_pack? && purchase.rounds_remaining.nil?
         purchase.rounds_remaining = purchase.prepaid_package.rounds_included
-      elsif purchase.prepaid_package.value_card?
+      elsif purchase.prepaid_package.value_card? && purchase.balance_cents.nil?
         purchase.balance_cents = purchase.prepaid_package.value_cents
       end
     end

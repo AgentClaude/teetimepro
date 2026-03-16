@@ -106,6 +106,8 @@ RSpec.describe Tournaments::FinalizeResultsService, type: :service do
 
     context 'when tournament is already completed' do
       let(:completed_tournament) { create(:tournament, :completed, organization: organization) }
+      let!(:completed_entry1) { create(:tournament_entry, tournament: completed_tournament) }
+      let!(:completed_entry2) { create(:tournament_entry, tournament: completed_tournament) }
       let(:service) { described_class.new(tournament: completed_tournament) }
 
       before do

@@ -44,28 +44,27 @@ RSpec.describe "API Integration", type: :request do
       expect(json_response["data"].first["available_spots"]).to eq(4)
 
       # 5. Create a booking (mocked service)
+      booking_mock = double(
+        id: 123,
+        confirmation_code: "ABC123XYZ",
+        status: "confirmed",
+        players_count: 2,
+        total: Money.new(5000, "USD"),
+        total_cents: 5000,
+        notes: "",
+        tee_time: tee_time,
+        course: course,
+        user: user,
+        booking_players: [
+          double(id: 1, name: "John Doe"),
+          double(id: 2, name: "Jane Smith")
+        ],
+        created_at: Time.current,
+        updated_at: Time.current
+      )
+
       allow(Bookings::CreateBookingService).to receive(:call).and_return(
-        double(
-          success?: true,
-          booking: double(
-            id: 123,
-            confirmation_code: "ABC123XYZ",
-            status: "confirmed",
-            players_count: 2,
-            total: Money.new(5000, "USD"),
-            total_cents: 5000,
-            notes: "",
-            tee_time: tee_time,
-            course: course,
-            user: user,
-            booking_players: [
-              double(id: 1, name: "John Doe"),
-              double(id: 2, name: "Jane Smith")
-            ],
-            created_at: Time.current,
-            updated_at: Time.current
-          )
-        )
+        ServiceResult.new(success: true, data: { booking: booking_mock })
       )
 
       booking_payload = {

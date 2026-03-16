@@ -8,9 +8,8 @@ RSpec.describe WebhookDeliveryJob, type: :job do
   describe "#perform" do
     context "with valid webhook event" do
       it "calls the delivery service" do
-        mock_service = instance_double(Webhooks::DeliverWebhookService)
-        allow(Webhooks::DeliverWebhookService).to receive(:call).and_return(mock_service)
-        allow(mock_service).to receive(:success?).and_return(true)
+        mock_result = ServiceResult.new(success: true)
+        allow(Webhooks::DeliverWebhookService).to receive(:call).and_return(mock_result)
 
         described_class.new.perform(webhook_event.id)
 
@@ -18,7 +17,7 @@ RSpec.describe WebhookDeliveryJob, type: :job do
       end
 
       it "logs successful delivery" do
-        result = double("ServiceResult", success?: true)
+        result = ServiceResult.new(success: true)
         allow(Webhooks::DeliverWebhookService).to receive(:call).and_return(result)
         allow(Rails.logger).to receive(:info)
 
@@ -129,9 +128,11 @@ RSpec.describe WebhookDeliveryJob, type: :job do
       end
 
       it "can be delayed for retry scenarios" do
-        expect {
-          WebhookDeliveryJob.set(wait: 1.hour).perform_later(webhook_event.id)
-        }.to have_enqueued_job(WebhookDeliveryJob).with(webhook_event.id).at(1.hour.from_now)
+        freeze_time do
+          expect {
+            WebhookDeliveryJob.set(wait: 1.hour).perform_later(webhook_event.id)
+          }.to have_enqueued_job(WebhookDeliveryJob).with(webhook_event.id).at(1.hour.from_now)
+        end
       end
 
       it "executes the perform method when processed" do

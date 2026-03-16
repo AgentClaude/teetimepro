@@ -89,7 +89,7 @@ RSpec.describe Pricing::CalculatePriceService do
         expect(service).to be_success
         expect(service.original_price_cents).to eq(5000)
         # (5000 * 1.25 * 1.15) + 500 = 7187.5 rounds to 7188 + 500 = 7688
-        expected_price = (5000 * 1.25 * 1.15).round + 500
+        expected_price = 7688
         expect(service.dynamic_price_cents).to eq(expected_price)
         expect(service.applied_rules).to have_attributes(size: 3)
         expect(service.price_breakdown).to have_attributes(size: 4) # base + 3 rules
