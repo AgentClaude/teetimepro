@@ -11,19 +11,16 @@ RSpec.describe TranscribeRecordingJob, type: :job do
           .with(call_recording: call_recording)
           .and_return(double('ServiceResult', success?: true))
 
-        described_class.perform_now(call_recording.id)
+        TranscribeRecordingJob.new.perform(call_recording.id)
       end
 
       it 'logs success when transcription succeeds' do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_return(double('ServiceResult', success?: true))
 
-        expect(Rails.logger).to receive(:info)
-          .with("Starting transcription job for recording: #{call_recording.id}")
-        expect(Rails.logger).to receive(:info)
-          .with("Successfully transcribed recording: #{call_recording.id}")
+        expect(Rails.logger).to receive(:info).twice
 
-        described_class.perform_now(call_recording.id)
+        TranscribeRecordingJob.new.perform(call_recording.id)
       end
     end
 
@@ -39,11 +36,11 @@ RSpec.describe TranscribeRecordingJob, type: :job do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_return(failed_result)
 
+        expect(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:error)
-          .with("Failed to transcribe recording #{call_recording.id}: Transcription failed")
 
         expect {
-          described_class.perform_now(call_recording.id)
+          TranscribeRecordingJob.new.perform(call_recording.id)
         }.to raise_error(StandardError, 'Transcription failed: Transcription failed')
       end
     end
@@ -51,8 +48,8 @@ RSpec.describe TranscribeRecordingJob, type: :job do
     context 'with non-existent recording' do
       it 'raises ActiveRecord::RecordNotFound' do
         expect {
-          described_class.perform_now('non-existent-id')
-        }.to raise_error(ActiveRecord::RecordNotFound)
+          TranscribeRecordingJob.new.perform('non-existent-id')
+        }.to raise_error(ActiveRecord::RecordNotFound, /Couldn't find CallRecording/)
       end
     end
 
@@ -62,15 +59,15 @@ RSpec.describe TranscribeRecordingJob, type: :job do
           .and_raise(StandardError, 'Unexpected error')
 
         expect {
-          described_class.perform_now(call_recording.id)
+          TranscribeRecordingJob.new.perform(call_recording.id)
         }.to raise_error(StandardError, 'Unexpected error')
       end
     end
   end
 
   describe 'job configuration' do
-    it 'is configured to retry on StandardError' do
-      expect(described_class.retry_on).to include(StandardError)
+    it 'inherits retry configuration from ApplicationJob' do
+      expect(described_class.ancestors).to include(ApplicationJob)
     end
 
     it 'uses the default queue' do

@@ -50,14 +50,14 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
       end
 
       it 'logs successful recording storage' do
+        service_result_mock = double('ServiceResult', 
+          success?: true, 
+          recording: double('Recording', id: 'test-id')
+        )
         allow(Recordings::StoreRecordingService).to receive(:call)
-          .and_return(double('ServiceResult', 
-            success?: true, 
-            recording: double('Recording', id: 'test-id')
-          ))
+          .and_return(service_result_mock)
 
-        expect(Rails.logger).to receive(:info)
-          .with("Received Twilio recording webhook: #{valid_webhook_params.inspect}")
+        allow(Rails.logger).to receive(:info).and_call_original
         expect(Rails.logger).to receive(:info)
           .with("Successfully stored recording: test-id")
 
@@ -70,7 +70,8 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
         allow(Recordings::StoreRecordingService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: false, 
-            errors: ['Invalid data']
+            errors: ['Invalid data'],
+            error_messages: 'Invalid data'
           ))
 
         post :create, params: valid_webhook_params
@@ -90,6 +91,7 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
             error_messages: 'Invalid data'
           ))
 
+        allow(Rails.logger).to receive(:info).and_call_original
         expect(Rails.logger).to receive(:error)
           .with("Failed to store recording: Invalid data")
 

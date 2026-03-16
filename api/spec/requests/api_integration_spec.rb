@@ -44,27 +44,29 @@ RSpec.describe "API Integration", type: :request do
       expect(json_response["data"].first["available_spots"]).to eq(4)
 
       # 5. Create a booking (mocked service)
+      booking_mock = double(
+        id: 123,
+        confirmation_code: "ABC123XYZ",
+        status: "confirmed",
+        players_count: 2,
+        total: Money.new(5000, "USD"),
+        total_cents: 5000,
+        notes: "",
+        tee_time: tee_time,
+        course: course,
+        user: user,
+        booking_players: [
+          double(id: 1, name: "John Doe"),
+          double(id: 2, name: "Jane Smith")
+        ],
+        created_at: Time.current,
+        updated_at: Time.current
+      )
+      
       allow(Bookings::CreateBookingService).to receive(:call).and_return(
         double(
           success?: true,
-          booking: double(
-            id: 123,
-            confirmation_code: "ABC123XYZ",
-            status: "confirmed",
-            players_count: 2,
-            total: Money.new(5000, "USD"),
-            total_cents: 5000,
-            notes: "",
-            tee_time: tee_time,
-            course: course,
-            user: user,
-            booking_players: [
-              double(id: 1, name: "John Doe"),
-              double(id: 2, name: "Jane Smith")
-            ],
-            created_at: Time.current,
-            updated_at: Time.current
-          )
+          data: { booking: booking_mock }
         )
       )
 
@@ -84,42 +86,49 @@ RSpec.describe "API Integration", type: :request do
 
       post "/api/v1/bookings", headers: headers, params: booking_payload.to_json
       expect(response).to have_http_status(:created)
-      expect(json_response["confirmation_code"]).to eq("ABC123XYZ")
+      expect(json_response["data"]["confirmation_code"]).to eq("ABC123XYZ")
       
-      booking_id = json_response["id"]
+      booking_id = json_response["data"]["id"]
 
-      # 6. Get booking details
+      # 6. Get booking details (mock the show action)
+      allow_any_instance_of(Api::V1::BookingsController).to receive(:find_booking).with(booking_id.to_s).and_return(booking_mock)
+      
       get "/api/v1/bookings/#{booking_id}", headers: headers
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]["id"]).to eq(booking_id)
 
       # 7. Cancel the booking (mocked service)
+      cancelled_booking_mock = double(
+        id: booking_id,
+        confirmation_code: "ABC123XYZ",
+        status: "cancelled",
+        players_count: 2,
+        total: Money.new(5000, "USD"),
+        total_cents: 5000,
+        notes: "",
+        tee_time: tee_time,
+        course: course,
+        user: user,
+        booking_players: [],
+        created_at: 1.hour.ago,
+        updated_at: Time.current
+      )
+      
       allow(Bookings::CancelBookingService).to receive(:call).and_return(
         double(
           success?: true,
-          booking: double(
-            id: booking_id,
-            confirmation_code: "ABC123XYZ",
-            status: "cancelled",
-            players_count: 2,
-            total: Money.new(5000, "USD"),
-            total_cents: 5000,
-            notes: "",
-            tee_time: tee_time,
-            course: course,
-            user: user,
-            booking_players: [],
-            created_at: 1.hour.ago,
-            updated_at: Time.current
-          )
+          booking: cancelled_booking_mock
         )
       )
+
+      # Mock the find_booking call for the cancel action too
+      allow_any_instance_of(Api::V1::BookingsController).to receive(:find_booking).with(booking_id.to_s).and_return(cancelled_booking_mock)
 
       patch "/api/v1/bookings/#{booking_id}/cancel", headers: headers, params: {
         reason: "Weather concerns"
       }.to_json
       expect(response).to have_http_status(:ok)
-      expect(json_response["status"]).to eq("cancelled")
+      expect(json_response["data"]["status"]).to eq("cancelled")
     end
   end
 
