@@ -9,7 +9,9 @@ module Bookings
       return failure(["Booking is already cancelled"]) if booking.cancelled?
       return failure(["Cannot cancel past bookings"]) if booking.starts_at <= Time.current
 
-      ActiveRecord::Base.transaction do
+      @refund_error = nil
+
+      result = ActiveRecord::Base.transaction do
         # Check cancellation policy
         if booking.late_cancel?
           Rails.logger.info("Late cancellation for booking #{booking.id}")
@@ -23,8 +25,8 @@ module Bookings
           )
 
           unless refund_result.success?
+            @refund_error = refund_result
             raise ActiveRecord::Rollback
-            return refund_result
           end
         end
 
@@ -52,6 +54,11 @@ module Bookings
 
         success(booking: booking)
       end
+
+      # If refund failed and transaction was rolled back, return the refund error
+      return @refund_error if @refund_error
+
+      result || failure(["Cancellation failed unexpectedly"])
     rescue ActiveRecord::RecordInvalid => e
       failure([e.message])
     end
