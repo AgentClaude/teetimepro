@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_16_040000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -693,6 +693,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_040000) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
+  create_table "notification_preferences", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.boolean "email_booking_confirmation", default: true
+    t.boolean "email_booking_cancellation", default: true
+    t.boolean "email_booking_reminder", default: true
+    t.boolean "email_marketing", default: false
+    t.boolean "sms_booking_confirmation", default: true
+    t.boolean "sms_booking_cancellation", default: false
+    t.boolean "sms_booking_reminder", default: true
+    t.boolean "sms_marketing", default: false
+    t.boolean "push_booking_confirmation", default: true
+    t.boolean "push_booking_cancellation", default: true
+    t.boolean "push_booking_reminder", default: true
+    t.boolean "push_marketing", default: false
+    t.integer "reminder_hours_before", default: 24
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name", null: false
     t.string "slug", null: false
@@ -1331,6 +1351,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_040000) do
   add_foreign_key "member_account_charges", "users", column: "charged_by_id"
   add_foreign_key "memberships", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "users", on_delete: :cascade
+  add_foreign_key "notification_preferences", "users"
   add_foreign_key "payments", "bookings", on_delete: :cascade
   add_foreign_key "payments", "organizations", on_delete: :cascade
   add_foreign_key "payments", "users", on_delete: :nullify
