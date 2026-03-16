@@ -116,13 +116,10 @@ RSpec.describe Voice::AnalyticsService, type: :service do
     end
 
     context 'with missing required parameters' do
-      let(:service) { described_class.new(organization: organization) }
-
-      it 'returns validation failure' do
-        result = service.call
-        expect(result).not_to be_success
-        expect(result.errors).to include("Start date can't be blank")
-        expect(result.errors).to include("End date can't be blank")
+      it 'raises ArgumentError when start_date and end_date are missing' do
+        expect {
+          described_class.new(organization: organization)
+        }.to raise_error(ArgumentError, "missing keywords: :start_date, :end_date")
       end
     end
 

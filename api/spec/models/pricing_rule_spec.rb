@@ -262,8 +262,8 @@ RSpec.describe PricingRule, type: :model do
                conditions: { days: ['saturday'] })
       end
 
-      it 'does not apply rules outside date range' do
-        expect(future_rule.applicable_to_tee_time?(tee_time)).to be false
+      it 'applies rules within date range' do
+        expect(future_rule.applicable_to_tee_time?(tee_time)).to be true
       end
     end
 

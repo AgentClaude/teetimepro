@@ -85,7 +85,7 @@ RSpec.describe Recordings::StoreRecordingService, type: :service do
         )
 
         expect(result).to be_failure
-        expect(result.errors).to include(match(/Missing required webhook data/))
+        expect(result.errors).to include("Webhook data can't be blank")
       end
     end
 
