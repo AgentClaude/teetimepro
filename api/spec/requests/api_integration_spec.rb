@@ -83,21 +83,20 @@ RSpec.describe "API Integration", type: :request do
 
       post "/api/v1/bookings", headers: headers, params: booking_payload.to_json
       expect(response).to have_http_status(:created)
-      expect(json_response["data"]["booking"]["confirmation_code"]).to eq("ABC123XYZ")
-      
-      booking_id = json_response["data"]["booking"]["id"]
+      expect(json_response["data"]["confirmation_code"]).to eq("ABC123XYZ")
 
-      # 6. Get booking details
-      get "/api/v1/bookings/#{booking_id}", headers: headers
+      # 6. Get booking details — create a real booking since mock ID won't be in DB
+      real_booking = create(:booking, tee_time: tee_time, user: user, players_count: 2, total_cents: 5000)
+      get "/api/v1/bookings/#{real_booking.id}", headers: headers
       expect(response).to have_http_status(:ok)
-      expect(json_response["data"]["id"]).to eq(booking_id)
+      expect(json_response["data"]["id"]).to eq(real_booking.id)
 
       # 7. Cancel the booking (mocked service)
       allow(Bookings::CancelBookingService).to receive(:call).and_return(
         double(
           success?: true,
           booking: double(
-            id: booking_id,
+            id: real_booking.id,
             confirmation_code: "ABC123XYZ",
             status: "cancelled",
             players_count: 2,
@@ -114,11 +113,11 @@ RSpec.describe "API Integration", type: :request do
         )
       )
 
-      patch "/api/v1/bookings/#{booking_id}/cancel", headers: headers, params: {
+      patch "/api/v1/bookings/#{real_booking.id}/cancel", headers: headers, params: {
         reason: "Weather concerns"
       }.to_json
       expect(response).to have_http_status(:ok)
-      expect(json_response["status"]).to eq("cancelled")
+      expect(json_response["data"]["status"]).to eq("cancelled")
     end
   end
 

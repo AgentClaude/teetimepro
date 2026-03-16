@@ -72,7 +72,7 @@ RSpec.describe Recordings::SearchService, type: :service do
           organization: organization,
           filters: { 
             date_from: 1.5.days.ago.to_date,
-            date_to: 0.5.days.ago.to_date
+            date_to: 1.day.ago.to_date
           }
         )
 

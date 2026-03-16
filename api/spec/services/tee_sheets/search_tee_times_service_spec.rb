@@ -257,7 +257,7 @@ RSpec.describe TeeSheets::SearchTeeTimesService do
     end
 
     context "course filtering" do
-      let(:second_course) { create(:course, organization: organization) }
+      let(:second_course) { create(:course, organization: organization, name: "Second Test Golf Course") }
       let(:second_sheet) { create(:tee_sheet, course: second_course, date: target_date) }
 
       let!(:second_course_time) do
