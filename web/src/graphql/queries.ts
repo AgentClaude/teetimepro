@@ -681,6 +681,21 @@ export const GET_DASHBOARD_STATS = gql`
   }
 `;
 
+export const GET_RECENT_ACTIVITY = gql`
+  query GetRecentActivity($courseId: ID, $limit: Int) {
+    recentActivity(courseId: $courseId, limit: $limit) {
+      id
+      activityType
+      confirmationCode
+      userName
+      courseName
+      teeTime
+      playersCount
+      occurredAt
+    }
+  }
+`;
+
 export const GET_REPORTS_SUMMARY = gql`
   query GetReportsSummary($courseId: ID, $days: Int) {
     reportsSummary(courseId: $courseId, days: $days)

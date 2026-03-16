@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { Card } from '../components/ui/Card';
-import { GET_DASHBOARD_STATS, GET_COURSES, GET_UTILIZATION_HEAT_MAP } from '../graphql/queries';
+import { GET_DASHBOARD_STATS, GET_COURSES, GET_UTILIZATION_HEAT_MAP, GET_RECENT_ACTIVITY } from '../graphql/queries';
 import { formatCents, formatTime } from '../lib/utils';
 import { RevenueChart } from '../components/dashboard/RevenueChart';
 import { UtilizationHeatMap } from '../components/dashboard/UtilizationHeatMap';
+import RecentActivityFeed from '../components/dashboard/RecentActivityFeed';
 import type { UtilizationHeatMap as UtilizationHeatMapType } from '../types';
 import {
   CalendarDaysIcon,
@@ -39,6 +40,17 @@ interface Course {
   name: string;
 }
 
+interface RecentActivity {
+  id: string;
+  activityType: 'booked' | 'cancelled' | 'checked_in' | 'completed' | 'no_show';
+  confirmationCode: string;
+  userName: string;
+  courseName: string;
+  teeTime: string;
+  playersCount: number;
+  occurredAt: string;
+}
+
 export function DashboardPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
@@ -63,6 +75,15 @@ export function DashboardPage() {
       courseId: selectedCourseId || undefined,
       startDate,
       endDate,
+    },
+  });
+
+  const { data: activityData, loading: activityLoading } = useQuery<{
+    recentActivity: RecentActivity[];
+  }>(GET_RECENT_ACTIVITY, {
+    variables: {
+      courseId: selectedCourseId || undefined,
+      limit: 20,
     },
   });
 
@@ -185,6 +206,14 @@ export function DashboardPage() {
             loading={statsLoading}
           />
         </Card>
+      </div>
+
+      {/* Recent Activity Feed */}
+      <div>
+        <RecentActivityFeed 
+          activities={activityData?.recentActivity || []}
+          loading={activityLoading}
+        />
       </div>
 
       {/* Utilization Heat Map */}
