@@ -28,15 +28,18 @@ class ServiceResult
   end
 
   # Delegate unknown methods to data (OpenStruct) for convenience
+  # Returns nil for missing getter methods (allows safe chaining on failure results)
   def method_missing(method, *args, &block)
     if data.respond_to?(method)
       data.send(method, *args, &block)
-    else
+    elsif method.to_s.end_with?('=') || method.to_s.end_with?('!') || block
       super
+    else
+      nil
     end
   end
 
   def respond_to_missing?(method, include_private = false)
-    data.respond_to?(method, include_private) || super
+    data.respond_to?(method, include_private) || !method.to_s.end_with?('=', '!') || super
   end
 end

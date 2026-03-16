@@ -6,7 +6,7 @@ module Recordings
     validates :organization, presence: true
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
 
       begin
         extract_webhook_data!

@@ -6,7 +6,7 @@ module Accounting
     validates :payload, presence: true
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
 
       begin
         verify_webhook_signature!

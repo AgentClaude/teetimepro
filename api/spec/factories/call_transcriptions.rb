@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :call_transcription do
-    organization
     call_recording
+    organization { call_recording.organization }
     transcription_text { "Hello, thank you for calling TeeTimes Pro. How can I help you today?" }
     confidence_score { 0.85 }
     language { 'en' }

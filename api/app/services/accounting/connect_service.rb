@@ -8,7 +8,7 @@ module Accounting
 
     def call
       validate_oauth_params!
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
 
       begin
         exchange_oauth_code_for_tokens!

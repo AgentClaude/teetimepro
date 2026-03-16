@@ -20,9 +20,11 @@ module Voice
         return failure(["Tee time not found or unavailable"]) unless tee_time
 
         user = find_or_create_user
+        user.save! unless user.persisted?
         return validation_failure(user) unless user.persisted?
 
         booking = create_pending_booking(tee_time, user)
+        booking.save!
         return validation_failure(booking) unless booking.persisted?
       end
 

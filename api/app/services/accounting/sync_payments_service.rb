@@ -5,7 +5,7 @@ module Accounting
     validates :payment, presence: true
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
       return failure(errors: ["Payment is not completed"]) unless payment.completed?
 
       begin

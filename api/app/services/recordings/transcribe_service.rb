@@ -5,7 +5,7 @@ module Recordings
     validates :call_recording, presence: true
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
 
       begin
         create_transcription_record!

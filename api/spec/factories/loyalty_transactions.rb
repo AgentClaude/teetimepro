@@ -14,7 +14,7 @@ FactoryBot.define do
 
     trait :redemption do
       transaction_type { :redeem }
-      points { -200 }
+      points { -50 }
       description { "Redeemed points for reward" }
     end
 
@@ -36,7 +36,15 @@ FactoryBot.define do
 
     # Ensure balance_after reflects the correct state
     after(:build) do |transaction|
-      transaction.balance_after = transaction.loyalty_account.points_balance + transaction.points
+      account = transaction.loyalty_account
+      account.reload if account.persisted?
+      balance = account.points_balance || 0
+      transaction.balance_after = [balance + transaction.points, 0].max
+    end
+
+    after(:create) do |transaction|
+      account = transaction.loyalty_account
+      account.update_column(:points_balance, transaction.balance_after) if account.persisted?
     end
   end
 end

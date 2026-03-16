@@ -6,7 +6,7 @@ module Accounting
     validates :provider, presence: true, inclusion: { in: %w[quickbooks xero] }
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
 
       begin
         find_integration!

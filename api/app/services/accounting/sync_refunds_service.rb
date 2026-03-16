@@ -6,7 +6,7 @@ module Accounting
     validates :refund_amount, presence: true, numericality: { greater_than: 0 }
 
     def call
-      return failure(errors: errors.full_messages) if errors.any?
+      return validation_failure(self) unless valid?
       return failure(errors: ["Payment is not refundable"]) unless payment.completed?
 
       begin
