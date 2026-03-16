@@ -2,7 +2,7 @@ class TournamentPrize < ApplicationRecord
   belongs_to :tournament
   belongs_to :awarded_to, class_name: "TournamentEntry", optional: true
 
-  enum :prize_type, { cash: "cash", voucher: "voucher", trophy: "trophy", merchandise: "merchandise", custom: "custom" }
+  enum :prize_type, { cash: 0, voucher: 1, trophy: 2, merchandise: 3, custom: 4 }
 
   monetize :amount_cents
 

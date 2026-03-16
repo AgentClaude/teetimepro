@@ -4,7 +4,7 @@ class DeviceToken < ApplicationRecord
   belongs_to :user
   belongs_to :organization
 
-  enum :platform, { ios: "ios", android: "android" }
+  enum :platform, { ios: 0, android: 1 }
 
   validates :token, presence: true, uniqueness: true
   validates :platform, presence: true

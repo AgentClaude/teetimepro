@@ -5,8 +5,8 @@ class MemberAccountCharge < ApplicationRecord
   belongs_to :fnb_tab, optional: true
   belongs_to :booking, optional: true
 
-  enum :charge_type, { fnb: 'fnb', booking: 'booking', pro_shop: 'pro_shop', dues: 'dues', other: 'other' }
-  enum :status, { pending: 'pending', posted: 'posted', voided: 'voided', paid: 'paid' }
+  enum :charge_type, { fnb: 0, booking: 1, pro_shop: 2, dues: 3, other: 4 }
+  enum :status, { pending: 0, posted: 1, voided: 2, paid: 3 }
 
   monetize :amount_cents
 

@@ -14,7 +14,7 @@ class FnbTab < ApplicationRecord
   validate :closed_at_after_opened_at, if: :closed_at?
   validate :organization_consistency
 
-  enum :status, { open: 'open', closed: 'closed', merged: 'merged' }
+  enum :status, { open: 0, closed: 1, merged: 2 }
 
   scope :for_organization, ->(org) { where(organization: org) }
   scope :for_course, ->(course) { where(course: course) }
