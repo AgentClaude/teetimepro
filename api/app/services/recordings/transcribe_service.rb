@@ -8,11 +8,10 @@ module Recordings
       return validation_failure(self) unless valid?
 
       begin
-        create_transcription_record!
         fetch_audio_content!
         call_deepgram_api!
         process_transcription_response!
-        finalize_transcription!
+        create_transcription_record!
         
         success(transcription: @transcription)
       rescue => e
@@ -28,13 +27,13 @@ module Recordings
       @transcription = call_recording.call_transcriptions.create!(
         organization: call_recording.organization,
         voice_call_log: call_recording.voice_call_log,
-        transcription_text: '',
-        confidence_score: 0.0,
+        transcription_text: @transcript_text,
+        confidence_score: @confidence_score,
         language: 'en',
         provider: 'deepgram',
-        status: 'processing',
+        status: 'completed',
         duration_seconds: call_recording.duration_seconds,
-        word_count: 0
+        raw_response: @raw_response
       )
       Rails.logger.info "Created transcription record: #{@transcription.id}"
     end
@@ -118,15 +117,6 @@ module Recordings
       end
     end
 
-    def finalize_transcription!
-      @transcription.update!(
-        transcription_text: @transcript_text,
-        confidence_score: @confidence_score,
-        raw_response: @raw_response,
-        status: 'completed'
-      )
-      
-      Rails.logger.info "Completed transcription for recording: #{call_recording.id}"
-    end
+
   end
 end

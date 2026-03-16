@@ -53,11 +53,13 @@ module Recordings
 
     def apply_date_range_filter!
       if filters[:date_from].present?
-        @query_scope = @query_scope.where('created_at >= ?', filters[:date_from])
+        date_from = filters[:date_from].is_a?(Date) ? filters[:date_from].beginning_of_day : filters[:date_from]
+        @query_scope = @query_scope.where('created_at >= ?', date_from)
       end
       
       if filters[:date_to].present?
-        @query_scope = @query_scope.where('created_at <= ?', filters[:date_to])
+        date_to = filters[:date_to].is_a?(Date) ? filters[:date_to].end_of_day : filters[:date_to]
+        @query_scope = @query_scope.where('created_at <= ?', date_to)
       end
     end
 
@@ -97,12 +99,12 @@ module Recordings
     end
 
     def apply_pagination!
-      @page = (page || 1).to_i
+      @current_page = (page || 1).to_i
       @per_page = [(per_page || 20).to_i, 100].min # Cap at 100 per page
       
       @total_count = @query_scope.count
       @total_pages = (@total_count.to_f / @per_page).ceil
-      @current_page = [@page, @total_pages].min
+      @current_page = [@current_page, @total_pages].min
       
       offset = (@current_page - 1) * @per_page
       @recordings = @query_scope.limit(@per_page).offset(offset)

@@ -3,7 +3,6 @@ module Tournaments
     attr_accessor :tournament, :prize_definitions
 
     validates :tournament, presence: true
-    validates :prize_definitions, presence: true
     validate :tournament_not_completed_or_cancelled
     validate :prize_definitions_valid
 
@@ -40,7 +39,18 @@ module Tournaments
     end
 
     def prize_definitions_valid
-      return unless prize_definitions.is_a?(Array)
+      if prize_definitions.nil?
+        errors.add(:prize_definitions, "can't be blank")
+        return
+      end
+
+      unless prize_definitions.is_a?(Array)
+        errors.add(:prize_definitions, "must be an array of hashes")
+        return
+      end
+
+      # Allow empty arrays
+      return if prize_definitions.empty?
 
       prize_definitions.each_with_index do |prize_def, index|
         unless prize_def.is_a?(Hash)

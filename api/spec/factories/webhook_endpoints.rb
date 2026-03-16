@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :webhook_endpoint do
     association :organization
-    url { "https://example.com/webhooks/#{SecureRandom.hex(8)}" }
+    sequence(:url) { |n| "https://example.com/webhooks/endpoint-#{n}-#{SecureRandom.hex(4)}" }
     events { ["booking.created", "booking.cancelled"] }
     active { true }
     description { "Test webhook endpoint" }

@@ -4,7 +4,7 @@ RSpec.describe Recordings::SearchService, type: :service do
   let(:organization) { create(:organization) }
   let!(:recording1) { create(:call_recording, organization: organization, created_at: 2.days.ago) }
   let!(:recording2) { create(:call_recording, organization: organization, created_at: 1.day.ago) }
-  let!(:recording3) { create(:call_recording, organization: organization, status: 'failed') }
+  let!(:recording3) { create(:call_recording, organization: organization, status: 'failed', created_at: 1.day.from_now) }
 
   describe '.call' do
     context 'with basic search' do
@@ -104,16 +104,12 @@ RSpec.describe Recordings::SearchService, type: :service do
 
       # Note: This test assumes VoiceCallLog has caller_id and caller_name fields
       it 'filters by caller information' do
-        # Mock the voice call logs query since we don't have the exact schema
-        allow_any_instance_of(described_class).to receive(:apply_caller_filter!) do
-          @query_scope = @query_scope.where(id: recording_with_caller.id)
-        end
-
         result = described_class.call(
           organization: organization,
           filters: { caller: '+1234567890' }
         )
 
+        expect(result).to be_success
         expect(result.recordings).to include(recording_with_caller)
       end
     end
