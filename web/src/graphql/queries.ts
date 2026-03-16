@@ -687,6 +687,30 @@ export const GET_REPORTS_SUMMARY = gql`
   }
 `;
 
+export const GET_UTILIZATION_HEAT_MAP = gql`
+  query GetUtilizationHeatMap($courseId: ID, $startDate: ISO8601Date!, $endDate: ISO8601Date!) {
+    utilizationHeatMap(courseId: $courseId, startDate: $startDate, endDate: $endDate) {
+      cells {
+        date
+        hour
+        bookedPlayers
+        totalCapacity
+        slotCount
+        utilizationPercentage
+      }
+      summary {
+        overallUtilization
+        totalBookedPlayers
+        totalCapacity
+        peakHour
+        peakHourUtilization
+        peakDayOfWeek
+        peakDayUtilization
+      }
+    }
+  }
+`;
+
 // Golfer Segments
 export const GET_GOLFER_SEGMENTS = gql`
   query GetGolferSegments {
