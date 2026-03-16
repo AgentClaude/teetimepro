@@ -40,6 +40,7 @@ class TeeSheets::SearchTeeTimesService < ApplicationService
     query = apply_players_filter(query)
     query = apply_time_preference_filter(query)
     query = apply_status_filter(query)
+    query = exclude_past_tee_times(query)
 
     query.order("tee_sheets.date", "tee_times.starts_at")
   end
@@ -195,5 +196,10 @@ class TeeSheets::SearchTeeTimesService < ApplicationService
 
   def organization_timezone
     organization.try(:timezone) || "UTC"
+  end
+
+  # Filter out tee times that have already passed (only applies to today/past dates)
+  def exclude_past_tee_times(query)
+    query.where("tee_times.starts_at > ?", Time.current)
   end
 end
