@@ -16,6 +16,7 @@ class User < ApplicationRecord
   has_many :waitlist_entries, dependent: :destroy
   has_many :prepaid_purchases, dependent: :destroy
   has_many :prepaid_redemptions, dependent: :destroy
+  has_many :device_tokens, dependent: :destroy
 
   enum :role, { golfer: 0, staff: 1, pro_shop: 2, manager: 3, admin: 4, owner: 5 }
 

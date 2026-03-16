@@ -108,6 +108,11 @@ module Types
     field :update_email_template, mutation: Mutations::UpdateEmailTemplate
     field :seed_booking_templates, mutation: Mutations::SeedBookingTemplates
 
+    # Push notifications
+    field :register_device_token, mutation: Mutations::RegisterDeviceToken
+    field :unregister_device_token, mutation: Mutations::UnregisterDeviceToken
+    field :send_promotional_push, mutation: Mutations::SendPromotionalPush
+
     # Waitlist
     field :join_waitlist, mutation: Mutations::JoinWaitlist
     field :leave_waitlist, mutation: Mutations::LeaveWaitlist

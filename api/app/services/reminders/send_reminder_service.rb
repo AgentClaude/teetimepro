@@ -40,6 +40,9 @@ module Reminders
 
       BookingReminderMailer.public_send(mailer_method, booking: booking, organization: organization).deliver_now
 
+      # Also send push notification
+      send_push_reminder(booking, type)
+
       timestamp_column = type == :reminder_24h ? :reminder_sent_at : :morning_reminder_sent_at
       booking.update_column(timestamp_column, Time.current)
 
@@ -50,6 +53,19 @@ module Reminders
         "Failed to send #{type} reminder for booking #{booking.id}: #{e.message}"
       )
       results[:errors] << { booking_id: booking.id, type: type, error: e.message }
+    end
+
+    def send_push_reminder(booking, type)
+      reminder_type = type == :reminder_24h ? "24h" : "morning_of"
+      PushNotifications::SendBookingReminderPushService.call(
+        booking: booking,
+        reminder_type: reminder_type
+      )
+    rescue StandardError => e
+      # Push notification failures should not break the reminder flow
+      Rails.logger.error(
+        "Failed to send push reminder for booking #{booking.id}: #{e.message}"
+      )
     end
 
     def bookings_needing_24h_reminder
