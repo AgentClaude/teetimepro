@@ -59,7 +59,7 @@ export function BookingList({ bookings, onViewBooking, onCancelBooking }: Bookin
                 {booking.confirmationCode}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
-                {booking.teeTime.course.name}
+                {booking.teeTime?.course?.name || '—'}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
                 {new Date(booking.teeTime.startsAt).toLocaleString()}

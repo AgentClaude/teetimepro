@@ -1,6 +1,7 @@
 module Types
   class TeeTimeType < Types::BaseObject
     field :id, ID, null: false
+    field :course, Types::CourseType, null: false
     field :starts_at, GraphQL::Types::ISO8601DateTime, null: false
     field :formatted_time, String, null: false
     field :status, String, null: false

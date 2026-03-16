@@ -205,6 +205,10 @@ export const GET_BOOKINGS = gql`
         id
         startsAt
         formattedTime
+        course {
+          id
+          name
+        }
       }
       user {
         id
