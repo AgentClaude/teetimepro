@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_COURSES } from '../graphql/queries';
+import { useAuth } from '../hooks/useAuth';
 import type { Course } from '../types';
 
 interface CourseContextValue {
@@ -20,8 +21,8 @@ const CourseContext = createContext<CourseContextValue>({
 });
 
 export function CourseProvider({ children }: { children: ReactNode }) {
-  const hasToken = !!localStorage.getItem('auth_token');
-  const { data, loading } = useQuery(GET_COURSES, { skip: !hasToken });
+  const { isAuthenticated } = useAuth();
+  const { data, loading } = useQuery(GET_COURSES, { skip: !isAuthenticated });
   const courses: Course[] = useMemo(() => data?.courses || [], [data?.courses]);
 
   const [selectedCourseId, setSelectedCourseIdState] = useState<string>(() => {
