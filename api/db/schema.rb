@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_16_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -185,6 +185,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
     t.index ["organization_id", "status"], name: "index_call_transcriptions_on_organization_id_and_status"
     t.index ["organization_id"], name: "index_call_transcriptions_on_organization_id"
     t.index ["voice_call_log_id"], name: "index_call_transcriptions_on_voice_call_log_id"
+  end
+
+  create_table "course_gps_features", force: :cascade do |t|
+    t.bigint "course_hole_id", null: false
+    t.integer "feature_type", default: 0, null: false
+    t.string "name", null: false
+    t.decimal "latitude", precision: 10, scale: 7, null: false
+    t.decimal "longitude", precision: 10, scale: 7, null: false
+    t.decimal "elevation_feet", precision: 8, scale: 2
+    t.integer "distance_from_tee_yards"
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_hole_id", "feature_type"], name: "index_course_gps_features_on_course_hole_id_and_feature_type"
+    t.index ["course_hole_id"], name: "index_course_gps_features_on_course_hole_id"
   end
 
   create_table "course_holes", force: :cascade do |t|
@@ -759,6 +774,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "player_locations", force: :cascade do |t|
+    t.bigint "booking_id", null: false
+    t.bigint "course_id", null: false
+    t.bigint "rangefinder_device_id"
+    t.decimal "latitude", precision: 10, scale: 7, null: false
+    t.decimal "longitude", precision: 10, scale: 7, null: false
+    t.decimal "accuracy_meters", precision: 8, scale: 2
+    t.integer "current_hole"
+    t.datetime "recorded_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id", "recorded_at"], name: "index_player_locations_on_booking_id_and_recorded_at"
+    t.index ["booking_id"], name: "index_player_locations_on_booking_id"
+    t.index ["course_id", "recorded_at"], name: "index_player_locations_on_course_id_and_recorded_at"
+    t.index ["course_id"], name: "index_player_locations_on_course_id"
+    t.index ["rangefinder_device_id"], name: "index_player_locations_on_rangefinder_device_id"
+  end
+
   create_table "pos_products", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "course_id", null: false
@@ -869,6 +902,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
     t.index ["organization_id", "rule_type"], name: "index_pricing_rules_on_organization_id_and_rule_type"
     t.index ["organization_id"], name: "index_pricing_rules_on_organization_id"
     t.index ["priority"], name: "index_pricing_rules_on_priority"
+  end
+
+  create_table "rangefinder_devices", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "device_id", null: false
+    t.string "name", null: false
+    t.integer "device_type", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.string "firmware_version"
+    t.decimal "battery_level", precision: 5, scale: 2
+    t.datetime "last_seen_at"
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "device_id"], name: "index_rangefinder_devices_on_organization_id_and_device_id", unique: true
+    t.index ["organization_id"], name: "index_rangefinder_devices_on_organization_id"
   end
 
   create_table "rounds", force: :cascade do |t|
@@ -1298,6 +1347,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
   add_foreign_key "call_transcriptions", "call_recordings"
   add_foreign_key "call_transcriptions", "organizations"
   add_foreign_key "call_transcriptions", "voice_call_logs"
+  add_foreign_key "course_gps_features", "course_holes"
   add_foreign_key "course_holes", "courses", on_delete: :cascade
   add_foreign_key "courses", "organizations", on_delete: :cascade
   add_foreign_key "device_tokens", "organizations"
@@ -1355,6 +1405,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
   add_foreign_key "payments", "bookings", on_delete: :cascade
   add_foreign_key "payments", "organizations", on_delete: :cascade
   add_foreign_key "payments", "users", on_delete: :nullify
+  add_foreign_key "player_locations", "bookings"
+  add_foreign_key "player_locations", "courses"
+  add_foreign_key "player_locations", "rangefinder_devices"
   add_foreign_key "pos_products", "courses"
   add_foreign_key "pos_products", "organizations"
   add_foreign_key "prepaid_packages", "courses", on_delete: :nullify
@@ -1368,6 +1421,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_072448) do
   add_foreign_key "prepaid_redemptions", "users", on_delete: :cascade
   add_foreign_key "pricing_rules", "courses"
   add_foreign_key "pricing_rules", "organizations"
+  add_foreign_key "rangefinder_devices", "organizations"
   add_foreign_key "rounds", "courses", on_delete: :nullify
   add_foreign_key "rounds", "golfer_profiles", on_delete: :cascade
   add_foreign_key "scorecards", "bookings", on_delete: :nullify
