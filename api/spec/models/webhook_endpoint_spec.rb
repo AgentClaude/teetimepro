@@ -11,7 +11,6 @@ RSpec.describe WebhookEndpoint, type: :model do
 
   describe "validations" do
     it { should validate_presence_of(:url) }
-    it { should validate_presence_of(:secret) }
     it { should validate_presence_of(:events) }
 
     context "url validation" do

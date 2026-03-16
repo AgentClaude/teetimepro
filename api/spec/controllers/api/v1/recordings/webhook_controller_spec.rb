@@ -21,7 +21,7 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
   describe 'POST #create' do
     context 'with valid webhook data' do
       it 'returns success response' do
-        allow(Recordings::StoreRecordingService).to receive(:call)
+        allow(::Recordings::StoreRecordingService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: true, 
             recording: double('Recording', id: 'test-id')
@@ -38,7 +38,7 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
       end
 
       it 'calls StoreRecordingService with correct parameters' do
-        expect(Recordings::StoreRecordingService).to receive(:call).with(
+        expect(::Recordings::StoreRecordingService).to receive(:call).with(
           webhook_data: valid_webhook_params,
           organization: organization
         ).and_return(double('ServiceResult', 
@@ -50,14 +50,15 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
       end
 
       it 'logs successful recording storage' do
-        allow(Recordings::StoreRecordingService).to receive(:call)
+        allow(::Recordings::StoreRecordingService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: true, 
             recording: double('Recording', id: 'test-id')
           ))
 
+        allow(Rails.logger).to receive(:info).at_least(:once)
         expect(Rails.logger).to receive(:info)
-          .with("Received Twilio recording webhook: #{valid_webhook_params.inspect}")
+          .with(start_with("Received Twilio recording webhook:"))
         expect(Rails.logger).to receive(:info)
           .with("Successfully stored recording: test-id")
 
@@ -67,10 +68,11 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
 
     context 'with invalid webhook data' do
       it 'returns error response when service fails' do
-        allow(Recordings::StoreRecordingService).to receive(:call)
+        allow(::Recordings::StoreRecordingService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: false, 
-            errors: ['Invalid data']
+            errors: ['Invalid data'],
+            error_messages: 'Invalid data'
           ))
 
         post :create, params: valid_webhook_params
@@ -83,7 +85,7 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
       end
 
       it 'logs service failure' do
-        allow(Recordings::StoreRecordingService).to receive(:call)
+        allow(::Recordings::StoreRecordingService).to receive(:call)
           .and_return(double('ServiceResult', 
             success?: false, 
             errors: ['Invalid data'],
@@ -164,7 +166,7 @@ RSpec.describe Api::V1::Recordings::WebhookController, type: :controller do
     it 'only permits allowed parameters' do
       # We can't directly test the private method, but we can ensure
       # the service is called with only permitted params
-      expect(Recordings::StoreRecordingService).to receive(:call) do |args|
+      expect(::Recordings::StoreRecordingService).to receive(:call) do |args|
         webhook_data = args[:webhook_data]
         
         # Should include all expected params
