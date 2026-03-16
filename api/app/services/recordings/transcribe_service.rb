@@ -123,7 +123,8 @@ module Recordings
         transcription_text: @transcript_text,
         confidence_score: @confidence_score,
         raw_response: @raw_response,
-        status: 'completed'
+        status: 'completed',
+        word_count: @transcript_text.split.length
       )
       
       Rails.logger.info "Completed transcription for recording: #{call_recording.id}"

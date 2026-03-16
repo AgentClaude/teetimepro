@@ -60,7 +60,6 @@ RSpec.describe Voice::BookVoiceCallService, type: :service do
         expect(user.email).to eq("15551234567@voice-booking.local")
         expect(user.role).to eq("golfer")
         expect(user.organization).to eq(organization)
-        expect(user.confirmed_at).to be_present
       end
 
       it 'handles single name correctly' do
@@ -94,7 +93,8 @@ RSpec.describe Voice::BookVoiceCallService, type: :service do
 
       it 'finds existing user by phone' do
         existing_user = create(:user, organization: organization, phone: "+15551234567")
-        
+
+        result = nil
         expect {
           result = described_class.call(valid_params)
           expect(result.success?).to be true

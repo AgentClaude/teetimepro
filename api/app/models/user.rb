@@ -23,7 +23,7 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: true
   validates :first_name, presence: true
-  validates :last_name, presence: true
+  validates :last_name, length: { maximum: 255 }
   validates :role, presence: true
 
   def full_name

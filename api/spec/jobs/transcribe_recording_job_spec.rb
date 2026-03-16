@@ -17,20 +17,21 @@ RSpec.describe TranscribeRecordingJob, type: :job do
       it 'logs success when transcription succeeds' do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_return(double('ServiceResult', success?: true))
-
-        expect(Rails.logger).to receive(:info)
-          .with("Starting transcription job for recording: #{call_recording.id}")
-        expect(Rails.logger).to receive(:info)
-          .with("Successfully transcribed recording: #{call_recording.id}")
+        allow(Rails.logger).to receive(:info)
 
         described_class.perform_now(call_recording.id)
+
+        expect(Rails.logger).to have_received(:info)
+          .with("Starting transcription job for recording: #{call_recording.id}")
+        expect(Rails.logger).to have_received(:info)
+          .with("Successfully transcribed recording: #{call_recording.id}")
       end
     end
 
     context 'when transcription fails' do
       let(:failed_result) do
-        double('ServiceResult', 
-          success?: false, 
+        double('ServiceResult',
+          success?: false,
           error_messages: 'Transcription failed'
         )
       end
@@ -38,13 +39,15 @@ RSpec.describe TranscribeRecordingJob, type: :job do
       it 'logs error and raises exception' do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_return(failed_result)
-
-        expect(Rails.logger).to receive(:error)
-          .with("Failed to transcribe recording #{call_recording.id}: Transcription failed")
+        allow(Rails.logger).to receive(:info)
+        allow(Rails.logger).to receive(:error)
 
         expect {
           described_class.perform_now(call_recording.id)
         }.to raise_error(StandardError, 'Transcription failed: Transcription failed')
+
+        expect(Rails.logger).to have_received(:error)
+          .with("Failed to transcribe recording #{call_recording.id}: Transcription failed").at_least(:once)
       end
     end
 
@@ -60,6 +63,7 @@ RSpec.describe TranscribeRecordingJob, type: :job do
       it 'allows exception to bubble up for retry handling' do
         allow(Recordings::TranscribeService).to receive(:call)
           .and_raise(StandardError, 'Unexpected error')
+        allow(Rails.logger).to receive(:info)
 
         expect {
           described_class.perform_now(call_recording.id)
@@ -70,7 +74,8 @@ RSpec.describe TranscribeRecordingJob, type: :job do
 
   describe 'job configuration' do
     it 'is configured to retry on StandardError' do
-      expect(described_class.retry_on).to include(StandardError)
+      handler = described_class.rescue_handlers.detect { |h| h.first == "StandardError" }
+      expect(handler).to be_present
     end
 
     it 'uses the default queue' do

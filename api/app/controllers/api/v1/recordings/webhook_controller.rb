@@ -22,7 +22,7 @@ module Api
 
           organization = voice_call_log.organization
 
-          result = Recordings::StoreRecordingService.call(
+          result = ::Recordings::StoreRecordingService.call(
             webhook_data: webhook_params.to_h,
             organization: organization
           )
