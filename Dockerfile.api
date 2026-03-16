@@ -43,8 +43,15 @@ COPY --from=builder /app .
 # Set Rails environment
 ENV RAILS_ENV=production
 
-# Create necessary directories
-RUN mkdir -p tmp/pids tmp/sockets log storage
+# Create non-root user
+RUN groupadd -r app && useradd -r -g app app
+
+# Create necessary directories and set permissions
+RUN mkdir -p tmp/pids tmp/sockets log storage && \
+    chown -R app:app /app
+
+# Switch to non-root user
+USER app
 
 # Expose port
 EXPOSE 3000
