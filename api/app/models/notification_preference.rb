@@ -3,11 +3,11 @@ class NotificationPreference < ApplicationRecord
 
   belongs_to :user
 
-  # Validation for reminder hours before booking
-  validates :reminder_hours_before, inclusion: { in: REMINDER_HOURS_OPTIONS }
-
   # Constant for available reminder hours options
   REMINDER_HOURS_OPTIONS = [1, 2, 4, 12, 24, 48].freeze
+
+  # Validation for reminder hours before booking
+  validates :reminder_hours_before, inclusion: { in: REMINDER_HOURS_OPTIONS }
 
   # Default preferences for new users
   def self.default_preferences

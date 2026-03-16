@@ -93,6 +93,7 @@ export function NotificationPreferencesCard() {
   });
 
   // Debounced update function to avoid too many API calls
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedUpdate = useCallback(
     debounce(async (preferences: Partial<NotificationPreference>) => {
       setIsUpdating(true);
