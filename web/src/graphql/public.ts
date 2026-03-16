@@ -18,7 +18,7 @@ export const GET_PUBLIC_COURSE = gql`
 `;
 
 export const GET_PUBLIC_AVAILABLE_TEE_TIMES = gql`
-  query GetPublicAvailableTeeTimes($courseSlug: String!, $date: Date!, $players: Int, $timePreference: String) {
+  query GetPublicAvailableTeeTimes($courseSlug: String!, $date: ISO8601Date!, $players: Int, $timePreference: String) {
     publicAvailableTeeTimes(
       courseSlug: $courseSlug
       date: $date
