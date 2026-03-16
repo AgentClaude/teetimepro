@@ -6,6 +6,8 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require "rspec/rails"
 require "factory_bot_rails"
 require "database_cleaner/active_record"
+require "webmock/rspec"
+WebMock.disable_net_connect!(allow_localhost: true)
 
 # Requires supporting ruby files in spec/support/
 Dir[Rails.root.join("spec", "support", "**", "*.rb")].each { |f| require f }
