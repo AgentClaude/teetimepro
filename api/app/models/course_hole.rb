@@ -1,5 +1,6 @@
 class CourseHole < ApplicationRecord
   belongs_to :course
+  has_many :gps_features, class_name: "CourseGpsFeature", dependent: :destroy
 
   validates :hole_number, presence: true, inclusion: { in: 1..36 },
             uniqueness: { scope: :course_id, message: "already configured for this course" }

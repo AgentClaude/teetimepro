@@ -1236,5 +1236,71 @@ module Types
     def course_holes(course_id:)
       CourseHole.where(course_id: course_id).ordered
     end
+
+    # GPS & Rangefinder queries
+    field :course_gps_features, [Types::CourseGpsFeatureType], null: false,
+      description: "GPS features for a course, optionally filtered by hole" do
+      argument :course_id, ID, required: true
+      argument :hole_number, Integer, required: false
+      argument :feature_type, Types::GpsFeatureTypeEnum, required: false
+    end
+    def course_gps_features(course_id:, hole_number: nil, feature_type: nil)
+      require_auth!
+      course = Course.where(organization: current_organization).find(course_id)
+
+      features = course.course_gps_features.includes(:course_hole)
+      features = features.for_hole(hole_number) if hole_number
+      features = features.where(feature_type: feature_type) if feature_type
+      features.order(:id)
+    end
+
+    field :hole_gps_overview, GraphQL::Types::JSON, null: true,
+      description: "Complete GPS overview for a specific hole with optional distance calculations" do
+      argument :course_id, ID, required: true
+      argument :hole_number, Integer, required: true
+      argument :player_latitude, Float, required: false
+      argument :player_longitude, Float, required: false
+    end
+    def hole_gps_overview(course_id:, hole_number:, player_latitude: nil, player_longitude: nil)
+      require_auth!
+      course = Course.where(organization: current_organization).find(course_id)
+
+      result = Gps::GetHoleOverviewService.call(
+        course: course,
+        hole_number: hole_number,
+        player_latitude: player_latitude,
+        player_longitude: player_longitude
+      )
+
+      return nil unless result.success?
+      result.data[:overview]
+    end
+
+    field :rangefinder_devices, [Types::RangefinderDeviceObjectType], null: false,
+      description: "Registered rangefinder devices for the organization" do
+      argument :status, Types::RangefinderDeviceStatusEnum, required: false
+      argument :device_type, Types::RangefinderDeviceTypeEnum, required: false
+    end
+    def rangefinder_devices(status: nil, device_type: nil)
+      require_auth!
+      devices = RangefinderDevice.where(organization: current_organization)
+      devices = devices.where(status: status) if status
+      devices = devices.where(device_type: device_type) if device_type
+      devices.order(:name)
+    end
+
+    field :player_locations, [Types::PlayerLocationType], null: false,
+      description: "Recent player locations on a course" do
+      argument :course_id, ID, required: true
+      argument :hole_number, Integer, required: false
+    end
+    def player_locations(course_id:, hole_number: nil)
+      require_auth!
+      course = Course.where(organization: current_organization).find(course_id)
+
+      locations = course.player_locations.recent.includes(:booking, :rangefinder_device)
+      locations = locations.for_hole(hole_number) if hole_number
+      locations
+    end
   end
 end
