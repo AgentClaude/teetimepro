@@ -129,9 +129,12 @@ RSpec.describe WebhookDeliveryJob, type: :job do
       end
 
       it "can be delayed for retry scenarios" do
-        expect {
-          WebhookDeliveryJob.set(wait: 1.hour).perform_later(webhook_event.id)
-        }.to have_enqueued_job(WebhookDeliveryJob).with(webhook_event.id).at(1.hour.from_now)
+        freeze_time do
+          expected_time = 1.hour.from_now
+          expect {
+            WebhookDeliveryJob.set(wait: 1.hour).perform_later(webhook_event.id)
+          }.to have_enqueued_job(WebhookDeliveryJob).with(webhook_event.id).at(expected_time)
+        end
       end
 
       it "executes the perform method when processed" do

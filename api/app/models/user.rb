@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   belongs_to :organization
   has_many :bookings, dependent: :destroy
+  has_many :memberships, dependent: :destroy
   has_one :golfer_profile, dependent: :destroy
   has_many :tournament_entries, dependent: :destroy
   has_many :tournaments_entered, through: :tournament_entries, source: :tournament

@@ -106,12 +106,48 @@ RSpec.describe Tournaments::FinalizeResultsService, type: :service do
 
     context 'when tournament is already completed' do
       let(:completed_tournament) { create(:tournament, :completed, organization: organization) }
+      let!(:completed_entry1) { create(:tournament_entry, tournament: completed_tournament) }
+      let!(:completed_entry2) { create(:tournament_entry, tournament: completed_tournament) }
+      let!(:completed_entry3) { create(:tournament_entry, tournament: completed_tournament) }
       let(:service) { described_class.new(tournament: completed_tournament) }
+
+      let(:completed_mock_leaderboard_entries) do
+        [
+          {
+            entry_id: completed_entry1.id,
+            position: 1,
+            total_strokes: 69,
+            total_to_par: -3,
+            tied: false
+          },
+          {
+            entry_id: completed_entry2.id,
+            position: 2,
+            total_strokes: 72,
+            total_to_par: 0,
+            tied: false
+          },
+          {
+            entry_id: completed_entry3.id,
+            position: 3,
+            total_strokes: 75,
+            total_to_par: 3,
+            tied: false
+          }
+        ]
+      end
+
+      let(:completed_mock_leaderboard_result) do
+        ServiceResult.new(
+          success: true,
+          data: { entries: completed_mock_leaderboard_entries }
+        )
+      end
 
       before do
         allow(Leaderboard::CalculateService).to receive(:call)
           .with(tournament: completed_tournament)
-          .and_return(mock_leaderboard_result)
+          .and_return(completed_mock_leaderboard_result)
       end
 
       it 'works for completed tournaments' do
