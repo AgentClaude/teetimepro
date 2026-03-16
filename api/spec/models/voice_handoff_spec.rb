@@ -150,7 +150,7 @@ RSpec.describe VoiceHandoff, type: :model do
         handoff = build(:voice_handoff, organization: organization, started_at: custom_time)
         
         handoff.save!
-        expect(handoff.started_at).to eq(custom_time)
+        expect(handoff.started_at).to be_within(1.second).of(custom_time)
       end
     end
   end

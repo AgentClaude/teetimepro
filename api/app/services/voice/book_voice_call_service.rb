@@ -65,7 +65,7 @@ module Voice
       # Split caller name into first/last
       name_parts = caller_name.strip.split(/\s+/)
       first_name = name_parts[0]
-      last_name = name_parts.length > 1 ? name_parts[1..].join(" ") : ""
+      last_name = name_parts.length > 1 ? name_parts[1..].join(" ") : "(Voice Caller)"
 
       # Normalize phone number
       normalized_phone = normalize_phone_number(caller_phone)

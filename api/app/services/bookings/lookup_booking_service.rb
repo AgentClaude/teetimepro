@@ -2,7 +2,7 @@
 
 module Bookings
   class LookupBookingService < ApplicationService
-    attr_accessor :confirmation_code, :email
+    attr_accessor :confirmation_code, :email, :organization
 
     validates :confirmation_code, presence: true
     validates :email, presence: true
@@ -10,8 +10,12 @@ module Bookings
     def call
       return validation_failure(self) unless valid?
 
-      booking = Booking
-        .joins(:user)
+      bookings_scope = Booking.joins(:user)
+      
+      # If organization is provided, scope to that organization
+      bookings_scope = bookings_scope.for_organization(organization) if organization
+
+      booking = bookings_scope
         .where(confirmation_code: confirmation_code.strip.upcase)
         .where("LOWER(users.email) = ?", email.strip.downcase)
         .includes(tee_time: { tee_sheet: :course }, user: [], booking_players: [])

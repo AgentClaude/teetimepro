@@ -211,7 +211,7 @@ RSpec.describe Mutations::UpdateVoiceHandoff do
         result = execute_query(query, variables: variables, context: context)
         
         expect(result["errors"]).to be_present
-        expect(result["errors"].first["message"]).to include("find")
+        expect(result["errors"].first["message"]).to include("not found")
       end
     end
 

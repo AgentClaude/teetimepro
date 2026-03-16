@@ -51,7 +51,7 @@ RSpec.describe LoyaltyAccount, type: :model do
 
   describe '#loyalty_program' do
     let(:organization) { create(:organization) }
-    let(:loyalty_program) { create(:loyalty_program, organization: organization) }
+    let!(:loyalty_program) { create(:loyalty_program, organization: organization) }
     let(:account) { create(:loyalty_account, organization: organization) }
 
     it 'returns the active loyalty program for the organization' do

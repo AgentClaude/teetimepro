@@ -50,7 +50,11 @@ RSpec.describe Waitlists::NotifyService do
       let(:tee_time) { create(:tee_time, :past, tee_sheet: tee_sheet) }
 
       it "does not notify anyone" do
-        create(:waitlist_entry, tee_time: tee_time, organization: organization)
+        # Create a waitlist entry first with a future tee time, then change it
+        future_tee_time = create(:tee_time, tee_sheet: tee_sheet)
+        entry = create(:waitlist_entry, tee_time: future_tee_time, organization: organization)
+        entry.update_column(:tee_time_id, tee_time.id)
+        
         expect(result).to be_success
         expect(result.data.notified_count).to eq(0)
       end

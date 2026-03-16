@@ -2,9 +2,16 @@ require 'rails_helper'
 
 RSpec.describe Recordings::SearchService, type: :service do
   let(:organization) { create(:organization) }
-  let!(:recording1) { create(:call_recording, organization: organization, created_at: 2.days.ago) }
-  let!(:recording2) { create(:call_recording, organization: organization, created_at: 1.day.ago) }
-  let!(:recording3) { create(:call_recording, organization: organization, status: 'failed') }
+  
+  around do |example|
+    travel_to(Date.current.noon) do
+      example.run
+    end
+  end
+  
+  let!(:recording1) { create(:call_recording, organization: organization, created_at: 2.days.ago.noon) }
+  let!(:recording2) { create(:call_recording, organization: organization, created_at: 1.day.ago.noon) }
+  let!(:recording3) { create(:call_recording, organization: organization, status: 'failed', created_at: Time.current) }
 
   describe '.call' do
     context 'with basic search' do
@@ -65,7 +72,7 @@ RSpec.describe Recordings::SearchService, type: :service do
           organization: organization,
           filters: { 
             date_from: 1.5.days.ago.to_date,
-            date_to: 0.5.days.ago.to_date
+            date_to: 1.day.ago.to_date
           }
         )
 
@@ -104,17 +111,13 @@ RSpec.describe Recordings::SearchService, type: :service do
 
       # Note: This test assumes VoiceCallLog has caller_id and caller_name fields
       it 'filters by caller information' do
-        # Mock the voice call logs query since we don't have the exact schema
-        allow_any_instance_of(described_class).to receive(:apply_caller_filter!) do
-          @query_scope = @query_scope.where(id: recording_with_caller.id)
-        end
-
         result = described_class.call(
           organization: organization,
           filters: { caller: '+1234567890' }
         )
 
-        expect(result.recordings).to include(recording_with_caller)
+        expect(result).to be_success
+        expect(result.data[:recordings]).to include(recording_with_caller)
       end
     end
 

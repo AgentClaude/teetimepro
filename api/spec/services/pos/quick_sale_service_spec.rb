@@ -97,16 +97,17 @@ RSpec.describe Pos::QuickSaleService do
       let(:other_org) { create(:organization) }
       let(:other_user) { create(:user, organization: other_org) }
 
-      it 'raises authorization error' do
-        expect {
-          described_class.call(
-            organization: org,
-            user: other_user,
-            course: course,
-            golfer_name: 'John Doe',
-            items: items
-          )
-        }.to raise_error(AuthorizationError)
+      it 'returns failure result for wrong organization' do
+        result = described_class.call(
+          organization: org,
+          user: other_user,
+          course: course,
+          golfer_name: 'John Doe',
+          items: items
+        )
+        
+        expect(result).to be_failure
+        expect(result.errors).to be_present
       end
     end
   end

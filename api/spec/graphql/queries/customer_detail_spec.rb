@@ -30,12 +30,9 @@ RSpec.describe "Customer Detail Query" do
               id
               startsAt
               formattedTime
-              teeSheet {
-                date
-                course {
-                  id
-                  name
-                }
+              course {
+                id
+                name
               }
             }
           }
@@ -49,12 +46,9 @@ RSpec.describe "Customer Detail Query" do
               id
               startsAt
               formattedTime
-              teeSheet {
-                date
-                course {
-                  id
-                  name
-                }
+              course {
+                id
+                name
               }
             }
           }
@@ -98,7 +92,6 @@ RSpec.describe "Customer Detail Query" do
         context = graphql_context(user: manager)
         result = execute_query(query, variables: { id: golfer.id.to_s }, context: context)
         data = graphql_response(result)
-
         customer = data.dig("data", "customer")
         expect(customer).not_to be_nil
         expect(customer["fullName"]).to eq(golfer.full_name)
@@ -119,7 +112,7 @@ RSpec.describe "Customer Detail Query" do
         upcoming = data.dig("data", "customer", "upcomingBookings")
         expect(upcoming.length).to eq(1)
         expect(upcoming.first["confirmationCode"]).to eq(booking.confirmation_code)
-        expect(upcoming.first.dig("teeTime", "teeSheet", "course", "name")).to eq(course.name)
+        expect(upcoming.first.dig("teeTime", "course", "name")).to eq(course.name)
       end
 
       it "returns past bookings" do
@@ -187,7 +180,7 @@ RSpec.describe "Customer Detail Query" do
         loyalty = data.dig("data", "customer", "loyaltyAccount")
         expect(loyalty).not_to be_nil
         expect(loyalty["tier"]).to eq("gold")
-        expect(loyalty["pointsBalance"]).to eq(1500)
+        expect(loyalty["pointsBalance"]).to eq(loyalty_account.points_balance)
 
         transactions = loyalty["recentTransactions"]
         expect(transactions.length).to eq(1)

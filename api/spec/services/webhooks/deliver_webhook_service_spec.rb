@@ -158,6 +158,9 @@ RSpec.describe Webhooks::DeliverWebhookService, type: :service do
 
     context "HTTP configuration" do
       it "uses SSL for HTTPS URLs" do
+        stub_request(:post, webhook_endpoint.url)
+          .to_return(status: 200, body: "OK")
+
         described_class.call(webhook_event: webhook_event)
 
         # Verify SSL was used (WebMock handles this automatically for https)

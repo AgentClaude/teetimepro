@@ -70,6 +70,6 @@ class Booking < ApplicationRecord
   private
 
   def generate_confirmation_code
-    self.confirmation_code = SecureRandom.alphanumeric(8).upcase
+    self.confirmation_code ||= SecureRandom.alphanumeric(8).upcase
   end
 end

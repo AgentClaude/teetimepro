@@ -15,9 +15,14 @@ module Webhooks
         secret: secret
       )
 
-      if webhook_endpoint.save
-        success(webhook_endpoint: webhook_endpoint)
-      else
+      begin
+        if webhook_endpoint.save
+          success(webhook_endpoint: webhook_endpoint)
+        else
+          validation_failure(webhook_endpoint)
+        end
+      rescue ActiveRecord::RecordNotUnique
+        webhook_endpoint.errors.add(:url, "has already been taken")
         validation_failure(webhook_endpoint)
       end
     end

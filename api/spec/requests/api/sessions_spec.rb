@@ -3,7 +3,16 @@ require "rails_helper"
 RSpec.describe "Api::Sessions", type: :request do
   let(:organization) { create(:organization) }
   let(:user) { create(:user, organization: organization, password: "password123") }
-  let(:secret) { ENV.fetch("JWT_SECRET_KEY", Rails.application.secret_key_base) }
+  before do
+    # Use a consistent JWT secret for tests — must also update both Devise
+    # and Warden configs since they are separate objects initialized at boot
+    @jwt_test_secret = "test-jwt-secret-key"
+    ENV["JWT_SECRET_KEY"] = @jwt_test_secret
+    Devise::JWT.config.secret = @jwt_test_secret
+    Warden::JWTAuth.config.secret = @jwt_test_secret
+  end
+
+  let(:secret) { @jwt_test_secret }
 
   describe "POST /api/auth/login" do
     it "returns access and refresh tokens on valid login" do

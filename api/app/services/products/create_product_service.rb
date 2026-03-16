@@ -25,10 +25,10 @@ module Products
         return validation_failure(product) unless product.persisted?
         
         # Create inventory level if tracking inventory
-        inventory_level = create_inventory_level(product) if track_inventory
+        inventory_level = create_inventory_level(product) if track_inventory == true
         
-        # Create initial stock movement if specified
-        initial_movement = create_initial_stock_movement(product) if initial_stock && initial_stock > 0
+        # Create initial stock movement if specified and tracking inventory
+        initial_movement = create_initial_stock_movement(product) if track_inventory == true && initial_stock && initial_stock > 0
         
         success(
           product: product,

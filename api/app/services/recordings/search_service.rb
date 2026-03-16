@@ -53,11 +53,13 @@ module Recordings
 
     def apply_date_range_filter!
       if filters[:date_from].present?
-        @query_scope = @query_scope.where('created_at >= ?', filters[:date_from])
+        date_from = filters[:date_from].is_a?(Date) ? filters[:date_from].beginning_of_day : filters[:date_from]
+        @query_scope = @query_scope.where('created_at >= ?', date_from)
       end
       
       if filters[:date_to].present?
-        @query_scope = @query_scope.where('created_at <= ?', filters[:date_to])
+        date_to = filters[:date_to].is_a?(Date) ? filters[:date_to].end_of_day : filters[:date_to]
+        @query_scope = @query_scope.where('created_at <= ?', date_to)
       end
     end
 
@@ -81,7 +83,12 @@ module Recordings
                                         "%#{filters[:caller]}%")
                                   .pluck(:id)
         
-        @query_scope = @query_scope.where(voice_call_log_id: call_log_ids)
+        if call_log_ids.any?
+          @query_scope = @query_scope.where(voice_call_log_id: call_log_ids)
+        else
+          # No matching call logs found, return empty result
+          @query_scope = @query_scope.none
+        end
       end
     end
 

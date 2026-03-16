@@ -111,18 +111,15 @@ RSpec.describe Calendars::SyncBookingService do
       end
 
       context "with expired token requiring refresh" do
-        let!(:expired_connection) do
-          create(
-            :calendar_connection,
-            user: user,
-            provider: "google",
-            enabled: true,
-            calendar_id: "primary",
+        before do
+          google_connection.update!(
             access_token: "expired_token",
             refresh_token: "refresh_token",
             token_expires_at: 1.hour.ago
           )
         end
+        
+        let(:expired_connection) { google_connection }
 
         before do
           # Mock successful token refresh

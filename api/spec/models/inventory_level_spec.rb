@@ -58,7 +58,7 @@ RSpec.describe InventoryLevel, type: :model do
   end
 
   describe 'scopes' do
-    let(:course2) { create(:course, organization: organization) }
+    let(:course2) { create(:course, organization: organization, name: "Second Course") }
     let(:product2) { create(:pos_product, organization: organization, course: course2) }
 
     before do
