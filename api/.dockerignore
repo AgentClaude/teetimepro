@@ -1,0 +1,45 @@
+# Version control
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Documentation
+README.md
+docs/
+
+# Test files
+spec/
+.rspec
+
+# Development files
+.env*
+!.env.example
+tmp/
+log/
+storage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Coverage
+coverage/
+
+# Node (if any)
+node_modules/
+
+# Bundler vendor cache (use gems from builder stage)
+vendor/bundle
