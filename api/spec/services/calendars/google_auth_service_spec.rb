@@ -6,13 +6,9 @@ RSpec.describe Calendars::GoogleAuthService do
   let(:authorization_code) { "auth_code_123" }
 
   before do
-    # Mock credentials
-    allow(Rails.application.credentials).to receive(:google).and_return(
-      OpenStruct.new(
-        client_id: "mock_client_id",
-        client_secret: "mock_client_secret"
-      )
-    )
+    # Mock credentials constants
+    stub_const("#{described_class}::GOOGLE_CLIENT_ID", "mock_client_id")
+    stub_const("#{described_class}::GOOGLE_CLIENT_SECRET", "mock_client_secret")
   end
 
   describe ".call" do

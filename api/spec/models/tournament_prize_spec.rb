@@ -34,7 +34,7 @@ RSpec.describe TournamentPrize, type: :model do
   end
 
   describe 'enums' do
-    it { should define_enum_for(:prize_type).with_values(cash: 0, voucher: 1, trophy: 2, merchandise: 3, custom: 4) }
+    it { should define_enum_for(:prize_type).with_values(cash: "cash", voucher: "voucher", trophy: "trophy", merchandise: "merchandise", custom: "custom") }
   end
 
   describe 'scopes' do

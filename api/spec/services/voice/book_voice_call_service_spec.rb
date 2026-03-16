@@ -60,7 +60,8 @@ RSpec.describe Voice::BookVoiceCallService, type: :service do
         expect(user.email).to eq("15551234567@voice-booking.local")
         expect(user.role).to eq("golfer")
         expect(user.organization).to eq(organization)
-        expect(user.confirmed_at).to be_present
+        # User model doesn't use confirmable module
+        expect(user).to be_persisted
       end
 
       it 'handles single name correctly' do

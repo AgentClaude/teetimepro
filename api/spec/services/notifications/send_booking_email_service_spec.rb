@@ -37,7 +37,11 @@ RSpec.describe Notifications::SendBookingEmailService do
     end
 
     context "when user has no email" do
-      let(:user) { create(:user, organization: organization, email: nil) }
+      let(:user) do 
+        user = create(:user, organization: organization, email: "temp@example.com")
+        user.update_column(:email, nil)  # Bypass validation to set email to nil
+        user
+      end
 
       it "returns failure" do
         result = described_class.call(booking: booking, email_type: "confirmation")

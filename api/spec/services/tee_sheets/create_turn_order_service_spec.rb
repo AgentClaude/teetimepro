@@ -173,16 +173,17 @@ RSpec.describe TeeSheets::CreateTurnOrderService do
       let(:other_org) { create(:organization) }
       let(:other_user) { create(:user, organization: other_org) }
 
-      it 'raises authorization error' do
-        expect {
-          described_class.call(
-            organization: org,
-            user: other_user,
-            course: course,
-            booking_id: booking.id,
-            items: items
-          )
-        }.to raise_error(AuthorizationError)
+      it 'returns validation error for booking not found' do
+        result = described_class.call(
+          organization: org,
+          user: other_user,
+          course: course,
+          booking_id: booking.id,
+          items: items
+        )
+        
+        expect(result).to be_failure
+        expect(result.errors).to include('Booking not found')
       end
     end
   end

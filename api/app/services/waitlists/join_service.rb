@@ -12,6 +12,17 @@ module Waitlists
       return failure(["Tee time must be in the future"]) if tee_time.starts_at <= Time.current
       return failure(["You are already on the waitlist for this tee time"]) if already_waitlisted?
 
+      # Check for existing cancelled entry and reactivate it
+      existing_entry = WaitlistEntry.find_by(user: user, tee_time: tee_time, status: :cancelled)
+      if existing_entry
+        existing_entry.update!(
+          players_requested: players_requested || 1,
+          status: :waiting
+        )
+        Rails.logger.info("User #{user.id} reactivated waitlist for tee time #{tee_time.id}")
+        return success(waitlist_entry: existing_entry)
+      end
+
       entry = WaitlistEntry.new(
         user: user,
         tee_time: tee_time,
