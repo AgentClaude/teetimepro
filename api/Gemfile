@@ -27,7 +27,7 @@ gem "stripe", "~> 10.0"
 gem "twilio-ruby", "~> 6.0"
 # gem "actioncable" # will add when WebSocket features needed
 gem "request_store", "~> 1.6"
-gem "paper_trail", "~> 15.1"
+gem "paper_trail", "~> 14.0"
 
 # Calendar sync functionality
 gem "google-apis-calendar_v3", "~> 0.39"
