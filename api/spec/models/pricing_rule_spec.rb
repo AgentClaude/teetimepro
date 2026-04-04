@@ -253,11 +253,12 @@ RSpec.describe PricingRule, type: :model do
     end
 
     context 'when rule has date restrictions' do
+      let(:target_saturday) { Date.current.next_occurring(:saturday) }
       let(:future_rule) do
         create(:pricing_rule,
                organization: organization,
-               start_date: 1.day.from_now.to_date,
-               end_date: 5.days.from_now.to_date,
+               start_date: target_saturday - 1.day,
+               end_date: target_saturday + 1.day,
                rule_type: 'day_of_week',
                conditions: { days: ['saturday'] })
       end
