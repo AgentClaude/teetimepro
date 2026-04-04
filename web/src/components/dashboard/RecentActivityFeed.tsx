@@ -47,14 +47,14 @@ const getActivityColor = (activityType: string) => {
   switch (activityType) {
     case 'booked':
     case 'checked_in':
-      return 'text-green-700 bg-green-100';
+      return 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/40';
     case 'cancelled':
     case 'no_show':
-      return 'text-red-700 bg-red-100';
+      return 'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/40';
     case 'completed':
-      return 'text-blue-700 bg-blue-100';
+      return 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/40';
     default:
-      return 'text-gray-700 bg-gray-100';
+      return 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-800';
   }
 };
 
@@ -87,17 +87,17 @@ const formatTeeTime = (teeTime: string) => {
 const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activities, loading }) => {
   if (loading) {
     return (
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+      <div className="bg-white dark:bg-gray-900 shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="animate-pulse flex items-center space-x-3">
-              <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+              <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </div>
-              <div className="h-3 bg-gray-200 rounded w-16"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
             </div>
           ))}
         </div>
@@ -107,12 +107,12 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activities, loa
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+      <div className="bg-white dark:bg-gray-900 shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
         <div className="text-center py-8">
-          <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No recent activity</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Booking activity will appear here as it happens.
           </p>
         </div>
@@ -121,8 +121,8 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activities, loa
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg p-6">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
       <div className="space-y-4">
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-start space-x-3">
@@ -134,18 +134,18 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activities, loa
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActivityColor(activity.activityType)}`}>
                   {getActivityText(activity.activityType)}
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   #{activity.confirmationCode}
                 </span>
               </div>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-gray-900 dark:text-gray-100">
                 <span className="font-medium">{activity.userName}</span> • {activity.courseName}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {formatTeeTime(activity.teeTime)} • {activity.playersCount} player{activity.playersCount !== 1 ? 's' : ''}
               </p>
             </div>
-            <div className="flex-shrink-0 text-xs text-gray-500">
+            <div className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
               {formatDistanceToNow(new Date(activity.occurredAt), { addSuffix: true })}
             </div>
           </div>
