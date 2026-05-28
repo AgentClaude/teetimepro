@@ -41,13 +41,25 @@ jobs:
             echo "🚀 Rolling restart..."
             # Restart API first
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps api
-            sleep 15
 
-            # Health check
-            if curl -sf http://localhost:3000/health > /dev/null; then
+            # Wait for the container healthcheck, which probes the API from inside the
+            # container. In production the API is not published on host port 3000.
+            echo "⏳ Waiting for API health check..."
+            for i in $(seq 1 30); do
+              health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' teetimepro_api)
+              if [ "$health_status" = "healthy" ]; then
+                break
+              fi
+
+              echo "API health status: $health_status ($i/30)"
+              sleep 10
+            done
+
+            if [ "$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' teetimepro_api)" = "healthy" ]; then
               echo "✅ API healthy"
             else
               echo "❌ API unhealthy"
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api curl -sS http://localhost:3000/health || true
               docker compose -f docker-compose.yml -f docker-compose.prod.yml logs api --tail 30
               exit 1
             fi
