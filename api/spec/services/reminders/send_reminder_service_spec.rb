@@ -46,6 +46,19 @@ RSpec.describe Reminders::SendReminderService do
         expect { described_class.call }
           .not_to change { ActionMailer::Base.deliveries.count }
       end
+
+      it "does not send 24-hour reminders for tee times later today" do
+        travel_to Time.zone.local(2026, 5, 27, 0, 30, 0) do
+          tee_sheet = create(:tee_sheet, course: course, date: Date.current)
+          tee_time = create(:tee_time, tee_sheet: tee_sheet, starts_at: Time.current.change(hour: 23, min: 50))
+          booking = create(:booking, tee_time: tee_time, status: :confirmed, morning_reminder_sent_at: 1.hour.ago)
+
+          expect { described_class.call }
+            .not_to change { ActionMailer::Base.deliveries.count }
+
+          expect(booking.reload.reminder_sent_at).to be_nil
+        end
+      end
     end
 
     context "morning-of reminders" do
@@ -111,8 +124,8 @@ RSpec.describe Reminders::SendReminderService do
       it "continues processing when one reminder fails" do
         # Use 24h window for reliability (avoids timezone edge cases)
         tee_sheet = create(:tee_sheet, course: course, date: Date.tomorrow)
-        tee_time1 = create(:tee_time, tee_sheet: tee_sheet, starts_at: 23.hours.from_now)
-        tee_time2 = create(:tee_time, tee_sheet: tee_sheet, starts_at: 24.hours.from_now)
+        tee_time1 = create(:tee_time, tee_sheet: tee_sheet, starts_at: 24.hours.from_now)
+        tee_time2 = create(:tee_time, tee_sheet: tee_sheet, starts_at: 25.hours.from_now)
 
         booking1 = create(:booking, tee_time: tee_time1, status: :confirmed)
         booking2 = create(:booking, tee_time: tee_time2, status: :confirmed)

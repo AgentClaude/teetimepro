@@ -76,6 +76,7 @@ module Reminders
         .joins(:tee_time)
         .where(status: [:confirmed, :checked_in])
         .where(reminder_sent_at: nil)
+        .where("tee_times.starts_at > ?", Time.current.end_of_day)
         .where(tee_times: { starts_at: window_start..window_end })
     end
 
