@@ -30,17 +30,18 @@ jobs:
           script: |
             set -e
             cd /opt/teetimepro
+            COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
 
             echo "📦 Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
 
             echo "🔨 Building images..."
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build api sidekiq web
+            $COMPOSE build api sidekiq web
 
             echo "🚀 Rolling restart..."
             # Restart API first
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps api
+            $COMPOSE up -d --no-deps api
 
             # Wait for the container healthcheck, which probes the API from inside the
             # container. In production the API is not published on host port 3000.
@@ -59,13 +60,14 @@ jobs:
               echo "✅ API healthy"
             else
               echo "❌ API unhealthy"
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api curl -sS http://localhost:3000/health || true
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml logs api --tail 30
+              $COMPOSE exec -T api curl -sS http://localhost:3000/health || true
+              $COMPOSE logs api --tail 30
               exit 1
             fi
 
             # Restart remaining services
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps sidekiq web nginx
+            $COMPOSE up -d --no-deps sidekiq web
+            docker rm -f teetimepro_nginx >/dev/null 2>&1 || true
 
             echo "🧹 Pruning old images..."
             docker image prune -f --filter "until=168h"
