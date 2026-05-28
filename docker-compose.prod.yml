@@ -100,7 +100,8 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - FORCE_SSL=true
-    ports: []  # Only accessible via nginx
+    ports: !override
+      - "${API_PORT:-3007}:3000"
     command: >
       sh -c "
         rm -f /app/tmp/pids/server.pid &&
@@ -125,9 +126,21 @@ services:
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
       - SIDEKIQ_REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - DOMAIN=${DOMAIN}
+      - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=${ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY}
+      - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=${ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY}
+      - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=${ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT}
     command: bundle exec sidekiq -c 10 -q default -q mailers
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep sidekiq | grep -v grep || exit 1"]
+      test: ["CMD-SHELL", "kill -0 1 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

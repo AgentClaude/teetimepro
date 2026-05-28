@@ -10,6 +10,7 @@ gem "graphql", "~> 2.2"
 # gem "graphiql-rails", "~> 1.9", group: :development # requires sprockets, skip for API-only
 gem "sidekiq", "~> 7.2"
 gem "sidekiq-cron", "~> 2.0"
+gem "connection_pool", "< 3"
 gem "faraday", "~> 2.8"
 gem "faraday-retry", "~> 2.2"
 gem "oj", "~> 3.16"

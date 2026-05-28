@@ -50,7 +50,7 @@ http {
 
     # Upstream backends
     upstream api_backend {
-        server api:3003;
+        server api:3000;
         keepalive 32;
     }
 
